@@ -1,4 +1,0 @@
-Invoking command in '/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis -- -j8 -l8
-Invoked command in '/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis -- -j8 -l8
-Invoking command in '/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis
-Invoked command in '/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis

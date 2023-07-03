@@ -1,1 +1,7 @@
 .vscode/
+offboard/log/
+offboard/build/
+offboard/install/
+onboard/log/
+onboard/build/
+onboard/install/
