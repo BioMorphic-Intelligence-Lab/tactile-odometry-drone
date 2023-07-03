@@ -1,0 +1,9 @@
+/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis/CMakeFiles/uninstall.dir
+/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis/CMakeFiles/rviz_vis_uninstall.dir
+/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis/CMakeFiles/test.dir
+/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis/CMakeFiles/edit_cache.dir
+/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis/CMakeFiles/rebuild_cache.dir
+/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis/CMakeFiles/list_install_components.dir
+/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis/CMakeFiles/install.dir
+/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis/CMakeFiles/install/local.dir
+/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis/CMakeFiles/install/strip.dir

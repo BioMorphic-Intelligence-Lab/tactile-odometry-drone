@@ -1,0 +1,36 @@
+[0.010s] Invoking command in '/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis -- -j8 -l8
+[0.070s] Invoked command in '/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis -- -j8 -l8
+[0.088s] Invoking command in '/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis
+[0.092s] -- Install configuration: ""
+[0.093s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/config
+[0.093s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/launch
+[0.093s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/launch/vis_joint_publisher.launch.py
+[0.093s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/maps
+[0.093s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes
+[0.093s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes/Link1.dae
+[0.094s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes/Link2.dae
+[0.100s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes/TactileMappingDroneBase.dae
+[0.117s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/models
+[0.117s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/params
+[0.117s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/rviz
+[0.117s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/rviz/rviz_basic_settings.rviz
+[0.117s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/src
+[0.117s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/urdf
+[0.117s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/urdf/tactile-odom-drone.urdf
+[0.117s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/worlds
+[0.117s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/ament_index/resource_index/package_run_dependencies/rviz_vis
+[0.117s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/ament_index/resource_index/parent_prefix_path/rviz_vis
+[0.117s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/environment/ament_prefix_path.sh
+[0.117s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/environment/ament_prefix_path.dsv
+[0.117s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/environment/path.sh
+[0.117s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/environment/path.dsv
+[0.118s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/local_setup.bash
+[0.118s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/local_setup.sh
+[0.118s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/local_setup.zsh
+[0.118s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/local_setup.dsv
+[0.118s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/package.dsv
+[0.118s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/ament_index/resource_index/packages/rviz_vis
+[0.118s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/cmake/rviz_visConfig.cmake
+[0.118s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/cmake/rviz_visConfig-version.cmake
+[0.118s] -- Up-to-date: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/package.xml
+[0.119s] Invoked command in '/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis

@@ -1,0 +1,8 @@
+source;share/estimators/hook/cmake_prefix_path.ps1
+source;share/estimators/hook/cmake_prefix_path.dsv
+source;share/estimators/hook/cmake_prefix_path.sh
+source;share/estimators/local_setup.bash
+source;share/estimators/local_setup.dsv
+source;share/estimators/local_setup.ps1
+source;share/estimators/local_setup.sh
+source;share/estimators/local_setup.zsh

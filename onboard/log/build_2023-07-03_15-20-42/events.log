@@ -1,0 +1,134 @@
+[0.000000] (-) TimerEvent: {}
+[0.000301] (estimators) JobQueued: {'identifier': 'estimators', 'dependencies': OrderedDict()}
+[0.000411] (estimators) JobStarted: {'identifier': 'estimators'}
+[0.008180] (estimators) JobProgress: {'identifier': 'estimators', 'progress': 'cmake'}
+[0.008316] (estimators) Command: {'cmd': ['/usr/bin/cmake', '/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators', '-DCMAKE_INSTALL_PREFIX=/home/anton/Desktop/tactile-odom-drone/onboard/install/estimators'], 'cwd': '/home/anton/Desktop/tactile-odom-drone/onboard/build/estimators', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('SDKMAN_VERSION', '5.16.0'), ('USER', 'anton'), ('LC_TIME', 'en_GB.UTF-8'), ('XDG_SEAT', 'seat0'), ('MATHEMATICA_HOME', '/usr/local/Wolfram/Mathematica/13.1'), ('XDG_SESSION_TYPE', 'x11'), ('GIT_ASKPASS', '/usr/share/code/resources/app/extensions/git/dist/askpass.sh'), ('SHLVL', '2'), ('LD_LIBRARY_PATH', '/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib:/opt/drake/lib:/opt/drake/lib'), ('HOME', '/home/anton'), ('CHROME_DESKTOP', 'code-url-handler.desktop'), ('CONDA_SHLVL', '0'), ('OLDPWD', '/home/anton/Desktop/tactile-odom-drone/onboard/src'), ('TERM_PROGRAM_VERSION', '1.79.2'), ('DESKTOP_SESSION', 'i3'), ('ROS_PYTHON_VERSION', '3'), ('GRADLE_HOME', '/home/anton/.sdkman/candidates/gradle/current'), ('HOMEBREW_PREFIX', '/home/linuxbrew/.linuxbrew'), ('GTK_MODULES', 'gail:atk-bridge'), ('VSCODE_GIT_ASKPASS_MAIN', '/usr/share/code/resources/app/extensions/git/dist/askpass-main.js'), ('LC_MONETARY', 'en_GB.UTF-8'), ('VSCODE_GIT_ASKPASS_NODE', '/usr/share/code/code'), ('SYSTEMD_EXEC_PID', '1796'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('COLORTERM', 'truecolor'), ('_CE_M', ''), ('MANDATORY_PATH', '/usr/share/gconf/i3.mandatory.path'), ('COLCON_PREFIX_PATH', '/home/anton/Desktop/tactile-odom-drone/offboard/install'), ('INFOPATH', '/home/linuxbrew/.linuxbrew/share/info:/home/linuxbrew/.linuxbrew/share/info:'), ('ROS_DISTRO', 'humble'), ('GTK_IM_MODULE', 'ibus'), ('LOGNAME', 'anton'), ('SDKMAN_CANDIDATES_API', 'https://api.sdkman.io/2'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('DEFAULTS_PATH', '/usr/share/gconf/i3.default.path'), ('USERNAME', 'anton'), ('TERM', 'xterm-256color'), ('XDG_SESSION_ID', '2'), ('_CE_CONDA', ''), ('ROS_LOCALHOST_ONLY', '0'), ('WINDOWPATH', '2'), ('PATH', '/opt/ros/humble/bin:/home/anton/bin:/opt/drake/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/opt/gcc-arm-none-eabi-9-2020-q2-update/bin:/home/anton/.local/bin:/home/anton/bin:/home/anton/miniconda3/condabin:/home/anton/.sdkman/candidates/gradle/current/bin:/home/anton/bin:/opt/drake/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/opt/gcc-arm-none-eabi-9-2020-q2-update/bin:/home/anton/.cargo/bin:/home/anton/.local/bin:/home/anton/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/home/anton/.spicetify:~/Programs/julia-1.6.7/bin:/home/anton/.spicetify:~/Programs/julia-1.6.7/bin'), ('SDKMAN_CANDIDATES_DIR', '/home/anton/.sdkman/candidates'), ('HOMEBREW_CELLAR', '/home/linuxbrew/.linuxbrew/Cellar'), ('PAPERSIZE', 'a4'), ('LC_ADDRESS', 'en_GB.UTF-8'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('GDK_BACKEND', 'x11'), ('DISPLAY', ':1'), ('LANG', 'en_US.UTF-8'), ('XDG_CURRENT_DESKTOP', 'i3'), ('LC_TELEPHONE', 'en_GB.UTF-8'), ('XMODIFIERS', '@im=ibus'), ('XDG_SESSION_DESKTOP', 'i3'), ('XAUTHORITY', '/run/user/1000/gdm/Xauthority'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('VSCODE_GIT_IPC_HANDLE', '/run/user/1000/vscode-git-0f91c6e253.sock'), ('SDKMAN_DIR', '/home/anton/.sdkman'), ('SDKMAN_PLATFORM', 'linuxx64'), ('TERM_PROGRAM', 'vscode'), ('AMENT_PREFIX_PATH', '/home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis:/opt/ros/humble'), ('CONDA_PYTHON_EXE', '/home/anton/miniconda3/bin/python'), ('ORIGINAL_XDG_CURRENT_DESKTOP', 'i3'), ('SHELL', '/bin/bash'), ('LC_NAME', 'en_GB.UTF-8'), ('QT_ACCESSIBILITY', '1'), ('GDMSESSION', 'i3'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('LC_MEASUREMENT', 'en_GB.UTF-8'), ('GPG_AGENT_INFO', '/run/user/1000/gnupg/S.gpg-agent:0:1'), ('LC_IDENTIFICATION', 'en_GB.UTF-8'), ('VSCODE_GIT_ASKPASS_EXTRA_ARGS', '--ms-enable-electron-run-as-node'), ('QT_IM_MODULE', 'ibus'), ('XDG_VTNR', '2'), ('PWD', '/home/anton/Desktop/tactile-odom-drone/onboard/build/estimators'), ('XDG_CONFIG_DIRS', '/etc/xdg/xdg-i3:/etc/xdg'), ('CONDA_EXE', '/home/anton/miniconda3/bin/conda'), ('CLUTTER_IM_MODULE', 'ibus'), ('XDG_DATA_DIRS', '/usr/share/i3:/usr/share/gnome:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop'), ('PYTHONPATH', '/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages:/opt/drake/lib/python3.10/site-packages:/opt/drake/lib/python3.10/site-packages'), ('HOMEBREW_REPOSITORY', '/home/linuxbrew/.linuxbrew/Homebrew'), ('LC_NUMERIC', 'en_GB.UTF-8'), ('I3SOCK', '/run/user/1000/i3/ipc-socket.1975'), ('LC_PAPER', 'en_GB.UTF-8'), ('COLCON', '1'), ('MANPATH', '/home/linuxbrew/.linuxbrew/share/man:/home/linuxbrew/.linuxbrew/share/man::'), ('CMAKE_PREFIX_PATH', '/home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis:/opt/ros/humble')]), 'shell': False}
+[0.099916] (-) TimerEvent: {}
+[0.103289] (estimators) StdoutLine: {'line': b'-- The C compiler identification is GNU 11.3.0\n'}
+[0.176155] (estimators) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 11.3.0\n'}
+[0.181332] (estimators) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[0.200026] (-) TimerEvent: {}
+[0.243933] (estimators) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[0.252492] (estimators) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[0.252856] (estimators) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[0.253462] (estimators) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[0.256680] (estimators) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[0.300139] (-) TimerEvent: {}
+[0.308916] (estimators) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[0.315282] (estimators) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[0.315471] (estimators) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[0.315763] (estimators) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[0.318333] (estimators) StdoutLine: {'line': b'-- Found ament_cmake: 1.3.4 (/opt/ros/humble/share/ament_cmake/cmake)\n'}
+[0.400236] (-) TimerEvent: {}
+[0.500455] (-) TimerEvent: {}
+[0.600726] (-) TimerEvent: {}
+[0.701004] (-) TimerEvent: {}
+[0.801226] (-) TimerEvent: {}
+[0.821734] (estimators) StdoutLine: {'line': b'-- Found Python3: /usr/bin/python3.10 (found version "3.10.6") found components: Interpreter \n'}
+[0.882544] (estimators) StdoutLine: {'line': b'-- Found rclcpp: 16.0.4 (/opt/ros/humble/share/rclcpp/cmake)\n'}
+[0.901318] (-) TimerEvent: {}
+[0.912415] (estimators) StdoutLine: {'line': b'-- Found rosidl_generator_c: 3.1.4 (/opt/ros/humble/share/rosidl_generator_c/cmake)\n'}
+[0.915616] (estimators) StdoutLine: {'line': b'-- Found rosidl_adapter: 3.1.4 (/opt/ros/humble/share/rosidl_adapter/cmake)\n'}
+[0.920752] (estimators) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 3.1.4 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)\n'}
+[0.929818] (estimators) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[0.941399] (estimators) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[0.986892] (estimators) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 6.1.1 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)\n'}
+[0.988178] (estimators) StdoutLine: {'line': b'-- Found rmw_fastrtps_cpp: 6.2.2 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)\n'}
+[1.001428] (-) TimerEvent: {}
+[1.052646] (estimators) StdoutLine: {'line': b'-- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.2")  \n'}
+[1.073872] (estimators) StdoutLine: {'line': b'-- Found FastRTPS: /opt/ros/humble/include  \n'}
+[1.101573] (-) TimerEvent: {}
+[1.110296] (estimators) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_fastrtps_cpp' as default\n"}
+[1.116988] (estimators) StdoutLine: {'line': b'-- Looking for pthread.h\n'}
+[1.163453] (estimators) StdoutLine: {'line': b'-- Looking for pthread.h - found\n'}
+[1.163829] (estimators) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n'}
+[1.201676] (-) TimerEvent: {}
+[1.211990] (estimators) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n'}
+[1.213043] (estimators) StdoutLine: {'line': b'-- Found Threads: TRUE  \n'}
+[1.301788] (-) TimerEvent: {}
+[1.315790] (estimators) StdoutLine: {'line': b'-- Found sensor_msgs: 4.2.3 (/opt/ros/humble/share/sensor_msgs/cmake)\n'}
+[1.401910] (-) TimerEvent: {}
+[1.403057] (estimators) StdoutLine: {'line': b'-- Found ament_lint_auto: 0.12.6 (/opt/ros/humble/share/ament_lint_auto/cmake)\n'}
+[1.456592] (estimators) StdoutLine: {'line': b"-- Added test 'cppcheck' to perform static code analysis on C / C++ code\n"}
+[1.456771] (estimators) StdoutLine: {'line': b'-- Configured cppcheck include dirs: $<BUILD_INTERFACE:/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include>;$<BUILD_INTERFACE:/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators>\n'}
+[1.456827] (estimators) StdoutLine: {'line': b'-- Configured cppcheck exclude dirs and/or files: \n'}
+[1.457152] (estimators) StdoutLine: {'line': b"-- Added test 'lint_cmake' to check CMake code style\n"}
+[1.457693] (estimators) StdoutLine: {'line': b"-- Added test 'uncrustify' to check C / C++ code style\n"}
+[1.457733] (estimators) StdoutLine: {'line': b'-- Configured uncrustify additional arguments: \n'}
+[1.458053] (estimators) StdoutLine: {'line': b"-- Added test 'xmllint' to check XML markup files\n"}
+[1.458802] (estimators) StdoutLine: {'line': b'-- Configuring done\n'}
+[1.464543] (estimators) StdoutLine: {'line': b'-- Generating done\n'}
+[1.465479] (estimators) StdoutLine: {'line': b'-- Build files have been written to: /home/anton/Desktop/tactile-odom-drone/onboard/build/estimators\n'}
+[1.471491] (estimators) CommandEnded: {'returncode': 0}
+[1.472014] (estimators) JobProgress: {'identifier': 'estimators', 'progress': 'build'}
+[1.472781] (estimators) Command: {'cmd': ['/usr/bin/cmake', '--build', '/home/anton/Desktop/tactile-odom-drone/onboard/build/estimators', '--', '-j8', '-l8'], 'cwd': '/home/anton/Desktop/tactile-odom-drone/onboard/build/estimators', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('SDKMAN_VERSION', '5.16.0'), ('USER', 'anton'), ('LC_TIME', 'en_GB.UTF-8'), ('XDG_SEAT', 'seat0'), ('MATHEMATICA_HOME', '/usr/local/Wolfram/Mathematica/13.1'), ('XDG_SESSION_TYPE', 'x11'), ('GIT_ASKPASS', '/usr/share/code/resources/app/extensions/git/dist/askpass.sh'), ('SHLVL', '2'), ('LD_LIBRARY_PATH', '/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib:/opt/drake/lib:/opt/drake/lib'), ('HOME', '/home/anton'), ('CHROME_DESKTOP', 'code-url-handler.desktop'), ('CONDA_SHLVL', '0'), ('OLDPWD', '/home/anton/Desktop/tactile-odom-drone/onboard/src'), ('TERM_PROGRAM_VERSION', '1.79.2'), ('DESKTOP_SESSION', 'i3'), ('ROS_PYTHON_VERSION', '3'), ('GRADLE_HOME', '/home/anton/.sdkman/candidates/gradle/current'), ('HOMEBREW_PREFIX', '/home/linuxbrew/.linuxbrew'), ('GTK_MODULES', 'gail:atk-bridge'), ('VSCODE_GIT_ASKPASS_MAIN', '/usr/share/code/resources/app/extensions/git/dist/askpass-main.js'), ('LC_MONETARY', 'en_GB.UTF-8'), ('VSCODE_GIT_ASKPASS_NODE', '/usr/share/code/code'), ('SYSTEMD_EXEC_PID', '1796'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('COLORTERM', 'truecolor'), ('_CE_M', ''), ('MANDATORY_PATH', '/usr/share/gconf/i3.mandatory.path'), ('COLCON_PREFIX_PATH', '/home/anton/Desktop/tactile-odom-drone/offboard/install'), ('INFOPATH', '/home/linuxbrew/.linuxbrew/share/info:/home/linuxbrew/.linuxbrew/share/info:'), ('ROS_DISTRO', 'humble'), ('GTK_IM_MODULE', 'ibus'), ('LOGNAME', 'anton'), ('SDKMAN_CANDIDATES_API', 'https://api.sdkman.io/2'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('DEFAULTS_PATH', '/usr/share/gconf/i3.default.path'), ('USERNAME', 'anton'), ('TERM', 'xterm-256color'), ('XDG_SESSION_ID', '2'), ('_CE_CONDA', ''), ('ROS_LOCALHOST_ONLY', '0'), ('WINDOWPATH', '2'), ('PATH', '/opt/ros/humble/bin:/home/anton/bin:/opt/drake/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/opt/gcc-arm-none-eabi-9-2020-q2-update/bin:/home/anton/.local/bin:/home/anton/bin:/home/anton/miniconda3/condabin:/home/anton/.sdkman/candidates/gradle/current/bin:/home/anton/bin:/opt/drake/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/opt/gcc-arm-none-eabi-9-2020-q2-update/bin:/home/anton/.cargo/bin:/home/anton/.local/bin:/home/anton/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/home/anton/.spicetify:~/Programs/julia-1.6.7/bin:/home/anton/.spicetify:~/Programs/julia-1.6.7/bin'), ('SDKMAN_CANDIDATES_DIR', '/home/anton/.sdkman/candidates'), ('HOMEBREW_CELLAR', '/home/linuxbrew/.linuxbrew/Cellar'), ('PAPERSIZE', 'a4'), ('LC_ADDRESS', 'en_GB.UTF-8'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('GDK_BACKEND', 'x11'), ('DISPLAY', ':1'), ('LANG', 'en_US.UTF-8'), ('XDG_CURRENT_DESKTOP', 'i3'), ('LC_TELEPHONE', 'en_GB.UTF-8'), ('XMODIFIERS', '@im=ibus'), ('XDG_SESSION_DESKTOP', 'i3'), ('XAUTHORITY', '/run/user/1000/gdm/Xauthority'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('VSCODE_GIT_IPC_HANDLE', '/run/user/1000/vscode-git-0f91c6e253.sock'), ('SDKMAN_DIR', '/home/anton/.sdkman'), ('SDKMAN_PLATFORM', 'linuxx64'), ('TERM_PROGRAM', 'vscode'), ('AMENT_PREFIX_PATH', '/home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis:/opt/ros/humble'), ('CONDA_PYTHON_EXE', '/home/anton/miniconda3/bin/python'), ('ORIGINAL_XDG_CURRENT_DESKTOP', 'i3'), ('SHELL', '/bin/bash'), ('LC_NAME', 'en_GB.UTF-8'), ('QT_ACCESSIBILITY', '1'), ('GDMSESSION', 'i3'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('LC_MEASUREMENT', 'en_GB.UTF-8'), ('GPG_AGENT_INFO', '/run/user/1000/gnupg/S.gpg-agent:0:1'), ('LC_IDENTIFICATION', 'en_GB.UTF-8'), ('VSCODE_GIT_ASKPASS_EXTRA_ARGS', '--ms-enable-electron-run-as-node'), ('QT_IM_MODULE', 'ibus'), ('XDG_VTNR', '2'), ('PWD', '/home/anton/Desktop/tactile-odom-drone/onboard/build/estimators'), ('XDG_CONFIG_DIRS', '/etc/xdg/xdg-i3:/etc/xdg'), ('CONDA_EXE', '/home/anton/miniconda3/bin/conda'), ('CLUTTER_IM_MODULE', 'ibus'), ('XDG_DATA_DIRS', '/usr/share/i3:/usr/share/gnome:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop'), ('PYTHONPATH', '/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages:/opt/drake/lib/python3.10/site-packages:/opt/drake/lib/python3.10/site-packages'), ('HOMEBREW_REPOSITORY', '/home/linuxbrew/.linuxbrew/Homebrew'), ('LC_NUMERIC', 'en_GB.UTF-8'), ('I3SOCK', '/run/user/1000/i3/ipc-socket.1975'), ('LC_PAPER', 'en_GB.UTF-8'), ('COLCON', '1'), ('MANPATH', '/home/linuxbrew/.linuxbrew/share/man:/home/linuxbrew/.linuxbrew/share/man::'), ('CMAKE_PREFIX_PATH', '/home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis:/opt/ros/humble')]), 'shell': False}
+[1.501209] (estimators) StdoutLine: {'line': b'[ 50%] \x1b[32mBuilding CXX object CMakeFiles/force_estimator.dir/src/force_estimator.cpp.o\x1b[0m\n'}
+[1.501995] (-) TimerEvent: {}
+[1.602159] (-) TimerEvent: {}
+[1.702426] (-) TimerEvent: {}
+[1.802760] (-) TimerEvent: {}
+[1.903014] (-) TimerEvent: {}
+[2.003298] (-) TimerEvent: {}
+[2.103644] (-) TimerEvent: {}
+[2.203928] (-) TimerEvent: {}
+[2.304209] (-) TimerEvent: {}
+[2.404512] (-) TimerEvent: {}
+[2.504841] (-) TimerEvent: {}
+[2.605210] (-) TimerEvent: {}
+[2.705468] (-) TimerEvent: {}
+[2.805755] (-) TimerEvent: {}
+[2.906014] (-) TimerEvent: {}
+[3.006270] (-) TimerEvent: {}
+[3.106526] (-) TimerEvent: {}
+[3.146257] (estimators) StderrLine: {'line': b'In file included from \x1b[01m\x1b[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:1\x1b[m\x1b[K:\n'}
+[3.146411] (estimators) StderrLine: {'line': b'\x1b[01m\x1b[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:37:19:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[K\xe2\x80\x98\x1b[01m\x1b[Kstd_srvs\x1b[m\x1b[K\xe2\x80\x99 was not declared in this scope\n'}
+[3.146461] (estimators) StderrLine: {'line': b'   37 |   rclcpp::Service<\x1b[01;31m\x1b[Kstd_srvs\x1b[m\x1b[K::srv::Trigger>::SharedPtr _bias_server;\n'}
+[3.146621] (estimators) StderrLine: {'line': b'      |                   \x1b[01;31m\x1b[K^~~~~~~~\x1b[m\x1b[K\n'}
+[3.146672] (estimators) StderrLine: {'line': b'\x1b[01m\x1b[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:37:41:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Ktemplate argument 1 is invalid\n'}
+[3.146711] (estimators) StderrLine: {'line': b'   37 |   rclcpp::Service<std_srvs::srv::Trigger\x1b[01;31m\x1b[K>\x1b[m\x1b[K::SharedPtr _bias_server;\n'}
+[3.146748] (estimators) StderrLine: {'line': b'      |                                         \x1b[01;31m\x1b[K^\x1b[m\x1b[K\n'}
+[3.146788] (estimators) StderrLine: {'line': b'\x1b[01m\x1b[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:37:44:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kexpected \xe2\x80\x98\x1b[01m\x1b[K;\x1b[m\x1b[K\xe2\x80\x99 at end of member declaration\n'}
+[3.146825] (estimators) StderrLine: {'line': b'   37 |   rclcpp::Service<std_srvs::srv::Trigger>::\x1b[01;31m\x1b[KSharedPtr\x1b[m\x1b[K _bias_server;\n'}
+[3.146860] (estimators) StderrLine: {'line': b'      |                                            \x1b[01;31m\x1b[K^~~~~~~~~\x1b[m\x1b[K\n'}
+[3.146895] (estimators) StderrLine: {'line': b'      |                                                     \x1b[32m\x1b[K;\x1b[m\x1b[K\n'}
+[3.147894] (estimators) StderrLine: {'line': b'\x1b[01m\x1b[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:37:54:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[K\xe2\x80\x98\x1b[01m\x1b[K_bias_server\x1b[m\x1b[K\xe2\x80\x99 does not name a type\n'}
+[3.147972] (estimators) StderrLine: {'line': b'   37 |   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr \x1b[01;31m\x1b[K_bias_server\x1b[m\x1b[K;\n'}
+[3.148014] (estimators) StderrLine: {'line': b'      |                                                      \x1b[01;31m\x1b[K^~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[3.157240] (estimators) StderrLine: {'line': b'\x1b[01m\x1b[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:3:1:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kredefinition of \xe2\x80\x98\x1b[01m\x1b[KForceEstimatorNode::ForceEstimatorNode()\x1b[m\x1b[K\xe2\x80\x99\n'}
+[3.157411] (estimators) StderrLine: {'line': b'    3 | \x1b[01;31m\x1b[KForceEstimatorNode\x1b[m\x1b[K::ForceEstimatorNode()\n'}
+[3.157457] (estimators) StderrLine: {'line': b'      | \x1b[01;31m\x1b[K^~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[3.157494] (estimators) StderrLine: {'line': b'In file included from \x1b[01m\x1b[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:1\x1b[m\x1b[K:\n'}
+[3.157531] (estimators) StderrLine: {'line': b'\x1b[01m\x1b[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:11:3:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[K\xe2\x80\x98\x1b[01m\x1b[KForceEstimatorNode::ForceEstimatorNode()\x1b[m\x1b[K\xe2\x80\x99 previously defined here\n'}
+[3.157569] (estimators) StderrLine: {'line': b'   11 |   \x1b[01;36m\x1b[KForceEstimatorNode\x1b[m\x1b[K()\n'}
+[3.157607] (estimators) StderrLine: {'line': b'      |   \x1b[01;36m\x1b[K^~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[3.157641] (estimators) StderrLine: {'line': b'\x1b[01m\x1b[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:6:1:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kexpected unqualified-id before \xe2\x80\x98\x1b[01m\x1b[K{\x1b[m\x1b[K\xe2\x80\x99 token\n'}
+[3.157677] (estimators) StderrLine: {'line': b'    6 | \x1b[01;31m\x1b[K{\x1b[m\x1b[K\n'}
+[3.157711] (estimators) StderrLine: {'line': b'      | \x1b[01;31m\x1b[K^\x1b[m\x1b[K\n'}
+[3.158969] (estimators) StderrLine: {'line': b'\x1b[01m\x1b[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:\x1b[m\x1b[K In member function \xe2\x80\x98\x1b[01m\x1b[Kvoid ForceEstimatorNode::_joint_callback(sensor_msgs::msg::JointState_<std::allocator<void> >::SharedPtr)\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[3.159030] (estimators) StderrLine: {'line': b'\x1b[01m\x1b[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:22:88:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kunused parameter \xe2\x80\x98\x1b[01m\x1b[Kmsg\x1b[m\x1b[K\xe2\x80\x99 [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wunused-parameter\x07-Wunused-parameter\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[3.159069] (estimators) StderrLine: {'line': b'   22 | void ForceEstimatorNode::_joint_callback(\x1b[01;35m\x1b[Kconst sensor_msgs::msg::JointState::SharedPtr msg\x1b[m\x1b[K)\n'}
+[3.159113] (estimators) StderrLine: {'line': b'      |                                          \x1b[01;35m\x1b[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~\x1b[m\x1b[K\n'}
+[3.206641] (-) TimerEvent: {}
+[3.306889] (-) TimerEvent: {}
+[3.407156] (-) TimerEvent: {}
+[3.507417] (-) TimerEvent: {}
+[3.607675] (-) TimerEvent: {}
+[3.707945] (-) TimerEvent: {}
+[3.808217] (-) TimerEvent: {}
+[3.908478] (-) TimerEvent: {}
+[4.008828] (-) TimerEvent: {}
+[4.109081] (-) TimerEvent: {}
+[4.209341] (-) TimerEvent: {}
+[4.309625] (-) TimerEvent: {}
+[4.409883] (-) TimerEvent: {}
+[4.510153] (-) TimerEvent: {}
+[4.610408] (-) TimerEvent: {}
+[4.710688] (-) TimerEvent: {}
+[4.811077] (-) TimerEvent: {}
+[4.911311] (-) TimerEvent: {}
+[4.926376] (estimators) StderrLine: {'line': b'gmake[2]: *** [CMakeFiles/force_estimator.dir/build.make:76: CMakeFiles/force_estimator.dir/src/force_estimator.cpp.o] Error 1\n'}
+[4.926542] (estimators) StderrLine: {'line': b'gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/force_estimator.dir/all] Error 2\n'}
+[4.926624] (estimators) StderrLine: {'line': b'gmake: *** [Makefile:146: all] Error 2\n'}
+[4.928115] (estimators) CommandEnded: {'returncode': 2}
+[4.953161] (estimators) JobEnded: {'identifier': 'estimators', 'rc': 2}
+[4.963655] (-) EventReactorShutdown: {}

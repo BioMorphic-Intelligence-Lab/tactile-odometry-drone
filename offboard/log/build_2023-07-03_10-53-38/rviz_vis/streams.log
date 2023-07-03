@@ -1,0 +1,85 @@
+[0.009s] Invoking command in '/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/anton/Desktop/tactile-odom-drone/offboard/src/rviz_vis -DCMAKE_INSTALL_PREFIX=/home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis
+[0.041s] -- The C compiler identification is GNU 11.3.0
+[0.077s] -- The CXX compiler identification is GNU 11.3.0
+[0.082s] -- Detecting C compiler ABI info
+[0.122s] -- Detecting C compiler ABI info - done
+[0.127s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.127s] -- Detecting C compile features
+[0.127s] -- Detecting C compile features - done
+[0.130s] -- Detecting CXX compiler ABI info
+[0.178s] -- Detecting CXX compiler ABI info - done
+[0.184s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.184s] -- Detecting CXX compile features
+[0.185s] -- Detecting CXX compile features - done
+[0.186s] -- Found ament_cmake: 1.3.4 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.669s] -- Found Python3: /usr/bin/python3.10 (found version "3.10.6") found components: Interpreter 
+[0.724s] -- Found tf2: 0.25.2 (/opt/ros/humble/share/tf2/cmake)
+[0.754s] -- Found rosidl_generator_c: 3.1.4 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.757s] -- Found rosidl_adapter: 3.1.4 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.761s] -- Found rosidl_generator_cpp: 3.1.4 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.769s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.780s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.861s] -- Found rclcpp: 16.0.4 (/opt/ros/humble/share/rclcpp/cmake)
+[0.895s] -- Found rmw_implementation_cmake: 6.1.1 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[0.897s] -- Found rmw_fastrtps_cpp: 6.2.2 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)
+[0.957s] -- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.2")  
+[0.978s] -- Found FastRTPS: /opt/ros/humble/include  
+[1.014s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[1.020s] -- Looking for pthread.h
+[1.069s] -- Looking for pthread.h - found
+[1.069s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[1.114s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+[1.115s] -- Found Threads: TRUE  
+[1.196s] -- Found ament_lint_auto: 0.12.6 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[1.247s] -- Added test 'flake8' to check Python code syntax and style conventions
+[1.248s] -- Added test 'lint_cmake' to check CMake code style
+[1.248s] -- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257
+[1.249s] -- Added test 'xmllint' to check XML markup files
+[1.250s] -- Configuring done
+[1.253s] -- Generating done
+[1.255s] -- Build files have been written to: /home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis
+[1.262s] Invoked command in '/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/anton/Desktop/tactile-odom-drone/offboard/src/rviz_vis -DCMAKE_INSTALL_PREFIX=/home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis
+[1.263s] Invoking command in '/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis -- -j8 -l8
+[1.286s] Invoked command in '/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis -- -j8 -l8
+[1.306s] Invoking command in '/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis
+[1.310s] -- Install configuration: ""
+[1.310s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/config
+[1.310s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/launch
+[1.311s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/launch/vis_joint_publisher.launch.py
+[1.311s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/maps
+[1.311s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes
+[1.311s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes/SensorizedBase.STL
+[1.312s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes/round-top.dae
+[1.313s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes/SensorizedBottom.dae
+[1.319s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes/HolybroX500V2-withOBC.dae
+[1.337s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes/top.STL
+[1.337s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes/SensorizedMiddle.dae
+[1.339s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes/round-top.STL
+[1.340s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes/HolybroX500V2-withOBC.STL
+[1.349s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes/SensorizedBottom.STL
+[1.351s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes/SensorizedMiddle.STL
+[1.352s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/meshes/SensorizedBase.dae
+[1.355s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/models
+[1.355s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/params
+[1.355s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/rviz
+[1.355s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/rviz/rviz_basic_settings.rviz
+[1.355s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/src
+[1.355s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/urdf
+[1.355s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/urdf/tactile-odom-drone.urdf
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/worlds
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/ament_index/resource_index/package_run_dependencies/rviz_vis
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/ament_index/resource_index/parent_prefix_path/rviz_vis
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/environment/ament_prefix_path.sh
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/environment/ament_prefix_path.dsv
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/environment/path.sh
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/environment/path.dsv
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/local_setup.bash
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/local_setup.sh
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/local_setup.zsh
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/local_setup.dsv
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/package.dsv
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/ament_index/resource_index/packages/rviz_vis
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/cmake/rviz_visConfig.cmake
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/cmake/rviz_visConfig-version.cmake
+[1.356s] -- Installing: /home/anton/Desktop/tactile-odom-drone/offboard/install/rviz_vis/share/rviz_vis/package.xml
+[1.358s] Invoked command in '/home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/anton/Desktop/tactile-odom-drone/offboard/build/rviz_vis

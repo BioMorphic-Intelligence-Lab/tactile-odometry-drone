@@ -1,0 +1,4 @@
+source;share/estimators/local_setup.bash
+source;share/estimators/local_setup.dsv
+source;share/estimators/local_setup.sh
+source;share/estimators/local_setup.zsh

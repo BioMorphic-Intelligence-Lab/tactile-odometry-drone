@@ -1,0 +1,31 @@
+In file included from [01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:1[m[K:
+[01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:37:19:[m[K [01;31m[Kerror: [m[K‘[01m[Kstd_srvs[m[K’ was not declared in this scope
+   37 |   rclcpp::Service<[01;31m[Kstd_srvs[m[K::srv::Trigger>::SharedPtr _bias_server;
+      |                   [01;31m[K^~~~~~~~[m[K
+[01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:37:41:[m[K [01;31m[Kerror: [m[Ktemplate argument 1 is invalid
+   37 |   rclcpp::Service<std_srvs::srv::Trigger[01;31m[K>[m[K::SharedPtr _bias_server;
+      |                                         [01;31m[K^[m[K
+[01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:37:44:[m[K [01;31m[Kerror: [m[Kexpected ‘[01m[K;[m[K’ at end of member declaration
+   37 |   rclcpp::Service<std_srvs::srv::Trigger>::[01;31m[KSharedPtr[m[K _bias_server;
+      |                                            [01;31m[K^~~~~~~~~[m[K
+      |                                                     [32m[K;[m[K
+[01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:37:54:[m[K [01;31m[Kerror: [m[K‘[01m[K_bias_server[m[K’ does not name a type
+   37 |   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr [01;31m[K_bias_server[m[K;
+      |                                                      [01;31m[K^~~~~~~~~~~~[m[K
+[01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:3:1:[m[K [01;31m[Kerror: [m[Kredefinition of ‘[01m[KForceEstimatorNode::ForceEstimatorNode()[m[K’
+    3 | [01;31m[KForceEstimatorNode[m[K::ForceEstimatorNode()
+      | [01;31m[K^~~~~~~~~~~~~~~~~~[m[K
+In file included from [01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:1[m[K:
+[01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:11:3:[m[K [01;36m[Knote: [m[K‘[01m[KForceEstimatorNode::ForceEstimatorNode()[m[K’ previously defined here
+   11 |   [01;36m[KForceEstimatorNode[m[K()
+      |   [01;36m[K^~~~~~~~~~~~~~~~~~[m[K
+[01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:6:1:[m[K [01;31m[Kerror: [m[Kexpected unqualified-id before ‘[01m[K{[m[K’ token
+    6 | [01;31m[K{[m[K
+      | [01;31m[K^[m[K
+[01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:[m[K In member function ‘[01m[Kvoid ForceEstimatorNode::_joint_callback(sensor_msgs::msg::JointState_<std::allocator<void> >::SharedPtr)[m[K’:
+[01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:22:88:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kmsg[m[K’ [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wunused-parameter-Wunused-parameter]8;;[m[K]
+   22 | void ForceEstimatorNode::_joint_callback([01;35m[Kconst sensor_msgs::msg::JointState::SharedPtr msg[m[K)
+      |                                          [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~[m[K
+gmake[2]: *** [CMakeFiles/force_estimator.dir/build.make:76: CMakeFiles/force_estimator.dir/src/force_estimator.cpp.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/force_estimator.dir/all] Error 2
+gmake: *** [Makefile:146: all] Error 2

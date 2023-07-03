@@ -1,0 +1,78 @@
+[0.009s] Invoking command in '/home/anton/Desktop/tactile-odom-drone/onboard/build/estimators': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/anton/Desktop/tactile-odom-drone/onboard/src/estimators -DCMAKE_INSTALL_PREFIX=/home/anton/Desktop/tactile-odom-drone/onboard/install/estimators
+[0.103s] -- The C compiler identification is GNU 11.3.0
+[0.175s] -- The CXX compiler identification is GNU 11.3.0
+[0.181s] -- Detecting C compiler ABI info
+[0.243s] -- Detecting C compiler ABI info - done
+[0.252s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.252s] -- Detecting C compile features
+[0.253s] -- Detecting C compile features - done
+[0.256s] -- Detecting CXX compiler ABI info
+[0.308s] -- Detecting CXX compiler ABI info - done
+[0.315s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.315s] -- Detecting CXX compile features
+[0.315s] -- Detecting CXX compile features - done
+[0.318s] -- Found ament_cmake: 1.3.4 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.821s] -- Found Python3: /usr/bin/python3.10 (found version "3.10.6") found components: Interpreter 
+[0.882s] -- Found rclcpp: 16.0.4 (/opt/ros/humble/share/rclcpp/cmake)
+[0.912s] -- Found rosidl_generator_c: 3.1.4 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.915s] -- Found rosidl_adapter: 3.1.4 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.920s] -- Found rosidl_generator_cpp: 3.1.4 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.929s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.941s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.986s] -- Found rmw_implementation_cmake: 6.1.1 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[0.987s] -- Found rmw_fastrtps_cpp: 6.2.2 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)
+[1.052s] -- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.2")  
+[1.073s] -- Found FastRTPS: /opt/ros/humble/include  
+[1.110s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[1.116s] -- Looking for pthread.h
+[1.163s] -- Looking for pthread.h - found
+[1.163s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[1.211s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+[1.212s] -- Found Threads: TRUE  
+[1.315s] -- Found sensor_msgs: 4.2.3 (/opt/ros/humble/share/sensor_msgs/cmake)
+[1.402s] -- Found ament_lint_auto: 0.12.6 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[1.456s] -- Added test 'cppcheck' to perform static code analysis on C / C++ code
+[1.456s] -- Configured cppcheck include dirs: $<BUILD_INTERFACE:/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include>;$<BUILD_INTERFACE:/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators>
+[1.456s] -- Configured cppcheck exclude dirs and/or files: 
+[1.456s] -- Added test 'lint_cmake' to check CMake code style
+[1.457s] -- Added test 'uncrustify' to check C / C++ code style
+[1.457s] -- Configured uncrustify additional arguments: 
+[1.457s] -- Added test 'xmllint' to check XML markup files
+[1.458s] -- Configuring done
+[1.464s] -- Generating done
+[1.465s] -- Build files have been written to: /home/anton/Desktop/tactile-odom-drone/onboard/build/estimators
+[1.471s] Invoked command in '/home/anton/Desktop/tactile-odom-drone/onboard/build/estimators' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/anton/Desktop/tactile-odom-drone/onboard/src/estimators -DCMAKE_INSTALL_PREFIX=/home/anton/Desktop/tactile-odom-drone/onboard/install/estimators
+[1.473s] Invoking command in '/home/anton/Desktop/tactile-odom-drone/onboard/build/estimators': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/anton/Desktop/tactile-odom-drone/onboard/build/estimators -- -j8 -l8
+[1.500s] [ 50%] [32mBuilding CXX object CMakeFiles/force_estimator.dir/src/force_estimator.cpp.o[0m
+[3.146s] In file included from [01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:1[m[K:
+[3.146s] [01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:37:19:[m[K [01;31m[Kerror: [m[K‘[01m[Kstd_srvs[m[K’ was not declared in this scope
+[3.146s]    37 |   rclcpp::Service<[01;31m[Kstd_srvs[m[K::srv::Trigger>::SharedPtr _bias_server;
+[3.146s]       |                   [01;31m[K^~~~~~~~[m[K
+[3.146s] [01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:37:41:[m[K [01;31m[Kerror: [m[Ktemplate argument 1 is invalid
+[3.146s]    37 |   rclcpp::Service<std_srvs::srv::Trigger[01;31m[K>[m[K::SharedPtr _bias_server;
+[3.146s]       |                                         [01;31m[K^[m[K
+[3.146s] [01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:37:44:[m[K [01;31m[Kerror: [m[Kexpected ‘[01m[K;[m[K’ at end of member declaration
+[3.146s]    37 |   rclcpp::Service<std_srvs::srv::Trigger>::[01;31m[KSharedPtr[m[K _bias_server;
+[3.146s]       |                                            [01;31m[K^~~~~~~~~[m[K
+[3.146s]       |                                                     [32m[K;[m[K
+[3.147s] [01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:37:54:[m[K [01;31m[Kerror: [m[K‘[01m[K_bias_server[m[K’ does not name a type
+[3.147s]    37 |   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr [01;31m[K_bias_server[m[K;
+[3.147s]       |                                                      [01;31m[K^~~~~~~~~~~~[m[K
+[3.157s] [01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:3:1:[m[K [01;31m[Kerror: [m[Kredefinition of ‘[01m[KForceEstimatorNode::ForceEstimatorNode()[m[K’
+[3.157s]     3 | [01;31m[KForceEstimatorNode[m[K::ForceEstimatorNode()
+[3.157s]       | [01;31m[K^~~~~~~~~~~~~~~~~~[m[K
+[3.157s] In file included from [01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:1[m[K:
+[3.157s] [01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/include/estimators/force_estimator.hpp:11:3:[m[K [01;36m[Knote: [m[K‘[01m[KForceEstimatorNode::ForceEstimatorNode()[m[K’ previously defined here
+[3.157s]    11 |   [01;36m[KForceEstimatorNode[m[K()
+[3.157s]       |   [01;36m[K^~~~~~~~~~~~~~~~~~[m[K
+[3.157s] [01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:6:1:[m[K [01;31m[Kerror: [m[Kexpected unqualified-id before ‘[01m[K{[m[K’ token
+[3.157s]     6 | [01;31m[K{[m[K
+[3.157s]       | [01;31m[K^[m[K
+[3.158s] [01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:[m[K In member function ‘[01m[Kvoid ForceEstimatorNode::_joint_callback(sensor_msgs::msg::JointState_<std::allocator<void> >::SharedPtr)[m[K’:
+[3.158s] [01m[K/home/anton/Desktop/tactile-odom-drone/onboard/src/estimators/src/force_estimator.cpp:22:88:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kmsg[m[K’ [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wunused-parameter-Wunused-parameter]8;;[m[K]
+[3.158s]    22 | void ForceEstimatorNode::_joint_callback([01;35m[Kconst sensor_msgs::msg::JointState::SharedPtr msg[m[K)
+[3.158s]       |                                          [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~[m[K
+[4.926s] gmake[2]: *** [CMakeFiles/force_estimator.dir/build.make:76: CMakeFiles/force_estimator.dir/src/force_estimator.cpp.o] Error 1
+[4.926s] gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/force_estimator.dir/all] Error 2
+[4.926s] gmake: *** [Makefile:146: all] Error 2
+[4.928s] Invoked command in '/home/anton/Desktop/tactile-odom-drone/onboard/build/estimators' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/anton/Desktop/tactile-odom-drone/onboard/build/estimators -- -j8 -l8

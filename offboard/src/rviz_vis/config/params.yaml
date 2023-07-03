@@ -1,0 +1,3 @@
+force_estimator:
+  ros__parameters:
+    k: 1.0 # Joint stiffness [Nm / rad]

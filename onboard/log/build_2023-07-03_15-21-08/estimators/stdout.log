@@ -1,0 +1,22 @@
+[35m[1mConsolidate compiler generated dependencies of target force_estimator[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/force_estimator.dir/src/force_estimator.cpp.o[0m
+[100%] [32m[1mLinking CXX executable force_estimator[0m
+[100%] Built target force_estimator
+-- Install configuration: ""
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/lib/estimators/force_estimator
+-- Set runtime path of "/home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/lib/estimators/force_estimator" to ""
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/ament_index/resource_index/package_run_dependencies/estimators
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/ament_index/resource_index/parent_prefix_path/estimators
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/estimators/environment/ament_prefix_path.sh
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/estimators/environment/ament_prefix_path.dsv
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/estimators/environment/path.sh
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/estimators/environment/path.dsv
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/estimators/local_setup.bash
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/estimators/local_setup.sh
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/estimators/local_setup.zsh
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/estimators/local_setup.dsv
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/estimators/package.dsv
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/ament_index/resource_index/packages/estimators
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/estimators/cmake/estimatorsConfig.cmake
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/estimators/cmake/estimatorsConfig-version.cmake
+-- Installing: /home/anton/Desktop/tactile-odom-drone/onboard/install/estimators/share/estimators/package.xml
