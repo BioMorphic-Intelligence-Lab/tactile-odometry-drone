@@ -27,14 +27,12 @@
         <mesh filename="package://rviz_vis/meshes/TactileMappingDroneBase.dae"
               scale="1 1 1"/>
       </geometry>
-      <material name="black"/>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
         <box size="0.5 0.5 0.1"/>
       </geometry>
-      <material name="trans_grey"/>
     </collision>
   </link>
 
@@ -45,36 +43,39 @@
         <mesh filename="package://rviz_vis/meshes/Link1.dae"
               scale="1 1 1"/>
       </geometry>
-      <material name="black"/>
     </visual>
     <collision>
       <origin xyz="-0.0175 0 0" rpy="0 -1.57 0"/>
       <geometry>
         <cylinder radius="0.01" length="0.12"/>
       </geometry>
-      <material name="trans_grey"/>
     </collision>
   </link>
 
   <link name="link2">
     <visual>
-      <origin xyz="0.035 0.021 -0.0275" rpy="1.57 0 -1.57"/>
+      <origin xyz="-0.006 0.0025 -0.0075" rpy="1.57 0 -1.57"/>
       <geometry>
-        <mesh filename="package://rviz_vis/meshes/Link2.dae"
-              scale="1 1 1"/>
+        <mesh filename="package://rviz_vis/meshes/Link2Assembly.dae"
+              scale="0.001 0.001 0.001"/>
       </geometry>
-      <material name="black"/>
     </visual>
     <collision>
-      <origin xyz="0.0 0.0 0.0175" rpy="0.0 0 0.0"/>
+      <origin xyz="0.0 0.0 0.0075" rpy="0.0 0 0.0"/>
       <geometry>
         <box size="0.07 0.05 0.01"/>
       </geometry>
-      <material name="trans_grey"/>
     </collision>
   </link>
 
-  <link name="ee"/>
+  <link name="ee">
+    <collision>
+      <origin xyz="0.0 0.0 -0.01" rpy="0.0 0 0.0"/>
+      <geometry>
+        <sphere radius="0.01"/>
+      </geometry>
+    </collision>
+  </link>
 
 
   <!-- ################ Joints ##################### -->
@@ -95,7 +96,7 @@
   <joint name="ee_connector" type="fixed">
     <parent link="link2"/>
     <child link="ee"/>
-    <origin xyz="0.0 0.0 0.02" rpy="0 0 0"/>
+    <origin xyz="0.0 0.0 0.028" rpy="0 0 0"/>
   </joint>    
 
 </robot>
