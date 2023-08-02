@@ -18,7 +18,6 @@ private:
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr _joint_subscriber;
   rclcpp::Publisher<geometry_msgs::msg::WrenchStamped>::SharedPtr _force_publisher;
 
-  std::vector<double> _force;
-  double _k;
+  double _k_lin, _k_rot, _d_ee;
 
 };

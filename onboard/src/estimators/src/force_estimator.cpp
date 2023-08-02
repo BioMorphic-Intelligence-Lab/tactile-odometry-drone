@@ -7,11 +7,13 @@ ForceEstimatorNode::ForceEstimatorNode()
 
   /* Declare all the parameters */
   // Arm properties
-  this->declare_parameter("k", 0.1);
+  this->declare_parameter("k_lin", 1.0);
+  this->declare_parameter("k_rot", 0.001);
+  this->declare_parameter("d_ee", 0.01);
   /* Get all the arm property parameters */
-  this->_k = this->get_parameter("k").as_double();
-
-  this->_force = {0.0, 0.0, 0.0};
+  this->_k_lin = this->get_parameter("k_lin").as_double();
+  this->_k_rot = this->get_parameter("k_rot").as_double();
+  this->_d_ee = this->get_parameter("d_ee").as_double();
 
   /* Init all the class members */
   this->_force_publisher = this->create_publisher<geometry_msgs::msg::WrenchStamped>("wrench", 10);
@@ -26,18 +28,26 @@ void ForceEstimatorNode::_joint_callback(const sensor_msgs::msg::JointState::Sha
                    msg->position[1]};
 
   /* Compute the force acting on the linear spring */
-  double f_spring = this->_k * pos[0];
+  double f_spring = this->_k_lin * pos[0];
+  /* Compute the torque required to bring rotational 
+   * joint into its current position */
+  double torque = this->_k_rot * pos[1];
+  /* Given the torque we can find the lateral
+   * component of the force*/
+  double f_lat = - torque / this->_d_ee;
 
   /* Define the wrench message. The force is published in ee frame*/
   auto wrench_msg = geometry_msgs::msg::WrenchStamped();
   wrench_msg.header.stamp = msg->header.stamp;
+  // By defining the force in the ee-frame it is easy to add
+  // the lateral component
   wrench_msg.header.frame_id = "ee";
 
-  /* In ee-frame the force is always normal, i.e. fx = fy = 0*/
+  /* In ee-frame the force is always normal, i.e. fx = 0*/
   wrench_msg.wrench.force.x = 0.0;
-  wrench_msg.wrench.force.y = 0.0;
+  wrench_msg.wrench.force.y = f_spring * sin(pos[1]) + f_lat;
   /* The normal force is found via the trigonometric relation through the rotational angle */
-  wrench_msg.wrench.force.z = f_spring / cos(pos[1]);
+  wrench_msg.wrench.force.z = f_spring * cos(pos[1]);
 
   /* Actually publish the message */
   this->_force_publisher->publish(wrench_msg);
