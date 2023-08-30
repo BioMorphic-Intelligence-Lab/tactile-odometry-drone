@@ -1,0 +1,3 @@
+[submodule "tactile-odom-teensy"]
+	path = tactile-odom-teensy
+	url = https://github.com/BioMorphic-Intelligence-Lab/tactile-odom-teensy
