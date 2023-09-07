@@ -7,7 +7,6 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
-#include "nav_msgs/msg/odometry.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
 #include "std_srvs/srv/trigger.hpp"
 
@@ -28,15 +27,15 @@ public:
 
     bool terminate_flag = 0;
 
-    // const char *pDevice = "/dev/input/mice";
+     const char *pDevice = "/dev/input/mice";
     //  const char *pDevice = "/dev/input/by-id/usb-Logitech_USB-PS_2_Optical_Mouse-mouse";
-    const char *pDevice = "/dev/input/by-id/usb-Cursor_Controls_Ltd_Cursor_Controls_Trackball-mouse";
+    //const char *pDevice = "/dev/input/by-id/usb-Cursor_Controls_Ltd_Cursor_Controls_Trackball-mouse";
 
     // Open Mouse
     fd = open(pDevice, O_RDONLY);
     if (fd == -1)
     {
-      printf("ERROR Opening %s\n", pDevice);
+      printf("ERROR Opening  %s\n", pDevice);
       close(fd);
     }
 
