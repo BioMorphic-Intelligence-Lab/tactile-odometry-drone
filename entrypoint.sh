@@ -5,7 +5,7 @@
 
 # Navigate to the right directory and source it
 cd /home/user/ros/ws
-source /opt/ros/${ROS_DISTRO}/setup.sh
-source install/setup.bash
-
+. /opt/ros/${ROS_DISTRO}/setup.sh
+. install/setup.bash
+echo v0.1
 exec ros2 run trackball_interface trackball_interface
