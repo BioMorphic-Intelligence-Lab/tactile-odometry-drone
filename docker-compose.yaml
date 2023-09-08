@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  teensy-uros-agent:
+    image: antbre/px4-uros-agent
+    privileged: true
+    network_mode: 'host'
+    command: serial --dev /dev/ttyACM0 -b 921600
+
+  track-ball-and-imu-driver:
+    image: michatud/tactile-odometry-drone
+    privileged: true 
+    network_mode: 'host'
+  
+
+
