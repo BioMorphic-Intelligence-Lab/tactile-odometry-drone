@@ -4,3 +4,15 @@
 [submodule "px4_msgs"]
 	path = onboard/src/px4_msgs
 	url = https://github.com/PX4/px4_msgs
+[submodule "offboard/src/px4_msgs"]
+	path = offboard/src/px4_msgs
+	url = https://github.com/PX4/px4_msgs
+[submodule "offboard/src/common"]
+	path = offboard/src/common
+	url = https://github.com/BioMorphic-Intelligence-Lab/common
+[submodule "offboard/src/mocap_optitrack_client"]
+	path = offboard/src/mocap_optitrack_client
+	url = https://github.com/BioMorphic-Intelligence-Lab/mocap_optitrack_client
+[submodule "offboard/src/mocap_optitrack_interfaces"]
+	path = offboard/src/mocap_optitrack_interfaces
+	url = https://github.com/BioMorphic-Intelligence-Lab/mocap_optitrack_interfaces
