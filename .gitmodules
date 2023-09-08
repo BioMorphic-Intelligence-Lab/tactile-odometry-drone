@@ -1,3 +1,6 @@
 [submodule "tactile-odom-teensy"]
 	path = tactile-odom-teensy
 	url = https://github.com/BioMorphic-Intelligence-Lab/tactile-odom-teensy
+[submodule "px4_msgs"]
+	path = onboard/src/px4_msgs
+	url = https://github.com/PX4/px4_msgs
