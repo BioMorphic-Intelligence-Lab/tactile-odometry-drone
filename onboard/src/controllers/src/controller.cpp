@@ -40,10 +40,10 @@ void Controller::_timer_callback()
             Uncomment this for the SITL e.g. automatic arming and switch to offboard mode */
             
         // Change to Offboard mode after 10 setpoints
-        this->_publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
+        //this->_publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
 
         // Arm the vehicle
-        this->arm();
+        //this->arm();
 
     }
 
