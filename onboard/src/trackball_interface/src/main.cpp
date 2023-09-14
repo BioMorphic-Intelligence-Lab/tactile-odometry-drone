@@ -18,6 +18,7 @@ public:
   int fd = -1;
   int sum_x, sum_y = 0;
   double deltaT, deltaT_temp = 0.0;
+
   void read_mouse()
   {
     printf("read_mouse");
@@ -27,22 +28,33 @@ public:
 
     bool terminate_flag = 0;
 
-     char *pDevice = "/dev/input/mice";
-     if (trackball_name.compare("X19"))
-     {
-      char *pDevice = "/dev/input/by-id/usb-Cursor_Controls_Ltd_Cursor_Controls_Trackball-mouse";
-     }
-     else if (trackball_name.compare("X13"))
-     {
-        char *pDevice = "/dev/input/by-id/usb-Cursor_Controls_Ltd_Cursor_Controls_Trackball-mouse";
-     }
-     else
-     {
-      RCLCPP_WARN(this->get_logger(),"wrong name of trackball. Using all mice as input.");
-     }
+    char *pDevice = "/dev/input/mouse0";
+    std::cout << "trackball_name:" << trackball_name << " \n";
+    if (!trackball_name.compare("X19"))
+    {
+      std::cout << "using trackball X19"
+                << "\n";
+      pDevice = "/dev/input/mouse0";
+      std::cout << "using mouse0"
+                << "\n";
+      printf(" Opening  %s\n", pDevice);
+    }
+    else if (!trackball_name.compare("X13"))
+    {
+      std::cout << "using trackball X13"
+                << "\n";
+      pDevice = "/dev/input/mouse1";
+      std::cout << "using mouse1"
+                << "\n";
+      printf(" Opening  %s\n", pDevice);
+    }
+    else
+    {
+      RCLCPP_WARN(this->get_logger(), "wrong name of trackball. Using all mouse0 as input.");
+    }
 
     //  const char *pDevice = "/dev/input/by-id/usb-Logitech_USB-PS_2_Optical_Mouse-mouse";
-    //const char *pDevice = "/dev/input/by-id/usb-Cursor_Controls_Ltd_Cursor_Controls_Trackball-mouse";
+    // const char *pDevice = "/dev/input/by-id/usb-Cursor_Controls_Ltd_Cursor_Controls_Trackball-mouse";
 
     // Open Mouse
     fd = open(pDevice, O_RDONLY);
@@ -82,6 +94,7 @@ public:
 
         last_time = current_time;
         // printf("counter= %i, readTime [µs]= %f, deltaT [ms]= %f, sum_x=%d, sum_y=%d\n", counter, deltaT_temp, deltaT, sum_x, sum_y);
+        printf("sum_x=%d, sum_y=%d\n", sum_x, sum_y);
         counter = 0;
         if (deltaT >= 20)
         {
@@ -103,15 +116,18 @@ public:
 
     this->declare_parameter("trackball_name", "X19");
 
-    
     trackball_name = this->get_parameter("trackball_name").as_string();
-    const str::string topic_name_prefix = "/trackball";
-    //const str::string topic_name_suffix1 = "/position";
+    std::string topic_name_prefix = "/trackball";
+    // const str::string topic_name_suffix1 = "/position";
     std::string topic_name_position = topic_name_prefix;
     std::string topic_name_ticks = topic_name_prefix;
-    topic_name_position.append(trackball_name);
+    // don't add trackball_name if it is "X19" ==> default topic
+    if (trackball_name.compare("X19"))
+    {
+      topic_name_position.append(trackball_name);
+      topic_name_ticks.append(trackball_name);
+    }
     topic_name_position.append("/position");
-    topic_name_ticks.append(trackball_name);
     topic_name_ticks.append("/ticks");
 
     service_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
@@ -167,7 +183,6 @@ private:
 int main(int argc, char *argv[])
 {
   rclcpp::init(argc, argv);
-
   rclcpp::executors::MultiThreadedExecutor executor;
   auto node = std::make_shared<TrackballInterface>();
   executor.add_node(node);
