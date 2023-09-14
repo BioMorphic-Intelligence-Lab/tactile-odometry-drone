@@ -18,7 +18,20 @@ def generate_launch_description():
          launch_ros.actions.Node(
             package="trackball_interface",
             executable="trackball_interface",
+            parameters=[
+                {"trackball_name": "X19"}
+            ],
             name="trackball_interface",
+            output="screen",
+            emulate_tty=True            
+        ),
+         launch_ros.actions.Node(
+            package="trackball_interface",
+            executable="trackball_interface",
+            parameters=[
+                {"trackball_name": "X13"}
+            ],
+            name="trackball_interface_2",
             output="screen",
             emulate_tty=True            
         )

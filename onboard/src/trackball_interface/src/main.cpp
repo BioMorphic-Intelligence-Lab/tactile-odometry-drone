@@ -94,7 +94,7 @@ public:
 
         last_time = current_time;
         // printf("counter= %i, readTime [µs]= %f, deltaT [ms]= %f, sum_x=%d, sum_y=%d\n", counter, deltaT_temp, deltaT, sum_x, sum_y);
-        printf("sum_x=%d, sum_y=%d\n", sum_x, sum_y);
+        //printf("sum_x=%d, sum_y=%d\n", sum_x, sum_y);
         counter = 0;
         if (deltaT >= 20)
         {
