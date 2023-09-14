@@ -28,7 +28,11 @@ find_package(std_srvs REQUIRED)
 add_executable(trackball_interface src/main.cpp)
 ament_target_dependencies(trackball_interface rclcpp std_msgs std_srvs geometry_msgs) 
 
-
+install(
+  DIRECTORY    
+    launch
+  DESTINATION share/${PROJECT_NAME})
+  
 install(TARGETS
 trackball_interface
   DESTINATION lib/${PROJECT_NAME})

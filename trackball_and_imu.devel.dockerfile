@@ -16,7 +16,8 @@ WORKDIR /home/user/ros/ws
 #CMD rm -r build install log
 RUN apt-get -y update; apt-get -y install curl
 RUN curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash - &&\
-apt-get install -y libphidget22
+apt-get install -y libphidget22 \
+apt-get install ros-humble-imu-tools
 # Setup workspace
 RUN . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --packages-select trackball_interface
 
