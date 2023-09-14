@@ -27,7 +27,20 @@ public:
 
     bool terminate_flag = 0;
 
-     const char *pDevice = "/dev/input/mice";
+     char *pDevice = "/dev/input/mice";
+     if (trackball_name.compare("X19"))
+     {
+      char *pDevice = "/dev/input/by-id/usb-Cursor_Controls_Ltd_Cursor_Controls_Trackball-mouse";
+     }
+     else if (trackball_name.compare("X13"))
+     {
+        char *pDevice = "/dev/input/by-id/usb-Cursor_Controls_Ltd_Cursor_Controls_Trackball-mouse";
+     }
+     else
+     {
+      RCLCPP_WARN(this->get_logger(),"wrong name of trackball. Using all mice as input.");
+     }
+
     //  const char *pDevice = "/dev/input/by-id/usb-Logitech_USB-PS_2_Optical_Mouse-mouse";
     //const char *pDevice = "/dev/input/by-id/usb-Cursor_Controls_Ltd_Cursor_Controls_Trackball-mouse";
 
@@ -88,11 +101,24 @@ public:
   {
     printf("constructor...");
 
+    this->declare_parameter("trackball_name", "X19");
+
+    
+    trackball_name = this->get_parameter("trackball_name").as_string();
+    const str::string topic_name_prefix = "/trackball";
+    //const str::string topic_name_suffix1 = "/position";
+    std::string topic_name_position = topic_name_prefix;
+    std::string topic_name_ticks = topic_name_prefix;
+    topic_name_position.append(trackball_name);
+    topic_name_position.append("/position");
+    topic_name_ticks.append(trackball_name);
+    topic_name_ticks.append("/ticks");
+
     service_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
     timer_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
 
-    odom_publisher_ = this->create_publisher<geometry_msgs::msg::PointStamped>("/trackball/position", 10);
-    tick_publisher_ = this->create_publisher<geometry_msgs::msg::PointStamped>("/trackball/ticks", 10);
+    odom_publisher_ = this->create_publisher<geometry_msgs::msg::PointStamped>(topic_name_position, 10);
+    tick_publisher_ = this->create_publisher<geometry_msgs::msg::PointStamped>(topic_name_ticks, 10);
     timer_ = this->create_wall_timer(
         50ms, std::bind(&TrackballInterface::timer_callback, this), timer_cb_group_);
 
@@ -122,7 +148,7 @@ private:
     message.header.stamp = this->get_clock()->now();
     odom_publisher_->publish(message);
   }
-
+  std::string trackball_name;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr zeroService;
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<std_msgs::msg::Header>::SharedPtr publisher_;
