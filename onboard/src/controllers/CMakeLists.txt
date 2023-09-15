@@ -23,11 +23,12 @@ include_directories(include/common
 # find_package(<dependency> REQUIRED)
 
 #add_executable(test_trajectory_publisher src/controller.cpp src/test_trajectory.cpp)
-#ament_target_dependencies(test_trajectory_publisher rclcpp common px4_msgs)
-#target_include_directories(test_trajectory_publisher PUBLIC
-#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/controllers>
-#  $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
-#  $<INSTALL_INTERFACE:include>)
+add_executable(rectangle_publisher src/controller.cpp src/rectangle_planer.cpp)
+ament_target_dependencies(rectangle_publisher rclcpp common)
+target_include_directories(rectangle_publisher PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/controllers>
+  $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
+  $<INSTALL_INTERFACE:include>)
 
 add_executable(ref_pos_repeater src/ref_pos_repeater.cpp)
 ament_target_dependencies(ref_pos_repeater rclcpp common geometry_msgs px4_msgs Eigen3)
