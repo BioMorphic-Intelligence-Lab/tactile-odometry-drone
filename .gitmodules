@@ -16,3 +16,6 @@
 [submodule "offboard/src/mocap_optitrack_interfaces"]
 	path = offboard/src/mocap_optitrack_interfaces
 	url = https://github.com/BioMorphic-Intelligence-Lab/mocap_optitrack_interfaces
+[submodule "onboard/src/common"]
+	path = onboard/src/common
+	url = git@github.com:BioMorphic-Intelligence-Lab/common.git
