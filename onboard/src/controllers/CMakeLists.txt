@@ -10,6 +10,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(common REQUIRED)
 find_package(geometry_msgs)
+find_package(sensor_msgs)
 find_package(px4_msgs REQUIRED)
 find_package(common REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -22,12 +23,12 @@ include_directories(include/common
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-#add_executable(test_trajectory_publisher src/controller.cpp src/test_trajectory.cpp)
-#ament_target_dependencies(test_trajectory_publisher rclcpp common px4_msgs)
-#target_include_directories(test_trajectory_publisher PUBLIC
-#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/controllers>
-#  $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
-#  $<INSTALL_INTERFACE:include>)
+add_executable(test_trajectory_publisher src/controller.cpp src/test_trajectory.cpp)
+ament_target_dependencies(test_trajectory_publisher rclcpp geometry_msgs sensor_msgs)
+target_include_directories(test_trajectory_publisher PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/controllers>
+  $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
+  $<INSTALL_INTERFACE:include>)
 
 add_executable(ref_pos_repeater src/ref_pos_repeater.cpp)
 ament_target_dependencies(ref_pos_repeater rclcpp common geometry_msgs px4_msgs Eigen3)
@@ -50,7 +51,7 @@ if(BUILD_TESTING)
 endif()
 
 install(TARGETS 
-  #test_trajectory_publisher
+  test_trajectory_publisher
   ref_pos_repeater
   DESTINATION lib/${PROJECT_NAME})
 

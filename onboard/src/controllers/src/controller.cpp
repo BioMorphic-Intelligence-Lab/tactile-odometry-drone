@@ -1,12 +1,14 @@
 #include "controller.hpp"
 
 Controller::Controller()
-    : Node("Controller"), _offboard_setpoint_counter(0)
+    : Node("Controller")
 {   
 
     /* Declare all the parameters */
     this->declare_parameter("frequency", 20.0);
-    this->declare_parameter("yaw_rate",5*M_PI/180;); // yaw anglular velocity in rad/s for alignment
+    this->declare_parameter("joint_topic", "/JointState");
+    this->declare_parameter("pose_topic", "/MocapPose");
+    this->declare_parameter("pub_topic", "/ref_pose");
 
     /* Actually get all the parameters */
     this->_frequency =  this->get_parameter("frequency").as_double();
@@ -14,18 +16,18 @@ Controller::Controller()
     /* Init Timer and subscribers*/
     this->_timer = this->create_wall_timer(1.0 / this->_frequency * 1s,
                                             std::bind(&Controller::_timer_callback, this));
-    this->_status_subscription = this->create_subscription<px4_msgs::msg::VehicleStatus>(
-        "/fmu/out/vehicle_status", rclcpp::SensorDataQoS(), std::bind(&Controller::_status_callback, this, std::placeholders::_1));
-    this->_timesync_subscription = this->create_subscription<px4_msgs::msg::TimesyncStatus>(
-        "/fmu/out/timesync_status", rclcpp::SensorDataQoS(), std::bind(&Controller::_timesync_callback, this, std::placeholders::_1));
+    this->_joint_subscription = this->create_subscription<sensor_msgs::msg::JointState>(
+        this->get_parameter("joint_topic").as_string(),
+        rclcpp::SensorDataQoS(),
+        std::bind(&Controller::_joint_callback, this, std::placeholders::_1));
+    this->_mocap_subscription = this->create_subscription<geometry_msgs::msg::PoseStamped>(
+        this->get_parameter("pose_topic").as_string(),
+        rclcpp::SensorDataQoS(),
+        std::bind(&Controller::_mocap_callback, this, std::placeholders::_1));
     
     /* Init Publishers */
-    this->_offboard_publisher = this->create_publisher<px4_msgs::msg::OffboardControlMode>(
-        "/fmu/in/offboard_control_mode", 10);
-    this->_trajectory_publisher = this->create_publisher<px4_msgs::msg::TrajectorySetpoint>(
-        "/fmu/in/trajectory_setpoint", 10);
-    this->_vehicle_command_pub = this->create_publisher<px4_msgs::msg::VehicleCommand>(
-        "/fmu/in/vehicle_command", 10);
+    this->_setpoint_publisher = this->create_publisher<geometry_msgs::msg::PoseStamped>(
+        this->get_parameter("pub_topic").as_string(), 10);
 
     /* Remember the beginning time stamp */
     this->_beginning = this->now();
@@ -35,145 +37,20 @@ Controller::Controller()
 /* Callback Functions */
 void Controller::_timer_callback()
 {
-    if (_offboard_setpoint_counter == 10) 
-    {
-        /* On the real system we want to arm and change mode using the remote control
-            Uncomment this for the SITL e.g. automatic arming and switch to offboard mode */
-            
-        // Change to Offboard mode after 10 setpoints
-        //this->_publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
-
-        // Arm the vehicle
-        //this->arm();
-
-    }
-
-    // offboard_control_mode needs to be paired with trajectory_setpoint
-    this->_publish_offboard_control_mode();
-    this->publish_trajectory_setpoint();
-
-    // stop the counter after reaching 11
-    if (_offboard_setpoint_counter < 11) {
-        _offboard_setpoint_counter++;
-    }
-
+    geometry_msgs::msg::PoseStamped msg{};
+    msg.header.frame_id = "World";
+    msg.header.stamp = this->now();
+    msg.pose = this->get_trajectory_setpoint();
+    this->_setpoint_publisher->publish(msg);
 }
 
 
-double Controller::normalize_angle(double angle)
+void Controller::_joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
 {
-    angle = fmod(angle, 2*M_PI);
-    angle = fmod(angle + 2*M_PI, 2*M_PI);
-    return (angle > M_PI ? angle - 2*M_PI : angle);
+    this->curr_js = *msg;
 }
 
-/**
- * @brief Publish the offboard control mode.
- *        For this example, only position and altitude controls are active.
- */
-void Controller::_publish_offboard_control_mode()
+void Controller::_mocap_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
 {
-    px4_msgs::msg::OffboardControlMode msg{};
-    msg.position = true;
-    msg.velocity = false;
-    msg.acceleration = false;
-    msg.attitude = false;
-    msg.body_rate = false;
-    msg.timestamp = this->get_timestamp();
-    _offboard_publisher->publish(msg);
-}
-
-void Controller::_status_callback(const px4_msgs::msg::VehicleStatus::SharedPtr msg)
-{
-    this->_nav_state = msg->nav_state;
-    this->_arming_state = msg->arming_state;
-}
-
-
-void Controller::_timesync_callback(const px4_msgs::msg::TimesyncStatus::SharedPtr msg)
-{
-    this->_timestamp_local = std::chrono::steady_clock::now();
-    this->_timestamp_remote.store(msg->timestamp);
-}
-
-uint64_t Controller::get_timestamp()
-{
-    auto now = std::chrono::steady_clock::now();
-    return this->_timestamp_remote.load() + std::chrono::round<std::chrono::microseconds>(now - this->_timestamp_local).count();
-}
-
-/**
- * @brief Send a command to Arm the vehicle
- */
-void Controller::arm()
-{
-    this->_publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 1.0);
-
-    RCLCPP_INFO(this->get_logger(), "Arm command send");
-}
-/**
- * @brief Send a command to Disarm the vehicle
- */
-void Controller::disarm()
-{
-    _publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 0.0);
-
-    RCLCPP_INFO(this->get_logger(), "Disarm command send");
-}
-/**
- * @brief Send a command to takeoff
- */
-void Controller::takeoff()
-{
-    px4_msgs::msg::VehicleCommand msg{};
-    msg.param7 = 3.0;
-    msg.command = px4_msgs::msg::VehicleCommand::VEHICLE_CMD_NAV_TAKEOFF;
-    msg.target_system = 1;
-    msg.target_component = 1;
-    msg.source_system = 1;
-    msg.source_component = 1;
-    msg.from_external = true;
-    msg.timestamp = this->get_timestamp();
-    _vehicle_command_pub->publish(msg);
-
-    this->_taken_off = true;
-    RCLCPP_INFO(this->get_logger(), "Takeoff command send");
-}
-/**
- * @brief Send a command to land
- */
-void Controller::land()
-{
-    _publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_NAV_LAND);
-
-    RCLCPP_INFO(this->get_logger(), "Land command send");
-}
-
-
-void Controller::_publish_vehicle_command(uint16_t command,
-                                                            float param1,
-                                                            float param2,
-                                                            float param3,
-                                                            float param4,
-                                                            float param5,
-                                                            float param6,
-                                                            float param7)
-{
-    px4_msgs::msg::VehicleCommand msg{};
-    msg.param1 = param1;
-    msg.param2 = param2;
-    msg.param3 = param3;
-    msg.param4 = param4;
-    msg.param5 = param5;
-    msg.param6 = param6;
-    msg.param7 = param7;
-
-    msg.command = command;
-    msg.target_system = 1;
-    msg.target_component = 1;
-    msg.source_system = 1;
-    msg.source_component = 1;
-    msg.from_external = true;
-    msg.timestamp = this->get_timestamp();
-    this->_vehicle_command_pub->publish(msg);
+    this->curr_pos = *msg;
 }

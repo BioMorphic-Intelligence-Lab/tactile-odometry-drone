@@ -9,7 +9,7 @@ RefPosRepeater::RefPosRepeater()
 
     /* Declare all the parameters */
     this->declare_parameter("frequency", 5.0);
-    this->declare_parameter("sub_topic", "ref_pose");
+    this->declare_parameter("sub_topic", "/ref_pose");
 
     /* Actually get all the parameters */
     this->_frequency =  this->get_parameter("frequency").as_double();
