@@ -6,6 +6,7 @@ Controller::Controller()
 
     /* Declare all the parameters */
     this->declare_parameter("frequency", 20.0);
+    this->declare_parameter("yaw_rate",5*M_PI/180;); // yaw anglular velocity in rad/s for alignment
 
     /* Actually get all the parameters */
     this->_frequency =  this->get_parameter("frequency").as_double();
