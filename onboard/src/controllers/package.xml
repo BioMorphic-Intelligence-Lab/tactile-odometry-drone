@@ -10,6 +10,7 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <build_depend>px4_msgs</build_depend>
+  <build_depend>common</build_depend>
   <build_depend>px4_ros_com</build_depend>
   <build_depend>common</build_depend>
 
