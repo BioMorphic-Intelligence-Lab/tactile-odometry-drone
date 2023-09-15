@@ -8,7 +8,7 @@ services:
     command: serial --dev /dev/ttyACM0 -b 921600
 
   track-ball-and-imu-driver:
-    image: michatud/tactile-odometry-drone
+    image: antbre/tactile-odometry-drone
     privileged: true 
     network_mode: 'host'
   
