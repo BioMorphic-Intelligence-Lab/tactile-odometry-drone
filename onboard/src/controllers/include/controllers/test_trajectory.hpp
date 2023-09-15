@@ -1,4 +1,5 @@
 #include "rclcpp/rclcpp.hpp"
+#include "common/common.hpp"
 #include "controller.hpp"
 
 class TestTrajectoryPublisher : public Controller
