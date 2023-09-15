@@ -11,7 +11,7 @@ void TestTrajectoryPublisher::publish_trajectory_setpoint()
 
     if(t < 20)
     {
-        msg.position = {0, 0, -1.7};
+        msg.position = {0, -0.90, -1.75};
         msg.yaw = 0.0;
 
         RCLCPP_INFO(this->get_logger(), "Mission start. T-%f s.", 20.0 - t);
@@ -19,12 +19,12 @@ void TestTrajectoryPublisher::publish_trajectory_setpoint()
     /* After mission time ran out */
     else if(t >= 20 && t < 25)
     {
-        msg.position = {-1.6, -0.10, -1.7};
+        msg.position =  {1.97, -0.90, -1.75};
         msg.yaw = 0.0;
     }
     else
     {
-        msg.position = {-1.6, -0.1f + (t-25)*0.01f , -1.7};
+        msg.position = {1.97, -0.90f + (t-25)*0.1f , -1.75};
         msg.yaw = 0.0;
     }
     
