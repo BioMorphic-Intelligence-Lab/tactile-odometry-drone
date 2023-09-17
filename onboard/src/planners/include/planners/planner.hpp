@@ -4,10 +4,10 @@
 
 using namespace std::chrono_literals;
 
-class Controller : public rclcpp::Node
+class Planner : public rclcpp::Node
 {
 public:
-    Controller();
+    Planner();
 
     /**
      * @brief Publish a trajectory setpoint

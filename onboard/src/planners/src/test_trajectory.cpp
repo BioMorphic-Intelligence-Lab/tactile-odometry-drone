@@ -33,6 +33,10 @@ void TestTrajectoryPublisher::align_to_wall(Eigen::Matrix3d *R_IB,Eigen::Vector3
     
 
 }*/
+
+TestTrajectoryPublisher::TestTrajectoryPublisher()
+{}
+
 /**
  * @brief Publish a trajectory setpoint.
  */

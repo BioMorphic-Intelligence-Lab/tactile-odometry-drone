@@ -1,7 +1,7 @@
 #include "rclcpp/rclcpp.hpp"
-#include "controller.hpp"
+#include "planner.hpp"
 
-class TestTrajectoryPublisher : public Controller
+class TestTrajectoryPublisher : public Planner
 {
 public:
     TestTrajectoryPublisher();

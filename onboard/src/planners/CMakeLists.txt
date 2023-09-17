@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(controllers)
+project(planners)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -23,25 +23,24 @@ include_directories(include/common
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-#add_executable(test_trajectory_publisher src/controller.cpp src/test_trajectory.cpp)
-add_executable(rectangle_publisher src/controller.cpp src/rectangle_planer.cpp)
-ament_target_dependencies(rectangle_publisher rclcpp common)
-target_include_directories(rectangle_publisher PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/controllers>
-  $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
-  $<INSTALL_INTERFACE:include>)
+#add_executable(rectangle_publisher src/planner.cpp src/rectangle_planer.cpp)
+#ament_target_dependencies(rectangle_publisher rclcpp common geometry_msgs sensor_msgs)
+#target_include_directories(rectangle_publisher PUBLIC
+#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
+#  $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
+#  $<INSTALL_INTERFACE:include>)
   
-add_executable(test_trajectory_publisher src/controller.cpp src/test_trajectory.cpp)
+add_executable(test_trajectory_publisher src/planner.cpp src/test_trajectory.cpp)
 ament_target_dependencies(test_trajectory_publisher rclcpp geometry_msgs sensor_msgs)
 target_include_directories(test_trajectory_publisher PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/controllers>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
   $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
   $<INSTALL_INTERFACE:include>)
 
 add_executable(ref_pos_repeater src/ref_pos_repeater.cpp)
 ament_target_dependencies(ref_pos_repeater rclcpp common geometry_msgs px4_msgs Eigen3)
 target_include_directories(ref_pos_repeater PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/controllers>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
   $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
   $<INSTALL_INTERFACE:include>)
 

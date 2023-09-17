@@ -1,7 +1,7 @@
-#include "controller.hpp"
+#include "planner.hpp"
 
-Controller::Controller()
-    : Node("Controller")
+Planner::Planner()
+    : Node("Planner")
 {   
 
     /* Declare all the parameters */
@@ -15,15 +15,15 @@ Controller::Controller()
 
     /* Init Timer and subscribers*/
     this->_timer = this->create_wall_timer(1.0 / this->_frequency * 1s,
-                                            std::bind(&Controller::_timer_callback, this));
+                                            std::bind(&Planner::_timer_callback, this));
     this->_joint_subscription = this->create_subscription<sensor_msgs::msg::JointState>(
         this->get_parameter("joint_topic").as_string(),
         rclcpp::SensorDataQoS(),
-        std::bind(&Controller::_joint_callback, this, std::placeholders::_1));
+        std::bind(&Planner::_joint_callback, this, std::placeholders::_1));
     this->_mocap_subscription = this->create_subscription<geometry_msgs::msg::PoseStamped>(
         this->get_parameter("pose_topic").as_string(),
         rclcpp::SensorDataQoS(),
-        std::bind(&Controller::_mocap_callback, this, std::placeholders::_1));
+        std::bind(&Planner::_mocap_callback, this, std::placeholders::_1));
     
     /* Init Publishers */
     this->_setpoint_publisher = this->create_publisher<geometry_msgs::msg::PoseStamped>(
@@ -35,7 +35,7 @@ Controller::Controller()
 }
 
 /* Callback Functions */
-void Controller::_timer_callback()
+void Planner::_timer_callback()
 {
     geometry_msgs::msg::PoseStamped msg{};
     msg.header.frame_id = "World";
@@ -45,12 +45,12 @@ void Controller::_timer_callback()
 }
 
 
-void Controller::_joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
+void Planner::_joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
 {
     this->curr_js = *msg;
 }
 
-void Controller::_mocap_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
+void Planner::_mocap_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
 {
     this->curr_pos = *msg;
 }
