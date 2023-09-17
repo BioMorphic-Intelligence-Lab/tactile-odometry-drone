@@ -26,9 +26,8 @@ public:
     unsigned char data[3];
     int counter = 0;
 
-    bool terminate_flag = 0;
 
-    char *pDevice = "/dev/input/mouse0";
+    std::string pDevice = "/dev/input/mouse0";
     std::cout << "trackball_name:" << trackball_name << " \n";
     if (!trackball_name.compare("X19"))
     {
@@ -37,7 +36,7 @@ public:
       pDevice = "/dev/input/mouse0";
       std::cout << "using mouse0"
                 << "\n";
-      printf(" Opening  %s\n", pDevice);
+      printf(" Opening  %s\n", pDevice.c_str());
     }
     else if (!trackball_name.compare("X13"))
     {
@@ -46,7 +45,7 @@ public:
       pDevice = "/dev/input/mouse1";
       std::cout << "using mouse1"
                 << "\n";
-      printf(" Opening  %s\n", pDevice);
+      printf(" Opening  %s\n", pDevice.c_str());
     }
     else
     {
@@ -57,14 +56,14 @@ public:
     // const char *pDevice = "/dev/input/by-id/usb-Cursor_Controls_Ltd_Cursor_Controls_Trackball-mouse";
 
     // Open Mouse
-    fd = open(pDevice, O_RDONLY);
+    fd = open(pDevice.c_str(), O_RDONLY);
     if (fd == -1)
     {
-      printf("ERROR Opening  %s\n", pDevice);
+      printf("ERROR Opening  %s\n", pDevice.c_str());
       close(fd);
     }
 
-    int left, middle, right;
+    //int left, middle, right;
     signed char x, y;
     rclcpp::Time start_time = this->get_clock()->now();
     rclcpp::Time publish_time = this->get_clock()->now();
@@ -82,9 +81,9 @@ public:
       if (bytes > 0)
       {
         // printf("data: %02x\n",data);
-        left = data[0] & 0x1;
+        /*left = data[0] & 0x1;
         right = data[0] & 0x2;
-        middle = data[0] & 0x4;
+        middle = data[0] & 0x4;*/
 
         x = data[1];
         y = data[2];
@@ -93,8 +92,7 @@ public:
         deltaT = (this->get_clock()->now() - publish_time).nanoseconds() / 1000000;
 
         last_time = current_time;
-        // printf("counter= %i, readTime [µs]= %f, deltaT [ms]= %f, sum_x=%d, sum_y=%d\n", counter, deltaT_temp, deltaT, sum_x, sum_y);
-        //printf("sum_x=%d, sum_y=%d\n", sum_x, sum_y);
+        
         counter = 0;
         if (deltaT >= 20)
         {
@@ -109,6 +107,7 @@ public:
       }
     }
   }
+
   TrackballInterface()
       : Node("trackball_interface")
   {
@@ -173,6 +172,7 @@ private:
 
   void setToZeroCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
   {
+    (void) request;
     std::cout << "setZero service" << std::endl;
     this->sum_x = 0;
     this->sum_y = 0;
