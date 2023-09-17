@@ -1,4 +1,4 @@
-#include "rectangle_planer.hpp"
+#include "rectangle_planner.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include <Eigen/Dense>
 /**
@@ -12,10 +12,10 @@
 *   pos_IB: updated position of UAV
 *   R_IB: updated orientation of UAV
  */
-void TestTrajectoryPublisher::align_to_wall(Eigen::Matrix3d *R_IB, Eigen::Vector3d *pos_IB, Eigen::Vector3d pos_IE, float32 encoderYaw, float32 mocapYaw, Eigen::Vector3d pos_BE)
+void RectanglePlanner::align_to_wall(Eigen::Matrix3d *R_IB, Eigen::Vector3d *pos_IB, Eigen::Vector3d pos_IE, float encoderYaw, float mocapYaw, Eigen::Vector3d pos_BE)
 {
 
-    const float velthis->get_parameter("yaw_rate").as_float();
+    const float vel = this->get_parameter("yaw_rate").as_double();
     const float encoderYaw_round = round(encoderYaw);
     float increment = copysign(vel, encoderYaw_round);
 
@@ -25,23 +25,23 @@ void TestTrajectoryPublisher::align_to_wall(Eigen::Matrix3d *R_IB, Eigen::Vector
         increment = encoderYaw;
     }
 
-    const float yaw = moCapYaw + increment;
+    const float yaw = mocapYaw + increment;
 
     // return position and orientation of uav
-    pos_IB = pos_IE - common::rot_z(yaw) * pos_BE;
-    R_IB = common::rot_z(yaw);
+    *pos_IB = (pos_IE) - common::rot_z(yaw) * (pos_BE);
+    *R_IB = common::rot_z(yaw);
 }
 
-TestTrajectoryPublisher::TestTrajectoryPublisher()
+RectanglePlanner::RectanglePlanner()
 {
     this->declare_parameter("L_x", 1.0);
     this->declare_parameter("L_z", 0.5);
     this->declare_parameter("v_x", 0.1);
     this->declare_parameter("v_z", 0.1);
-    _L_x = this->get_parameter("L_x").as_double();
-    _L_z = this->get_parameter("L_z").as_double();
-    _v_x = this->get_parameter("v_x").as_double();
-    _v_z = this->get_parameter("v_z").as_double();
+    this->_L_x = this->get_parameter("L_x").as_double();
+    this->_L_z = this->get_parameter("L_z").as_double();
+    this->_v_x = this->get_parameter("v_x").as_double();
+    this->_v_z = this->get_parameter("v_z").as_double();
 }
 /**
  * @brief Publish a trajectory setpoint.
@@ -52,36 +52,36 @@ TestTrajectoryPublisher::TestTrajectoryPublisher()
  |         |
  4---------3
  */
-geometry_msgs::msg::PoseStamped TestTrajectoryPublisher::publish_trajectory_setpoint()
+geometry_msgs::msg::Pose RectanglePlanner::get_trajectory_setpoint()
 {
     float time = (this->now() - this->_beginning).seconds();
-    geometry_msgs::msg::PoseStamped msg;
+    geometry_msgs::msg::Pose msg;
 
-    double Tx = L_x / _v_x;
-    double Tz = L_z / v_z;
+    double Tx = this->_L_x / this->_v_x;
+    double Tz = this->_L_z / this->_v_z;
     double p_x = 0;
     double p_z = 0;
     if (time > 0)
     {
         if (time <= Tx) // line 1-2
         {
-            p_x = time * _v_x;
+            p_x = time * this->_v_x;
             p_z = 0;
         }
         else if (time <= Tx + Tz) // line 2-3
         {
-            p_z = -(time - Tx) * _v_z;
-            p_x = L_x;
+            p_z = -(time - Tx) * this->_v_z;
+            p_x = this->_L_x;
         }
         else if (time <= 2 * Tx + Tz) // line 3-4
         {
-            p_x = L_x - (time - Tx - Tz) * _v_x;
-            p_z = -L_z;
+            p_x = this->_L_x - (time - Tx - Tz) * this->_v_x;
+            p_z = -this->_L_z;
         }
         else if (time <= 2 * Tx + 2 * Tz) // line 4-1
         {
             p_x = 0;
-            p_z = -L_z + (time - 2 * Tx - Tz) * _v_z;
+            p_z = -this->_L_z + (time - 2 * Tx - Tz) * this->_v_z;
         }
         else // time is greater than rectangle duration
         {
@@ -89,8 +89,10 @@ geometry_msgs::msg::PoseStamped TestTrajectoryPublisher::publish_trajectory_setp
             p_z = 0;
         }
     }
-    msg.pose.position = {p_x, 0, p_z};
-    msg.header.stamp = this->get_timestamp();
+    
+    msg.position.x = p_x;
+    msg.position.y = 0;
+    msg.position.z = p_z;
     return msg;
 }
 
@@ -98,7 +100,7 @@ int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
 
-    rclcpp::spin(std::make_shared<TestTrajectoryPublisher>());
+    rclcpp::spin(std::make_shared<RectanglePlanner>());
     rclcpp::shutdown();
     return 0;
 }
