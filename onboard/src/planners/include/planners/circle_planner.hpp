@@ -13,5 +13,5 @@ public:
     geometry_msgs::msg::Pose get_trajectory_setpoint() override;
 
 private:
-    double _L_x, _L_z, _v_x, _v_z;
+    double _T, _d;
 };

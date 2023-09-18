@@ -6,8 +6,8 @@ CirclePlanner::CirclePlanner()
 {
     this->declare_parameter("d", 1.0); // diameter of circle
     this->declare_parameter("T", 5);   // duration for circle
-    this->_L_x = this->get_parameter("d").as_double();
-    this->_L_z = this->get_parameter("T").as_double();
+    this->_d = this->get_parameter("d").as_double();
+    this->_T = this->get_parameter("T").as_double();
 
     /**
      * @brief Publish a trajectory setpoint.
@@ -19,11 +19,12 @@ CirclePlanner::CirclePlanner()
         float time = (this->now() - this->_beginning).seconds();
         geometry_msgs::msg::Pose msg;
 
-        const float angle = 2 * M_PI / T * (time % T);
+        const float angle = 2 * M_PI / T * (time % this->_T);
+        float p_x, p_z = 0;
         if (time > 0)
         {
-            p_x = d / 2 * sin(angle);
-            pz = d / 2 * cos(angle)
+            p_x = this->_d / 2 * sin(angle);
+            p_z = this->_d / 2 * cos(angle) - 1;
         }
 
         msg.position.x = p_x;
