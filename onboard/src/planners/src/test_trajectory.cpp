@@ -1,55 +1,22 @@
 #include "test_trajectory.hpp"
 #include <Eigen/Dense>
 
-/**
- * @brief Align UAV to be perpendicular to wall (i.e. encoderYaw == 0). The function is designed to run permanentely after the trajectory position has been set
- * Inputs:
- *      pos_IE: position of End-Effector-Tip in World-Frame 
-        encoderYaw: reading of encoder (in rad)
-        mocapYaw: current yaw angle of UAV
-        pos_BE:  position offset from UAV to End-Effector
-* Outputs:
-*   pos_IB: updated position of UAV
-*   R_IB: updated orientation of UAV
- 
-void TestTrajectoryPublisher::align_to_wall(Eigen::Matrix3d *R_IB,Eigen::Vector3d *pos_IB,Eigen::Vector3d pos_IE, float32 encoderYaw, float32 mocapYaw, Eigen::Vector3d pos_BE)
-{
-    
-    const float velthis->get_parameter("yaw_rate").as_float();
-    const float encoderYaw_round = round(encoderYaw);
-    float increment = copysign(vel,encoderYaw_round);
-
-    // limit increment to prevent overshoot
-    if (abs(increment) > abs(encoderYaw))
-    {
-        increment = encoderYaw;
-    }
-
-    const float yaw = moCapYaw+increment;
-
-    // return position and orientation of uav
-    pos_IB = pos_IE-common::rot_z(yaw)*pos_BE;
-    R_IB= common::rot_z(yaw);
-    
-
-}*/
-
 TestTrajectoryPublisher::TestTrajectoryPublisher()
 {}
 
 /**
  * @brief Publish a trajectory setpoint.
  */
-geometry_msgs::msg::Pose TestTrajectoryPublisher::get_trajectory_setpoint()
+std::vector<double> TestTrajectoryPublisher::get_trajectory_setpoint()
 {
     float t = (this->now() - this->_beginning).seconds();
-    geometry_msgs::msg::Pose msg{};
+    std::vector<double> position(3);
 
     if(t < 20)
     {
-        msg.position.x = 0;
-        msg.position.y = -0.90;
-        msg.position.z = 1.75;
+        position.at(0) = 0;
+        position.at(1) = -0.90;
+        position.at(2) = 1.75;
         
         if(fabs((int)t - t) < 0.05)
         {
@@ -60,25 +27,25 @@ geometry_msgs::msg::Pose TestTrajectoryPublisher::get_trajectory_setpoint()
     else if(t >= 20 && t < 25)
     {
        
-        msg.position.x = 1.97;
-        msg.position.y = -0.90;
-        msg.position.z = 1.75;
+        position.at(0) = 1.97;
+        position.at(1) = -0.90;
+        position.at(2) = 1.75;
     }
     else
     {
 
-        msg.position.x = 1.97;
-        msg.position.y = -0.90f + (t-25)*0.1f;
-        msg.position.z = 1.75;
+        position.at(0) = 1.97;
+        position.at(1) = -0.90f + (t-25)*0.1f;
+        position.at(2) = 1.75;
     }
 
     if(fabs((int)t - t) < 0.05)
     {
         RCLCPP_INFO(this->get_logger(), "Current Reference: [%f, %f, %f]",
-            msg.position.x, msg.position.y, msg.position.z);
+            position.at(0), position.at(1), position.at(2));
     }
 
-    return msg;
+    return position;
 }
 
 int main(int argc, char ** argv)

@@ -8,7 +8,7 @@ public:
     /**
      * @brief Publish a trajectory setpoint
      */
-    geometry_msgs::msg::Pose get_trajectory_setpoint() override;
+    std::vector<double> get_trajectory_setpoint() override;
  //   void align_to_wall(Eigen::Matrix3d *R_IB,Eigen::Vector3d *pos_IB,Eigen::Vector3d pos_IE, float32 encoderYaw, float32 mocapYaw, Eigen::Vector3d pos_BE) override;
 
 };

@@ -1,36 +1,5 @@
 #include "rectangle_planner.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
-#include <Eigen/Dense>
-/**
- * @brief Align UAV to be perpendicular to wall (i.e. encoderYaw == 0). The function is designed to run permanentely after the trajectory position has been set
- * Inputs:
- *      pos_IE: position of End-Effector-Tip in World-Frame
-        encoderYaw: reading of encoder (in rad)
-        mocapYaw: current yaw angle of UAV
-        pos_BE:  position offset from UAV to End-Effector
-* Outputs:
-*   pos_IB: updated position of UAV
-*   R_IB: updated orientation of UAV
- */
-void RectanglePlanner::align_to_wall(Eigen::Matrix3d *R_IB, Eigen::Vector3d *pos_IB, Eigen::Vector3d pos_IE, float encoderYaw, float mocapYaw, Eigen::Vector3d pos_BE)
-{
-
-    const float vel = this->get_parameter("yaw_rate").as_double();
-    const float encoderYaw_round = round(encoderYaw);
-    float increment = copysign(vel, encoderYaw_round);
-
-    // limit increment to prevent overshoot
-    if (abs(increment) > abs(encoderYaw))
-    {
-        increment = encoderYaw;
-    }
-
-    const float yaw = mocapYaw + increment;
-
-    // return position and orientation of uav
-    *pos_IB = (pos_IE) - common::rot_z(yaw) * (pos_BE);
-    *R_IB = common::rot_z(yaw);
-}
 
 RectanglePlanner::RectanglePlanner()
 {
@@ -52,10 +21,10 @@ RectanglePlanner::RectanglePlanner()
  |         |
  4---------3
  */
-geometry_msgs::msg::Pose RectanglePlanner::get_trajectory_setpoint()
+std::vector<double> RectanglePlanner::get_trajectory_setpoint()
 {
     float time = (this->now() - this->_beginning).seconds();
-    geometry_msgs::msg::Pose msg;
+    std::vector<double> position(3);
 
     double Tx = this->_L_x / this->_v_x;
     double Tz = this->_L_z / this->_v_z;
@@ -90,10 +59,9 @@ geometry_msgs::msg::Pose RectanglePlanner::get_trajectory_setpoint()
         }
     }
     
-    msg.position.x = p_x;
-    msg.position.y = 0;
-    msg.position.z = p_z;
-    return msg;
+    position.at(0) = p_x;
+    position.at(2) = p_z;
+    return position;
 }
 
 int main(int argc, char **argv)
