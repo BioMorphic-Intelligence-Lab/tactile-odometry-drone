@@ -31,6 +31,20 @@ target_include_directories(circle_planner PUBLIC
   $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
   $<INSTALL_INTERFACE:include>)
 
+add_executable(line_planner src/planner.cpp src/line_planner.cpp)
+ament_target_dependencies(line_planner rclcpp common geometry_msgs sensor_msgs)
+target_include_directories(line_planner PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
+  $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
+  $<INSTALL_INTERFACE:include>)
+
+add_executable(sin_planner src/planner.cpp src/sin_planner.cpp)
+ament_target_dependencies(sin_planner rclcpp common geometry_msgs sensor_msgs)
+target_include_directories(sin_planner PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
+  $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
+  $<INSTALL_INTERFACE:include>)
+
 add_executable(rectangle_planner src/planner.cpp src/rectangle_planner.cpp)
 ament_target_dependencies(rectangle_planner rclcpp common geometry_msgs sensor_msgs)
 target_include_directories(rectangle_planner PUBLIC
@@ -68,6 +82,9 @@ endif()
 install(TARGETS 
   test_trajectory_publisher
   rectangle_planner
+  sin_planner
+  circle_planner
+  line_planner
   ref_pos_repeater
   DESTINATION lib/${PROJECT_NAME})
 

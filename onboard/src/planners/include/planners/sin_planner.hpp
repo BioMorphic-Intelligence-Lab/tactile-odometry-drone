@@ -10,7 +10,7 @@ public:
     /**
      * @brief Publish a trajectory setpoint
      */
-    geometry_msgs::msg::Pose get_trajectory_setpoint() override;
+    std::vector<double> get_trajectory_setpoint() override;
 
 private:
     double _L_x, _h_z, _v_x, _N_p;
