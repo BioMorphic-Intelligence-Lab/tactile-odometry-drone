@@ -49,7 +49,7 @@ private:
     /**
      * @brief Align UAV to be perpendicular to wall (i.e. encoderYaw == 0). The function is designed to run permanentely after the trajectory position has been set
      * Inputs:
-     *      pos_IE: position of End-Effector-Tip in World-Frame
+     *      pos_IE: previously desired position of End-Effector-Tip in World-Frame
             encoderYaw: reading of encoder (in rad)
             mocapYaw: current yaw angle of UAV
             pos_BE:  position offset from UAV to End-Effector
@@ -57,8 +57,11 @@ private:
     *   pos_IB: updated position of UAV
     *   yaw_IB: updated yaw of UAV
     */
-    void align_to_wall(float &yaw_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_IE,
-                       Eigen::Vector3d pos_BE, float encoder_yaw=0, float mocap_yaw=0);
+    void align_to_wall(float &yaw_IB, Eigen::Vector3d &pos_IB,
+                    Eigen::Vector3d pos_IE,
+                    Eigen::Vector3d pos_BE,
+                    float encoder_yaw=0,
+                    float mocap_yaw=0);
 
 };
 

@@ -42,8 +42,13 @@ Planner::Planner()
     this->_setpoint_publisher = this->create_publisher<geometry_msgs::msg::PoseStamped>(
         this->get_parameter("pub_topic").as_string(), 10);
 
-    /* Remember the beginning time stamp */
-    this->_beginning = rclcpp::Time::max();
+    /* Init current joint state variable to avoid segmentation fault */
+    this->_curr_js.position = {1000, 0.0};
+
+    /* Init the timestamp to some time in the future value until we establish contact */
+    this->_beginning = this->now() + rclcpp::Duration(10000, 0);
+
+
 
 }
 
@@ -95,10 +100,7 @@ void Planner::_timer_callback()
 
     /* Put in the position of the planner */
     std::vector<double> position = this->get_trajectory_setpoint();
-    msg.pose.position.x = position.at(0);
-    msg.pose.position.y = position.at(1);
-    msg.pose.position.z = position.at(2);
-
+    
     /* Check if we already are in contact and if we want to align with the wall */
     if(this->_align && this->_in_contact)
     {
@@ -113,9 +115,9 @@ void Planner::_timer_callback()
         
         /* Find the aligned position and orientation */
         align_to_wall(output_yaw, aligned_position,
-            Eigen::Vector3d(curr_pos.pose.position.x,
-                            curr_pos.pose.position.y,
-                            curr_pos.pose.position.z),
+            Eigen::Vector3d(position.at(0),
+                            position.at(1),
+                            position.at(2)),
             this->_ee_offset + this->_curr_js.position[0] * Eigen::Vector3d::UnitY(), 
             this->_curr_js.position[1],
             curr_yaw);
@@ -127,11 +129,11 @@ void Planner::_timer_callback()
         msg.pose.orientation.y = output_q.y();
         msg.pose.orientation.z = output_q.z();
 
-        msg.pose.position.x += aligned_position.x();
-        msg.pose.position.y += aligned_position.y();
-        msg.pose.position.z += aligned_position.z();
+        msg.pose.position.x = aligned_position.x();
+        msg.pose.position.y = aligned_position.y();
+        msg.pose.position.z = aligned_position.z();
     }
-    /* Otherwise we leave the pose as is and only check if we're already in contact */
+    /* Otherwise we leave just use the start pose and only check if we're already in contact */
     else
     {
         if(this->_curr_js.position[0] < JS_THRESHOLD)
@@ -139,6 +141,10 @@ void Planner::_timer_callback()
             this->_in_contact = true;
             this->_beginning = this->now();
         }
+
+        msg.pose.position.x = this->_start_point.x();
+        msg.pose.position.y = this->_start_point.y();
+        msg.pose.position.z = this->_start_point.z();
     }
     this->_setpoint_publisher->publish(msg);
 }

@@ -1,0 +1,6 @@
+rectangle_planner:
+  ros__parameters:
+    L_x: 1.0
+    L_z: 0.5
+    v_x: 0.1
+    v_z: 0.1

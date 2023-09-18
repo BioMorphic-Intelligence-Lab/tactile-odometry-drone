@@ -24,7 +24,7 @@ RectanglePlanner::RectanglePlanner()
 std::vector<double> RectanglePlanner::get_trajectory_setpoint()
 {
     float time = (this->now() - this->_beginning).seconds();
-    std::vector<double> position(3);
+    std::vector<double> position(3, 0);
 
     double Tx = this->_L_x / this->_v_x;
     double Tz = this->_L_z / this->_v_z;

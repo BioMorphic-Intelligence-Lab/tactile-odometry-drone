@@ -7,10 +7,10 @@ SinPlanner::SinPlanner()
     this->declare_parameter("L_x", 1.0); // end position in m
     this->declare_parameter("h_z", 0.0); // amplitude of sin in m
     this->declare_parameter("v_x", 0.1); // velocity in m/s
-    this->declare_parameter("N_p", 2);   // number of periods per L_x
+    this->declare_parameter("N_p", 2.0);   // number of periods per L_x
     this->_L_x = this->get_parameter("L_x").as_double();
     this->_h_z = this->get_parameter("h_z").as_double();
-    this->_v_x = this->get_parameter("v").as_double();
+    this->_v_x = this->get_parameter("v_x").as_double();
     this->_N_p = this->get_parameter("N_p").as_double();
 }
 

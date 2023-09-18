@@ -5,7 +5,7 @@
 CirclePlanner::CirclePlanner()
 {
     this->declare_parameter("d", 1.0); // diameter of circle
-    this->declare_parameter("T", 15);   // duration for circle
+    this->declare_parameter("T", 15.0);   // duration for circle
     this->_d = this->get_parameter("d").as_double();
     this->_T = this->get_parameter("T").as_double();
 }
