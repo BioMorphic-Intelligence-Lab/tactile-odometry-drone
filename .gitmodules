@@ -19,3 +19,6 @@
 [submodule "onboard/src/common"]
 	path = onboard/src/common
 	url = git@github.com:BioMorphic-Intelligence-Lab/common.git
+[submodule "offboard/src/ros_gz"]
+	path = offboard/src/ros_gz
+	url = git@github.com:gazebosim/ros_gz.git
