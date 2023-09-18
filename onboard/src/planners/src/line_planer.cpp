@@ -44,12 +44,13 @@ LinePlanner::LinePlanner()
         msg.position.z = p_z;
         return msg;
     }
+}
 
-    int main(int argc, char **argv)
-    {
-        rclcpp::init(argc, argv);
+int main(int argc, char **argv)
+{
+    rclcpp::init(argc, argv);
 
-        rclcpp::spin(std::make_shared<LinePlanner>());
-        rclcpp::shutdown();
-        return 0;
-    }
+    rclcpp::spin(std::make_shared<LinePlanner>());
+    rclcpp::shutdown();
+    return 0;
+}
