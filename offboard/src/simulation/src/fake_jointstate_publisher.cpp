@@ -38,7 +38,7 @@ void FakeJointStatePublisher::_timer_callback()
     msg.header.stamp = this->now();
     msg.position = {0.0, 0.0};
 
-    if(this->_position.at(2) > 1.0)
+    if(this->_position.at(1) > 1.0)
     {
         msg.position[0] = -0.02;
         msg.position[1] = this->_base_yaw - this->_wall_yaw;
