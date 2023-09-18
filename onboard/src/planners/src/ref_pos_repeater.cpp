@@ -8,7 +8,7 @@ RefPosRepeater::RefPosRepeater()
 {   
 
     /* Declare all the parameters */
-    this->declare_parameter("frequency", 5.0);
+    this->declare_parameter("frequency", 10.0);
     this->declare_parameter("sub_topic", "/ref_pose");
 
     /* Actually get all the parameters */
@@ -55,7 +55,7 @@ void RefPosRepeater::_timer_callback()
 
     }
 
-    // offboard_control_mode needs to be paired with trajectory_setpoint
+    // offboard_control_mode
     this->_publish_offboard_control_mode();
 
     // stop the counter after reaching 11
