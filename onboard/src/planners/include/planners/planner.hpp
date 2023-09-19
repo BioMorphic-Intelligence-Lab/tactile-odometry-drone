@@ -30,22 +30,25 @@ private:
     double _position_offset = 0.0;    // positon offset calculated by force controller in m
     bool _align, _in_contact, _is_aligned;
 
+    std::vector<Eigen::Vector3d> _ee_offsets;
+
     Eigen::Vector3d _ee_offset, _start_point;
 
     sensor_msgs::msg::JointState _curr_js;
-    geometry_msgs::msg::PoseStamped _curr_pos;
+    geometry_msgs::msg::PoseStamped _curr_pos, _curr_ee_pos;
 
     rclcpp::TimerBase::SharedPtr _timer;
 
     /* Publishers and Subscribers */
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr _joint_subscription;
-    rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr _mocap_subscription;
+    rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr _mocap_subscription, _ee_subscription;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _setpoint_publisher;
 
     /* Callback Functions */
     void _timer_callback();
     void _joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg);
     void _mocap_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
+    void _ee_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
     /**
      * @brief Align UAV to be perpendicular to wall (i.e. encoderYaw == 0). The function is designed to run permanentely after the trajectory position has been set
@@ -65,6 +68,8 @@ private:
                        float mocap_yaw = 0);
 
     double control_contact_force(float linear_joint, float desired_joint);
+
+    void get_uav_to_ee_position();
 };
 
 #endif // PLANNER_H

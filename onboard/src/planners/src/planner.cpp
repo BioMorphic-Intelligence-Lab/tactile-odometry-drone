@@ -9,13 +9,14 @@ Planner::Planner()
     /* Declare all the parameters */
     this->declare_parameter("frequency", 20.0);
     this->declare_parameter("desired_linear_joint_pos", 0.03); // position in m
-    this->declare_parameter("alignment_threshold", M_PI / 180.0 * 1);
+    this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 10); // 10 Degree/s
     this->declare_parameter("align", true);
-    this->declare_parameter("ee_offset", std::vector<double>({0, 0.2, -0.1}));
+    // this->declare_parameter("ee_offset", std::vector<double>({0, 0.2, -0.1})); // offset from UAV-Center to ee
     this->declare_parameter("start_point", std::vector<double>({0, 1.0, 1.8}));
-    this->declare_parameter("joint_topic", "/JointState");
-    this->declare_parameter("pose_topic", "/MocapPose");
+    this->declare_parameter("joint_topic", "/joint_pose");
+    this->declare_parameter("pose_topic", "/mocap_pose");
+    this->declare_parameter("ee_topic", "/ee_pose");
     this->declare_parameter("pub_topic", "/ref_pose");
 
     /* Actually get all the parameters */
@@ -24,8 +25,8 @@ Planner::Planner()
     this->_alignment_threshold = this->get_parameter("alignment_threshold").as_double();
     this->_desired_linear_joint_pos = this->get_parameter("desired_linear_joint_pos").as_double();
     this->_align = this->get_parameter("align").as_bool();
-    std::vector<double> ee_offset = this->get_parameter("ee_offset").as_double_array();
-    this->_ee_offset << ee_offset.at(0), ee_offset.at(1), ee_offset.at(2);
+    // std::vector<double> ee_offset = this->get_parameter("ee_offset").as_double_array();
+    // this->_ee_offset << ee_offset.at(0), ee_offset.at(1), ee_offset.at(2);
     std::vector<double> start_point = this->get_parameter("start_point").as_double_array();
     this->_start_point << start_point.at(0), start_point.at(1), start_point.at(2);
 
@@ -40,6 +41,10 @@ Planner::Planner()
         this->get_parameter("pose_topic").as_string(),
         rclcpp::SensorDataQoS(),
         std::bind(&Planner::_mocap_callback, this, std::placeholders::_1));
+    this->_ee_subscription = this->create_subscription<geometry_msgs::msg::PoseStamped>(
+        this->get_parameter("ee_topic").as_string(),
+        rclcpp::SensorDataQoS(),
+        std::bind(&Planner::_ee_callback, this, std::placeholders::_1));
 
     /* Init Publishers */
     this->_setpoint_publisher = this->create_publisher<geometry_msgs::msg::PoseStamped>(
@@ -50,6 +55,22 @@ Planner::Planner()
 
     /* Init the timestamp to some time in the future value until we establish contact */
     this->_beginning = this->now() + rclcpp::Duration(10000, 0);
+}
+
+void Planner::get_uav_to_ee_position()
+{
+    Eigen::Vector3d mocap_pos(this->_curr_pos.pose.position.x, this->_curr_pos.pose.position.y, this->_curr_pos.pose.position.z);
+    Eigen::Vector3d ee_pos(this->_curr_ee_pos.pose.position.x, this->_curr_ee_pos.pose.position.y, this->_curr_ee_pos.pose.position.z);
+    Eigen::Vector3d mean;
+
+    if (this->_ee_offsets.size() <= 50)
+    {
+        this->_ee_offsets.push_back(ee_pos - mocap_pos);
+    }
+    if (this->_ee_offsets.size() == 50)
+    {
+        this->_ee_offset = std::reduce(this->_ee_offsets.begin(), this->_ee_offsets.end()) / this->_ee_offsets.size();
+    }
 }
 
 // needs to be applied on unaligned position and need to be aligned afterwards
@@ -88,7 +109,7 @@ void Planner::align_to_wall(float &yaw_IB, Eigen::Vector3d &pos_IB, Eigen::Vecto
     }
 
     // return position and orientation of uav
-    pos_IB = (pos_IE + this->_start_point) - common::rot_z(yaw) * (pos_BE);
+    pos_IB = pos_IE - common::rot_z(yaw) * (pos_BE);
     yaw_IB = yaw;
 }
 
@@ -107,16 +128,18 @@ void Planner::_timer_callback()
     /* Put in the position of the planner */
     Eigen::Vector3d position = this->get_trajectory_setpoint();
 
-    /* check if UAV is aligned to all*/
-    this->_is_aligned = fabs(fmod(joint_pos[1], 2 * M_PI)) < this->_alignment_threshold;
-
-    /* check if UAV is in contact*/
-    this->_in_contact = fabs(this->_curr_js.position[0]) > JS_THRESHOLD;
-
-    if (!this->_in_contact)
+    if (this->_in_contact)
+    {
+        /* check if UAV is aligned to all*/
+        this->_is_aligned = fabs(fmod(joint_pos[1], 2 * M_PI)) < this->_alignment_threshold;
+    }
+    else
     {
         // reset position offset if contact is lost
         this->_position_offset = 0.0;
+
+        /* check if UAV is in contact*/
+        this->_in_contact = fabs(this->_curr_js.position[0]) > JS_THRESHOLD;
     }
 
     if (this->_is_aligned && this->_in_contact)
@@ -127,13 +150,17 @@ void Planner::_timer_callback()
     else
     {
         // set beginning 1s to future, so it starts 1s after contact is established and alignment is done
-        // problem: restart trajectory if contact or alignment is lost
-        //  bettter: positive edge  on this signal?
         this->_beginning = this->now() + rclcpp::Duration(1, 0);
+
+        /* get ee_offset*/
+        this->get_uav_to_ee_position();
     }
 
     // allways add position offset (it will be 0 if not wanted)
     position.y() += this->_position_offset;
+
+    /* tranform to start point*/
+    position += this->_start_point;
 
     /* Check if we already are in contact and if we want to align with the wall */
     if (this->_align && this->_in_contact)
@@ -169,9 +196,9 @@ void Planner::_timer_callback()
     {
         if (this->_in_contact) // MS: wouldn't it be better to follow trajectory here?
         {
-            msg.pose.position.x = this->_start_point.x();
-            msg.pose.position.y = this->_start_point.y();
-            msg.pose.position.z = this->_start_point.z();
+            msg.pose.position.x = position.x();
+            msg.pose.position.y = position.y();
+            msg.pose.position.z = position.z();
         }
     }
     this->_setpoint_publisher->publish(msg);
@@ -185,4 +212,8 @@ void Planner::_joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
 void Planner::_mocap_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
 {
     this->_curr_pos = *msg;
+}
+void Planner::_ee_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
+{
+    this->_curr_ee_pos = *msg;
 }
