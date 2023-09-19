@@ -5,9 +5,9 @@
 SinPlanner::SinPlanner()
 {
     this->declare_parameter("L_x", 1.0); // end position in m
-    this->declare_parameter("h_z", 1.0); // amplitude of sin in m
+    this->declare_parameter("h_z", 0.5); // amplitude of sin in m
     this->declare_parameter("v_x", 0.1); // velocity in m/s
-    this->declare_parameter("N_p", 2.0);   // number of periods per L_x
+    this->declare_parameter("N_p", 2.0); // number of periods per L_x
     this->_L_x = this->get_parameter("L_x").as_double();
     this->_h_z = this->get_parameter("h_z").as_double();
     this->_v_x = this->get_parameter("v_x").as_double();
@@ -18,16 +18,16 @@ SinPlanner::SinPlanner()
  * @brief Publish a trajectory setpoint.
  * generate line in x-direction with sin-function in z-direction
  */
-std::vector<double> SinPlanner::get_trajectory_setpoint()
+Eigen::Vector3d SinPlanner::get_trajectory_setpoint()
 {
     float time = (this->now() - this->_beginning).seconds();
-    std::vector<double> position(3);
+    Eigen::Vector3d position;
 
-    if(time > 0)
-    {    
+    if (time > 0)
+    {
         float p_x = _v_x * time;
-        position.at(0) = p_x;
-        position.at(2) = this->_h_z * sin(this->_N_p * 2 * M_PI / this->_L_x * p_x);
+        position.x() = p_x;
+        position.z() = this->_h_z * sin(this->_N_p * 2 * M_PI / this->_L_x * p_x);
     }
 
     return position;

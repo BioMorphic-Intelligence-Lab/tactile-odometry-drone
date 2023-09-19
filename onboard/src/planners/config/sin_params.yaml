@@ -1,0 +1,6 @@
+sin_planner:
+  ros__parameters:
+    L_x: 1.0
+    h_z: 0.5
+    v_x: 0.1
+    N_p: 2.0

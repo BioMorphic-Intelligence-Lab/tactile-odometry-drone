@@ -18,21 +18,22 @@ public:
     /**
      * @brief Publish a trajectory setpoint
      */
-    virtual std::vector<double> get_trajectory_setpoint() = 0;
-    
-    rclcpp::Time _beginning;
-    
-private: 
+    virtual Eigen::Vector3d get_trajectory_setpoint() = 0;
 
+    rclcpp::Time _beginning;
+
+private:
     const double JS_THRESHOLD;
     double _frequency, _yaw_rate;
-    bool _align, _in_contact;
+    double _alignment_threshold;      // angle threshold in rad defining is_aligned
+    double _desired_linear_joint_pos; // desired value for linear joint in m
+    double _position_offset = 0.0;    // positon offset calculated by force controller in m
+    bool _align, _in_contact, _is_aligned;
 
     Eigen::Vector3d _ee_offset, _start_point;
 
     sensor_msgs::msg::JointState _curr_js;
     geometry_msgs::msg::PoseStamped _curr_pos;
-
 
     rclcpp::TimerBase::SharedPtr _timer;
 
@@ -40,7 +41,7 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr _joint_subscription;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr _mocap_subscription;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _setpoint_publisher;
-    
+
     /* Callback Functions */
     void _timer_callback();
     void _joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg);
@@ -58,12 +59,12 @@ private:
     *   yaw_IB: updated yaw of UAV
     */
     void align_to_wall(float &yaw_IB, Eigen::Vector3d &pos_IB,
-                    Eigen::Vector3d pos_IE,
-                    Eigen::Vector3d pos_BE,
-                    float encoder_yaw=0,
-                    float mocap_yaw=0);
+                       Eigen::Vector3d pos_IE,
+                       Eigen::Vector3d pos_BE,
+                       float encoder_yaw = 0,
+                       float mocap_yaw = 0);
 
+    double control_contact_force(float linear_joint, float desired_joint);
 };
 
-#endif //PLANNER_H
-
+#endif // PLANNER_H
