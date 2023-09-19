@@ -12,7 +12,6 @@ Planner::Planner()
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 10); // 10 Degree/s
     this->declare_parameter("align", true);
-    // this->declare_parameter("ee_offset", std::vector<double>({0, 0.2, -0.1})); // offset from UAV-Center to ee
     this->declare_parameter("start_point", std::vector<double>({0, 1.0, 1.8}));
     this->declare_parameter("joint_topic", "/joint_pose");
     this->declare_parameter("pose_topic", "/mocap_pose");
@@ -25,8 +24,7 @@ Planner::Planner()
     this->_alignment_threshold = this->get_parameter("alignment_threshold").as_double();
     this->_desired_linear_joint_pos = this->get_parameter("desired_linear_joint_pos").as_double();
     this->_align = this->get_parameter("align").as_bool();
-    // std::vector<double> ee_offset = this->get_parameter("ee_offset").as_double_array();
-    // this->_ee_offset << ee_offset.at(0), ee_offset.at(1), ee_offset.at(2);
+    this->_ee_offset << 0, 0.2, -0.1;
     std::vector<double> start_point = this->get_parameter("start_point").as_double_array();
     this->_start_point << start_point.at(0), start_point.at(1), start_point.at(2);
 
@@ -51,7 +49,7 @@ Planner::Planner()
         this->get_parameter("pub_topic").as_string(), 10);
 
     /* Init current joint state variable to avoid segmentation fault */
-    this->_curr_js.position = {1000, 0.0};
+    this->_curr_js.position = {0.0, 0.0};
 
     /* Init the timestamp to some time in the future value until we establish contact */
     this->_beginning = this->now() + rclcpp::Duration(10000, 0);
@@ -118,7 +116,7 @@ void Planner::_timer_callback()
 {
     /* Init the Message and time stamp it */
     geometry_msgs::msg::PoseStamped msg{};
-    msg.header.frame_id = "World";
+    msg.header.frame_id = "world";
     msg.header.stamp = this->now();
 
     /* Extract current state */
@@ -126,7 +124,8 @@ void Planner::_timer_callback()
     std::vector<double> joint_pos = this->_curr_js.position;
 
     /* Put in the position of the planner */
-    Eigen::Vector3d position = this->get_trajectory_setpoint();
+    Eigen::Vector3d position = this->get_trajectory_setpoint()
+                             + this->_start_point; // Transform to start point
 
     if (this->_in_contact)
     {
@@ -159,9 +158,6 @@ void Planner::_timer_callback()
     // allways add position offset (it will be 0 if not wanted)
     position.y() += this->_position_offset;
 
-    /* tranform to start point*/
-    position += this->_start_point;
-
     /* Check if we already are in contact and if we want to align with the wall */
     if (this->_align && this->_in_contact)
     {
@@ -191,16 +187,15 @@ void Planner::_timer_callback()
         msg.pose.position.y = aligned_position.y();
         msg.pose.position.z = aligned_position.z();
     }
-    /* Otherwise we leave just use the start pose and only check if we're already in contact */
+    /* Otherwise we just forward the position */
     else
     {
-        if (this->_in_contact) // MS: wouldn't it be better to follow trajectory here?
-        {
-            msg.pose.position.x = position.x();
-            msg.pose.position.y = position.y();
-            msg.pose.position.z = position.z();
-        }
+        msg.pose.position.x = position.x();
+        msg.pose.position.y = position.y();
+        msg.pose.position.z = position.z();
     }
+
+    /* Finally publish the message */
     this->_setpoint_publisher->publish(msg);
 }
 
