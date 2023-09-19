@@ -105,7 +105,7 @@ void Planner::_timer_callback()
     std::vector<double> joint_pos = this->_curr_js.position;
 
     /* Put in the position of the planner */
-    std::vector<double> position = this->get_trajectory_setpoint();
+    Eigen::Vector3d position = this->get_trajectory_setpoint();
 
     /* check if UAV is aligned to all*/
     this->_is_aligned = fabs(fmod(joint_pos[1], 2 * M_PI)) < this->_alignment_threshold;
@@ -133,7 +133,7 @@ void Planner::_timer_callback()
     }
 
     // allways add position offset (it will be 0 if not wanted)
-    position.at(1) += this->_position_offset;
+    position.y() += this->_position_offset;
 
     /* Check if we already are in contact and if we want to align with the wall */
     if (this->_align && this->_in_contact)
@@ -148,10 +148,7 @@ void Planner::_timer_callback()
         Eigen::Vector3d aligned_position;
 
         /* Find the aligned position and orientation */
-        align_to_wall(output_yaw, aligned_position,
-                      Eigen::Vector3d(position.at(0),
-                                      position.at(1),
-                                      position.at(2)),
+        align_to_wall(output_yaw, aligned_position, position,
                       this->_ee_offset + this->_curr_js.position[0] * Eigen::Vector3d::UnitY(),
                       this->_curr_js.position[1],
                       curr_yaw);

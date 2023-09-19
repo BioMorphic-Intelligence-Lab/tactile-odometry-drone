@@ -18,7 +18,7 @@ public:
     /**
      * @brief Publish a trajectory setpoint
      */
-    virtual std::vector<double> get_trajectory_setpoint() = 0;
+    virtual Eigen::Vector3d get_trajectory_setpoint() = 0;
 
     rclcpp::Time _beginning;
 

@@ -15,17 +15,17 @@ CirclePlanner::CirclePlanner()
  *
  generate circle, starting at 12 o'clock, roatating clockwise
     */
-std::vector<double> CirclePlanner::get_trajectory_setpoint()
+Eigen::Vector3d CirclePlanner::get_trajectory_setpoint()
 {
     float time = (this->now() - this->_beginning).seconds();
-    std::vector<double> position(3);
+    Eigen::Vector3d position;
 
     if (time > 0)
     {
         const float angle = 2 * M_PI / this->_T * time / this->_T;
 
-        position.at(0) = 0.5 * this->_d * sin(angle);
-        position.at(2) = 0.5 * this->_d * cos(angle) - 1;
+        position.x() = 0.5 * this->_d * sin(angle);
+        position.z() = 0.5 * this->_d * cos(angle) - 1;
     }
 
     return position;

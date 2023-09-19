@@ -21,10 +21,10 @@ RectanglePlanner::RectanglePlanner()
  |         |
  4---------3
  */
-std::vector<double> RectanglePlanner::get_trajectory_setpoint()
+Eigen::Vector3d RectanglePlanner::get_trajectory_setpoint()
 {
     float time = (this->now() - this->_beginning).seconds();
-    std::vector<double> position(3, 0);
+    Eigen::Vector3d position;
 
     double Tx = this->_L_x / this->_v_x;
     double Tz = this->_L_z / this->_v_z;
@@ -58,9 +58,9 @@ std::vector<double> RectanglePlanner::get_trajectory_setpoint()
             p_z = 0;
         }
     }
-    
-    position.at(0) = p_x;
-    position.at(2) = p_z;
+
+    position.x() = p_x;
+    position.z() = p_z;
     return position;
 }
 

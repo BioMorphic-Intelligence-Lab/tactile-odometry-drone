@@ -17,23 +17,23 @@ LinePlanner::LinePlanner()
  *
  generate line
     */
-std::vector<double> LinePlanner::get_trajectory_setpoint()
+Eigen::Vector3d LinePlanner::get_trajectory_setpoint()
 {
     float time = (this->now() - this->_beginning).seconds();
-    std::vector<double> position(3);
+    Eigen::Vector3d position;
 
-    if(time > 0)
+    if (time > 0)
     {
         const float angle = atan2(this->_L_z, this->_L_x);
-        
+
         const float v_x = this->_v * cos(angle);
         const float v_z = this->_v * sin(angle);
 
-        position.at(0) = v_x * time;
-        position.at(2) = v_z * time;
+        position.x() = v_x * time;
+        position.z() = v_z * time;
     }
 
-    return position;        
+    return position;
 }
 
 int main(int argc, char **argv)
