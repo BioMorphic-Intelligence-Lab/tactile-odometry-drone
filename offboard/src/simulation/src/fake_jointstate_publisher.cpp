@@ -10,8 +10,8 @@ FakeJointStatePublisher::FakeJointStatePublisher():
 
     this->declare_parameter("frequency", 25.0);
     this->declare_parameter("wall_yaw", 0.0);
-    this->declare_parameter("sub_topic", "/MocapPose");
-    this->declare_parameter("pub_topic", "/JointState");
+    this->declare_parameter("sub_topic", "/mocap_pose");
+    this->declare_parameter("pub_topic", "/joint_state");
 
     this->_wall_yaw = this->get_parameter("wall_yaw").as_double();
 

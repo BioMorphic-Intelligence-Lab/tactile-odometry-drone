@@ -6,7 +6,7 @@
 MocapForwarder::MocapForwarder():rclcpp::Node("mocap_forwarder")
 {
     /* Declare all the parameters */
-    this->declare_parameter("sub_topic", "/MocapPose");
+    this->declare_parameter("sub_topic", "/mocap_pose");
 
     this->_sub_topic = this->get_parameter("sub_topic").as_string();
 

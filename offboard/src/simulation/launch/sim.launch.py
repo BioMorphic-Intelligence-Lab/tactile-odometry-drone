@@ -27,10 +27,10 @@ def generate_launch_description():
             # Joint states (GZ -> ROS2)
             #'/world/cyberzoo/model/x500withArms_0/model/dummy_arm0/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model',
             # Base Pose Ground Truth (GZ->ROS2)
-            '/world/cyberzoo/model/x500_0/pose@geometry_msgs/msg/PoseStamped[gz.msgs.Pose',
+            '/world/cyberzoo/model/x500_odometry_0/pose@geometry_msgs/msg/PoseStamped[gz.msgs.Pose',
            ],
         remappings=[
-            ('/world/cyberzoo/model/x500_0/pose','/MocapPose'),
+            ('/world/cyberzoo/model/x500_odometry_0/pose','/mocap_pose'),
             #('/world/cyberzoo/model/x500withArms_0/model/dummy_arm0/joint_state','/squid/arm0/joint_state'),
         ],
         output='screen'
@@ -53,11 +53,11 @@ def generate_launch_description():
         SetEnvironmentVariable('GZ_SIM_SYSTEM_PLUGIN_PATH',
                                HOME + '/Desktop/tactile-odom-drone/offboard/build/simulation/'),
         SetEnvironmentVariable('PX4_GZ_MODEL',
-                               'x500odometry'),
+                               'x500_odometry'),
         SetEnvironmentVariable('PX4_GZ_WORLD',
                                'cyberzoo'),
         SetEnvironmentVariable('PX4_GZ_MODEL_POSE',
-                               '0,0,0.75,0,0,1.5707963267948966'),
+                               '0,0,0.75,0,0, -1.57079632679'),
         
         # Launch MicroXRCEAgent to communicate between PX4 and ROS2
         ExecuteProcess(
