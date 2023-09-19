@@ -53,7 +53,7 @@ def generate_launch_description():
         SetEnvironmentVariable('GZ_SIM_SYSTEM_PLUGIN_PATH',
                                HOME + '/Desktop/tactile-odom-drone/offboard/build/simulation/'),
         SetEnvironmentVariable('PX4_GZ_MODEL',
-                               'x500'),
+                               'x500odometry'),
         SetEnvironmentVariable('PX4_GZ_WORLD',
                                'cyberzoo'),
         SetEnvironmentVariable('PX4_GZ_MODEL_POSE',
