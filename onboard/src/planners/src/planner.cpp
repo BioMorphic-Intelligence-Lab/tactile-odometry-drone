@@ -3,11 +3,13 @@
 #include "rclcpp/time.hpp"
 
 Planner::Planner()
-    : Node("Planner"), JS_THRESHOLD(0.01)
-{   
+    : Node("Planner"), JS_THRESHOLD(0.01) // MS: make the threshold a paramteter
+{
 
     /* Declare all the parameters */
     this->declare_parameter("frequency", 20.0);
+    this->declare_parameter("desired_linear_joint_pos", 0.03); // position in m
+    this->declare_parameter("alignment_threshold", M_PI / 180.0 * 1);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 10); // 10 Degree/s
     this->declare_parameter("align", true);
     this->declare_parameter("ee_offset", std::vector<double>({0, 0.2, -0.1}));
@@ -18,17 +20,18 @@ Planner::Planner()
 
     /* Actually get all the parameters */
     this->_yaw_rate = this->get_parameter("yaw_rate").as_double();
-    this->_frequency =  this->get_parameter("frequency").as_double();
+    this->_frequency = this->get_parameter("frequency").as_double();
+    this->_alignment_threshold = this->get_parameter("alignment_threshold").as_double();
+    this->_desired_linear_joint_pos = this->get_parameter("desired_linear_joint_pos").as_double();
     this->_align = this->get_parameter("align").as_bool();
     std::vector<double> ee_offset = this->get_parameter("ee_offset").as_double_array();
     this->_ee_offset << ee_offset.at(0), ee_offset.at(1), ee_offset.at(2);
     std::vector<double> start_point = this->get_parameter("start_point").as_double_array();
     this->_start_point << start_point.at(0), start_point.at(1), start_point.at(2);
-    
- 
+
     /* Init Timer and subscribers*/
     this->_timer = this->create_wall_timer(1.0 / this->_frequency * 1s,
-                                            std::bind(&Planner::_timer_callback, this));
+                                           std::bind(&Planner::_timer_callback, this));
     this->_joint_subscription = this->create_subscription<sensor_msgs::msg::JointState>(
         this->get_parameter("joint_topic").as_string(),
         rclcpp::SensorDataQoS(),
@@ -37,7 +40,7 @@ Planner::Planner()
         this->get_parameter("pose_topic").as_string(),
         rclcpp::SensorDataQoS(),
         std::bind(&Planner::_mocap_callback, this, std::placeholders::_1));
-    
+
     /* Init Publishers */
     this->_setpoint_publisher = this->create_publisher<geometry_msgs::msg::PoseStamped>(
         this->get_parameter("pub_topic").as_string(), 10);
@@ -47,9 +50,13 @@ Planner::Planner()
 
     /* Init the timestamp to some time in the future value until we establish contact */
     this->_beginning = this->now() + rclcpp::Duration(10000, 0);
+}
 
-
-
+// needs to be applied on unaligned position and need to be aligned afterwards
+double Planner::control_contact_force(float linear_joint, float desired_joint)
+{
+    float p_gain = 0.5; // should be less than 1, as joint values are in m
+    return p_gain * (linear_joint - desired_joint);
 }
 
 /**
@@ -67,8 +74,8 @@ void Planner::align_to_wall(float &yaw_IB, Eigen::Vector3d &pos_IB, Eigen::Vecto
 {
     float yaw = 0;
     // If the encoder yaw is zero we do not want to align and only transform EE ref pose to Base ref pose
-    if(encoder_yaw != 0)
-    {    
+    if (encoder_yaw != 0)
+    {
         float increment = copysign(this->_yaw_rate / this->_frequency, encoder_yaw);
 
         // limit increment to prevent overshoot
@@ -85,7 +92,6 @@ void Planner::align_to_wall(float &yaw_IB, Eigen::Vector3d &pos_IB, Eigen::Vecto
     yaw_IB = yaw;
 }
 
-
 /* Callback Functions */
 void Planner::_timer_callback()
 {
@@ -100,27 +106,55 @@ void Planner::_timer_callback()
 
     /* Put in the position of the planner */
     std::vector<double> position = this->get_trajectory_setpoint();
-    
+
+    /* check if UAV is aligned to all*/
+    this->_is_aligned = fabs(fmod(joint_pos[1], 2 * M_PI)) < this->_alignment_threshold;
+
+    /* check if UAV is in contact*/
+    this->_in_contact = fabs(this->_curr_js.position[0]) > JS_THRESHOLD;
+
+    if (!this->_in_contact)
+    {
+        // reset position offset if contact is lost
+        this->_position_offset = 0.0;
+    }
+
+    if (this->_is_aligned && this->_in_contact)
+    {
+        // if alignment is lost, _position_offset will remain at last value to pprevent jumps. it will be reset, if conact is lost
+        this->_position_offset = control_contact_force(joint_pos[0], this->_desired_linear_joint_pos);
+    }
+    else
+    {
+        // set beginning 1s to future, so it starts 1s after contact is established and alignment is done
+        // problem: restart trajectory if contact or alignment is lost
+        //  bettter: positive edge  on this signal?
+        this->_beginning = this->now() + rclcpp::Duration(1, 0);
+    }
+
+    // allways add position offset (it will be 0 if not wanted)
+    position.at(1) += this->_position_offset;
+
     /* Check if we already are in contact and if we want to align with the wall */
-    if(this->_align && this->_in_contact)
+    if (this->_align && this->_in_contact)
     {
         /* Init input and ouput variables */
         float output_yaw = 0;
         float curr_yaw = common::yaw_from_quaternion(
-                Eigen::Quaterniond(curr_pos.pose.orientation.w,
-                                curr_pos.pose.orientation.x,
-                                curr_pos.pose.orientation.y,
-                                curr_pos.pose.orientation.z));
+            Eigen::Quaterniond(curr_pos.pose.orientation.w,
+                               curr_pos.pose.orientation.x,
+                               curr_pos.pose.orientation.y,
+                               curr_pos.pose.orientation.z));
         Eigen::Vector3d aligned_position;
-        
+
         /* Find the aligned position and orientation */
         align_to_wall(output_yaw, aligned_position,
-            Eigen::Vector3d(position.at(0),
-                            position.at(1),
-                            position.at(2)),
-            this->_ee_offset + this->_curr_js.position[0] * Eigen::Vector3d::UnitY(), 
-            this->_curr_js.position[1],
-            curr_yaw);
+                      Eigen::Vector3d(position.at(0),
+                                      position.at(1),
+                                      position.at(2)),
+                      this->_ee_offset + this->_curr_js.position[0] * Eigen::Vector3d::UnitY(),
+                      this->_curr_js.position[1],
+                      curr_yaw);
 
         /* Add it to the message */
         Eigen::Quaterniond output_q = common::quaternion_from_euler(0, 0, output_yaw);
@@ -136,19 +170,15 @@ void Planner::_timer_callback()
     /* Otherwise we leave just use the start pose and only check if we're already in contact */
     else
     {
-        if(this->_curr_js.position[0] < JS_THRESHOLD)
+        if (this->_in_contact) // MS: wouldn't it be better to follow trajectory here?
         {
-            this->_in_contact = true;
-            this->_beginning = this->now();
+            msg.pose.position.x = this->_start_point.x();
+            msg.pose.position.y = this->_start_point.y();
+            msg.pose.position.z = this->_start_point.z();
         }
-
-        msg.pose.position.x = this->_start_point.x();
-        msg.pose.position.y = this->_start_point.y();
-        msg.pose.position.z = this->_start_point.z();
     }
     this->_setpoint_publisher->publish(msg);
 }
-
 
 void Planner::_joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
 {
