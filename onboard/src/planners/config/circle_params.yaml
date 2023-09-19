@@ -1,0 +1,4 @@
+circle_planner:
+  ros__parameters:
+    d: 0.5
+    T: 15.0
