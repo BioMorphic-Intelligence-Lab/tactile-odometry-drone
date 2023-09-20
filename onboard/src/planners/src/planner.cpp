@@ -92,30 +92,29 @@ double Planner::control_contact_force(float linear_joint, float desired_joint)
 *   pos_IB: updated position of UAV
 *   yaw_IB: updated yaw of UAV
  */
-void Planner::align_to_wall(float &yaw_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_IE, Eigen::Vector3d pos_BE, float encoder_yaw, float mocap_yaw)
+void Planner::align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_IE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap_q)
 {
-    float yaw = 0;
-    // If the encoder yaw is zero we do not want to align and only transform EE ref pose to Base ref pose
-    if (encoder_yaw != 0)
+
+    Eigen::Matrix4d W;
+    Eigen::Vector4d quat_mocap(quat_mocap_q.w(), quat_mocap_q.x(), quat_mocap_q.y(), quat_mocap_q.z());
+    double increment = this->_yaw_rate;
+    increment = -copysign(increment, encoder_yaw);
+    double dt = 1.0 / this->_frequency;
+    if (abs(increment * dt) > abs(encoder_yaw))
     {
-        float increment = -copysign(this->_yaw_rate / this->_frequency, encoder_yaw);
-
-        // limit increment to prevent overshoot
-        if (abs(increment) > abs(encoder_yaw))
-        {
-            increment = encoder_yaw;
-        }
-
-        yaw = mocap_yaw + increment;
-
-        auto &clk = *this->get_clock();
-        RCLCPP_INFO_THROTTLE(this->get_logger(), clk, 1000,
-                            "Mocap Yaw: %f  Yaw: %f", mocap_yaw, yaw);
+        increment = encoder_yaw / dt;
     }
+    W << 1, 0, 0, -increment,
+        0, 1, increment, 0,
+        0, -increment, 1, 0,
+        increment, 0, 0, 1;
+
+    Eigen::Vector4d quat_IB_4d = (Eigen::Matrix4d::Identity() + 0.5 * W * dt) * quat_mocap;
+
+    quat_IB = Eigen::Quaterniond(quat_IB_4d[0], quat_IB_4d[1], quat_IB_4d[2], quat_IB_4d[3]);
 
     // return position and orientation of uav
-    pos_IB = pos_IE - common::rot_z(yaw) * (pos_BE);
-    yaw_IB = yaw;
+    pos_IB = pos_IE - quat_IB.toRotationMatrix() * (pos_BE);
 }
 
 /* Callback Functions */
@@ -169,27 +168,26 @@ void Planner::_timer_callback()
     /* Check if we already are in contact and if we want to align with the wall */
     if (this->_align && this->_in_contact)
     {
-        /* Init input and ouput variables */
-        float output_yaw = 0;
-        float curr_yaw = common::yaw_from_quaternion(
-            Eigen::Quaterniond(curr_pos.pose.orientation.w,
-                               curr_pos.pose.orientation.x,
-                               curr_pos.pose.orientation.y,
-                               curr_pos.pose.orientation.z));
+        // float curr_yaw = common::yaw_from_quaternion(
+        Eigen::Quaterniond current_quat(curr_pos.pose.orientation.w,
+                                        curr_pos.pose.orientation.x,
+                                        curr_pos.pose.orientation.y,
+                                        curr_pos.pose.orientation.z);
         Eigen::Vector3d aligned_position;
 
+        Eigen::Quaterniond output_q;
         /* Find the aligned position and orientation */
-        align_to_wall(output_yaw, aligned_position, position,
+        align_to_wall(output_q, aligned_position, position,
                       this->_ee_offset + this->_curr_js.position[0] * Eigen::Vector3d::UnitY(),
                       this->_curr_js.position[1],
-                      curr_yaw);
+                      current_quat);
 
         /* Transform to start point */
         RCLCPP_DEBUG(this->get_logger(), "%f %f %f", aligned_position.x(), aligned_position.y(), aligned_position.z());
         aligned_position += this->_start_point;
 
         /* Add it to the message */
-        Eigen::Quaterniond output_q = common::quaternion_from_euler(0, 0, output_yaw);
+        // Eigen::Quaterniond output_q = common::quaternion_from_euler(0, 0, output_yaw);
         msg.pose.orientation.w = output_q.w();
         msg.pose.orientation.x = output_q.x();
         msg.pose.orientation.y = output_q.y();
@@ -201,16 +199,15 @@ void Planner::_timer_callback()
     }
     /* Otherwise we just forward the position */
     else
-    {      
+    {
         RCLCPP_DEBUG(this->get_logger(), "%f %f %f", position.x(), position.y(), position.z());
         /* Transform to start point */
         position += this->_start_point;
-       
+
         msg.pose.position.x = position.x();
         msg.pose.position.y = position.y();
         msg.pose.position.z = position.z();
     }
-
 
     /* Finally publish the message */
     this->_setpoint_publisher->publish(msg);
