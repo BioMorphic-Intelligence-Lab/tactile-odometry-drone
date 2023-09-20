@@ -3,6 +3,8 @@
 #include "ref_pos_repeater.hpp"
 #include "common/common.hpp"
 
+using namespace personal;
+
 RefPosRepeater::RefPosRepeater()
     : Node("RefPosRepeater"), _offboard_setpoint_counter(0)
 {   

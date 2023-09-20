@@ -2,6 +2,8 @@
 
 #include "rclcpp/time.hpp"
 
+using namespace personal;
+
 Planner::Planner()
     : Node("Planner"), JS_THRESHOLD(0.01) // MS: make the threshold a paramteter
 {
