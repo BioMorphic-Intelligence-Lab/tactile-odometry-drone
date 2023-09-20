@@ -61,7 +61,7 @@ private:
     *   pos_IB: updated position of UAV
     *   yaw_IB: updated yaw of UAV
     */
-    void align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_IE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap);
+    void align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap);
 
     double control_contact_force(float linear_joint, float desired_joint);
 

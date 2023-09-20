@@ -92,7 +92,7 @@ double Planner::control_contact_force(float linear_joint, float desired_joint)
 *   pos_IB: updated position of UAV
 *   yaw_IB: updated yaw of UAV
  */
-void Planner::align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_IE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap_q)
+void Planner::align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap_q)
 {
 
     Eigen::Matrix4d W;
@@ -113,8 +113,10 @@ void Planner::align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB
 
     quat_IB = Eigen::Quaterniond(quat_IB_4d[0], quat_IB_4d[1], quat_IB_4d[2], quat_IB_4d[3]);
 
+    // Rotation Matrix between World/Inertial (I) and Wall (W)
+    Eigen::Matrix3d R_IW = quat_IB.toRotationMatrix() * common::quaternion_from_euler(0.0, 0.0, -encoder_yaw);
     // return position and orientation of uav
-    pos_IB = pos_IE - quat_IB.toRotationMatrix() * (pos_BE);
+    pos_IB = R_IW * (pos_WE - quat_IB.toRotationMatrix() * (pos_BE));
 }
 
 /* Callback Functions */
@@ -135,7 +137,7 @@ void Planner::_timer_callback()
     if (this->_in_contact)
     {
         /* check if UAV is aligned to all*/
-        this->_is_aligned = (this->_is_aligned) || 
+        this->_is_aligned = (this->_is_aligned) ||
                             fabs(fmod(joint_pos[1], 2 * M_PI)) < this->_alignment_threshold;
     }
     else
