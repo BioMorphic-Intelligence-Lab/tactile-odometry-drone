@@ -76,9 +76,9 @@ void RefPosRepeater::_ref_callback(const geometry_msgs::msg::PoseStamped::Shared
     px4_msgs::msg::TrajectorySetpoint px4_msg{};
 
     /* In the beginning we just want to take off */
-    if((this->now() - this->_beginning).seconds() < 10.0)
+    if((this->now() - this->_beginning).seconds() < 15.0)
     {
-        px4_msg.position = {0.0, 0.0, -1.7};
+        px4_msg.position = {1.0, 0.0, -1.85};
         px4_msg.yaw = 0.0;
     }
     /* Then we forward the transformed reference position */
@@ -102,7 +102,7 @@ void RefPosRepeater::_ref_callback(const geometry_msgs::msg::PoseStamped::Shared
                             (float)ned_position.y(),
                             (float)ned_position.z()};
         // This assumes the quaternion only describes yaw.
-        px4_msg.yaw = 2 * acos(ned_q.w());
+        px4_msg.yaw = common::normalize_angle(2 * acos(enu_q.w()));
     }
  
 
