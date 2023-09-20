@@ -10,7 +10,7 @@ Planner::Planner()
 
     /* Declare all the parameters */
     this->declare_parameter("frequency", 20.0);
-    this->declare_parameter("desired_linear_joint_pos", 0.01); // position in m
+    this->declare_parameter("desired_linear_joint_pos", -0.01); // position in m
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 10); // 10 Degree/s
     this->declare_parameter("align", true);
@@ -61,26 +61,17 @@ void Planner::get_uav_to_ee_position()
 {
     Eigen::Vector3d mocap_pos(this->_curr_pos.pose.position.x, this->_curr_pos.pose.position.y, this->_curr_pos.pose.position.z);
     Eigen::Vector3d ee_pos(this->_curr_ee_pos.pose.position.x, this->_curr_ee_pos.pose.position.y, this->_curr_ee_pos.pose.position.z);
-    auto &clk = *this->get_clock();
-    if (this->_ee_offsets.size() <= 500)
+
+    if (this->_ee_offsets.size() <= 50)
     {
         this->_ee_offsets.push_back((ee_pos - mocap_pos));
-        RCLCPP_INFO_THROTTLE(this->get_logger(),
-                             clk,
-                             500,
-                             "ee-mocap: %f   %f   %f", this->_ee_offsets.back().x(), this->_ee_offsets.back().y(), this->_ee_offsets.back().z());
     }
-    if (this->_ee_offsets.size() == 500)
+    if (this->_ee_offsets.size() == 50)
     {
         const auto pose = this->_curr_pos.pose.orientation;
         const Eigen::Quaterniond q(pose.w, pose.x, pose.y, pose.z);
         this->_ee_offset = q.toRotationMatrix() * std::reduce(this->_ee_offsets.begin(), this->_ee_offsets.end()) / this->_ee_offsets.size();
     }
-
-    RCLCPP_INFO_THROTTLE(this->get_logger(),
-                         clk,
-                         1000,
-                         "ee_offset: %f   %f   %f", this->_ee_offset.x(), this->_ee_offset.y(), this->_ee_offset.z());
 }
 
 // needs to be applied on unaligned position and need to be aligned afterwards
@@ -107,7 +98,7 @@ void Planner::align_to_wall(float &yaw_IB, Eigen::Vector3d &pos_IB, Eigen::Vecto
     // If the encoder yaw is zero we do not want to align and only transform EE ref pose to Base ref pose
     if (encoder_yaw != 0)
     {
-        float increment = copysign(this->_yaw_rate / this->_frequency, encoder_yaw);
+        float increment = -copysign(this->_yaw_rate / this->_frequency, encoder_yaw);
 
         // limit increment to prevent overshoot
         if (abs(increment) > abs(encoder_yaw))
@@ -155,7 +146,8 @@ void Planner::_timer_callback()
     if (this->_is_aligned && this->_in_contact)
     {
         // if alignment is lost, _position_offset will remain at last value to pprevent jumps. it will be reset, if conact is lost
-        this->_position_offset = control_contact_force(joint_pos[0], this->_desired_linear_joint_pos);
+        this->_position_offset = control_contact_force(joint_pos[0],
+                                                       this->_desired_linear_joint_pos);
     }
     else
     {
@@ -168,11 +160,6 @@ void Planner::_timer_callback()
 
     // allways add position offset (it will be 0 if not wanted)
     position.y() += this->_position_offset;
-    auto &clk = *this->get_clock();
-    RCLCPP_INFO_THROTTLE(this->get_logger(),
-                         clk,
-                         1000,
-                         "_position_offset: %f", this->_position_offset);
 
     /* Check if we already are in contact and if we want to align with the wall */
     if (this->_align && this->_in_contact)
@@ -191,11 +178,6 @@ void Planner::_timer_callback()
                       this->_ee_offset + this->_curr_js.position[0] * Eigen::Vector3d::UnitY(),
                       this->_curr_js.position[1],
                       curr_yaw);
-
-        RCLCPP_INFO_THROTTLE(this->get_logger(),
-                             clk,
-                             1000,
-                             "output_yaw: %f", output_yaw);
 
         /* Add it to the message */
         Eigen::Quaterniond output_q = common::quaternion_from_euler(0, 0, output_yaw);
