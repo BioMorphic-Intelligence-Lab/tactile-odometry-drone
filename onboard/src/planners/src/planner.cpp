@@ -5,7 +5,7 @@
 using namespace personal;
 
 Planner::Planner()
-    : Node("Planner"), JS_THRESHOLD(0.003) // MS: make the threshold a paramteter
+    : Node("Planner"), JS_THRESHOLD(0.0005) // MS: make the threshold a paramteter
 {
 
     /* Declare all the parameters */
@@ -14,7 +14,7 @@ Planner::Planner()
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 10); // 10 Degree/s
     this->declare_parameter("align", true);
-    this->declare_parameter("start_point", std::vector<double>({-1.05, 2.3, 1.87}));
+    this->declare_parameter("start_point", std::vector<double>({-1.05, 2.375, 1.87}));
     this->declare_parameter("joint_topic", "/joint_state");
     this->declare_parameter("pose_topic", "/mocap_pose");
     this->declare_parameter("ee_topic", "/ee_pose");
@@ -77,7 +77,7 @@ void Planner::get_uav_to_ee_position()
 // needs to be applied on unaligned position and need to be aligned afterwards
 double Planner::control_contact_force(float linear_joint, float desired_joint)
 {
-    float p_gain = 0.5; // should be less than 1, as joint values are in m
+    float p_gain = 1; // should be less than 1, as joint values are in m
     return p_gain * (linear_joint - desired_joint);
 }
 
@@ -111,7 +111,7 @@ void Planner::align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB
 
     Eigen::Vector4d quat_IB_4d = (Eigen::Matrix4d::Identity() + 0.5 * W * dt) * quat_mocap;
 
-    quat_IB = Eigen::Quaterniond(quat_IB_4d[0], quat_IB_4d[1], quat_IB_4d[2], quat_IB_4d[3]);
+    quat_IB = Eigen::Quaterniond(quat_IB_4d[0], quat_IB_4d[1], quat_IB_4d[2], quat_IB_4d[3]).normalized();
 
     // Rotation Matrix between World/Inertial (I) and Wall (W)
     Eigen::Matrix3d R_IW = quat_IB.toRotationMatrix() * common::quaternion_from_euler(0.0, 0.0, -encoder_yaw);
