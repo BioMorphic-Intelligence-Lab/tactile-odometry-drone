@@ -52,6 +52,7 @@ void RefPosRepeater::_timer_callback()
 
         // Arm the vehicle
         //this->arm();
+        //this->takeoff();
 
     }
 
@@ -152,7 +153,7 @@ void RefPosRepeater::disarm()
 void RefPosRepeater::takeoff()
 {
     px4_msgs::msg::VehicleCommand msg{};
-    msg.param7 = 3.0;
+    msg.param7 = 2.5;
     msg.command = px4_msgs::msg::VehicleCommand::VEHICLE_CMD_NAV_TAKEOFF;
     msg.target_system = 1;
     msg.target_component = 1;

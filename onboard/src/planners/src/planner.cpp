@@ -11,7 +11,7 @@ Planner::Planner()
     this->declare_parameter("desired_linear_joint_pos", 0.03); // position in m
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 10); // 10 Degree/s
-    this->declare_parameter("align", true);
+    this->declare_parameter("align", false);
     this->declare_parameter("start_point", std::vector<double>({0, 1.0, 1.8}));
     this->declare_parameter("joint_topic", "/joint_pose");
     this->declare_parameter("pose_topic", "/mocap_pose");
