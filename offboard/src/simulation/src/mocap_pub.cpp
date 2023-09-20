@@ -137,7 +137,7 @@ void MocapPub::PostUpdate(
   auto position = pose_msg.mutable_position();
   auto pos = pose->Data().Pos();
   /* Rotation quaternion */
-  Eigen::Quaterniond rot = personal::common::quaternion_from_euler(0.0, 0.0, M_PI).normalized();
+  Eigen::Quaterniond rot = personal::common::quaternion_from_euler(0.0, 0.0, -M_PI_2).normalized();
   /* Rotate position by - 90 deg around the z axis */
   Eigen::Vector3d eig_position(pos.X(), pos.Y(), pos.Z());
   eig_position = rot.toRotationMatrix() * eig_position; 
