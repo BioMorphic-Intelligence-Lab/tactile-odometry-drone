@@ -25,7 +25,7 @@ Eigen::Vector3d CirclePlanner::get_trajectory_setpoint()
         const float angle = 2 * M_PI / this->_T * time / this->_T;
 
         position.x() = 0.5 * this->_d * sin(angle);
-        position.z() = 0.5 * this->_d * cos(angle) - 1;
+        position.z() = 0.5 * this->_d * (cos(angle) - 1);
     }
 
     return position;
