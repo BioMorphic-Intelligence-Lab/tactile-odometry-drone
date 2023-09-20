@@ -44,7 +44,7 @@ RefPosRepeater::RefPosRepeater()
 /* Callback Functions */
 void RefPosRepeater::_timer_callback()
 {
-    if (_offboard_setpoint_counter == 10) 
+    if (_offboard_setpoint_counter == 20) 
     {
         /* On the real system we want to arm and change mode using the remote control
             Uncomment this for the SITL e.g. automatic arming and switch to offboard mode */
@@ -62,7 +62,7 @@ void RefPosRepeater::_timer_callback()
     this->_publish_offboard_control_mode();
 
     // stop the counter after reaching 11
-    if (_offboard_setpoint_counter < 11) {
+    if (_offboard_setpoint_counter < 21) {
         _offboard_setpoint_counter++;
     }
 

@@ -5,17 +5,17 @@
 using namespace personal;
 
 Planner::Planner()
-    : Node("Planner"), JS_THRESHOLD(0.01) // MS: make the threshold a paramteter
+    : Node("Planner"), JS_THRESHOLD(0.003) // MS: make the threshold a paramteter
 {
 
     /* Declare all the parameters */
     this->declare_parameter("frequency", 20.0);
-    this->declare_parameter("desired_linear_joint_pos", 0.03); // position in m
+    this->declare_parameter("desired_linear_joint_pos", 0.01); // position in m
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 10); // 10 Degree/s
-    this->declare_parameter("align", false);
+    this->declare_parameter("align", true);
     this->declare_parameter("start_point", std::vector<double>({0, 1.0, 1.8}));
-    this->declare_parameter("joint_topic", "/joint_pose");
+    this->declare_parameter("joint_topic", "/joint_state");
     this->declare_parameter("pose_topic", "/mocap_pose");
     this->declare_parameter("ee_topic", "/ee_pose");
     this->declare_parameter("pub_topic", "/ref_pose");
