@@ -33,9 +33,11 @@ target_link_libraries(MocapPub
   gz-plugin${GZ_PLUGIN_VER}::gz-plugin${GZ_PLUGIN_VER}
   gz-sim${GZ_SIM_VER}::gz-sim${GZ_SIM_VER}
   common::common
+  Eigen3::Eigen
 )
 target_include_directories(MocapPub PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/simulation>
+  $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
   $<INSTALL_INTERFACE:include>)
 
 

@@ -58,7 +58,7 @@ void FakeJointStatePublisher::_handle_visual_odometry(const geometry_msgs::msg::
                          msg->pose.orientation.x,
                          msg->pose.orientation.y,
                          msg->pose.orientation.z);
-    this->_base_yaw = common::yaw_from_quaternion(q);
+    this->_base_yaw = personal::common::yaw_from_quaternion(q);
 }
 
 int main(int argc, char **argv)

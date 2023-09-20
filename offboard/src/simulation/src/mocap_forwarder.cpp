@@ -28,13 +28,13 @@ void MocapForwarder::_handle_visual_odometry(
     Eigen::Vector3d enu_p(msg->pose.position.x,
                         msg->pose.position.y,
                         msg->pose.position.z);
-    Eigen::Vector3d ned_p = common::enu_2_ned(enu_p);
+    Eigen::Vector3d ned_p = personal::common::enu_2_ned(enu_p);
 
     Eigen::Quaterniond enu_q(msg->pose.orientation.w,
                              msg->pose.orientation.x,
                              msg->pose.orientation.y,
                              msg->pose.orientation.z);
-    Eigen::Quaterniond ned_q = common::enu_2_ned(enu_q);
+    Eigen::Quaterniond ned_q = personal::common::enu_2_ned(enu_q);
 
     px4_msgs::msg::VehicleOdometry odom{};
     odom.timestamp = this->get_timestamp();

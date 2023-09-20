@@ -10,9 +10,12 @@
 #include "gz/sim/Model.hh"
 #include "gz/sim/Util.hh"
 
-using namespace gz;
-using namespace sim;
-using namespace systems;
+#include <Eigen/Dense>
+
+#include "common/common.hpp"
+
+using namespace gz::sim;
+using namespace gz::sim::systems;
 
 class gz::sim::systems::MocapPubPrivate
 {
@@ -133,16 +136,26 @@ void MocapPub::PostUpdate(
   /* Then the Position */
   auto position = pose_msg.mutable_position();
   auto pos = pose->Data().Pos();
-  position->set_x(pos.X());
-  position->set_y(pos.Y());
-  position->set_z(pos.Z());
+  /* Rotation quaternion */
+  Eigen::Quaterniond rot = personal::common::quaternion_from_euler(0.0, 0.0, M_PI).normalized();
+  /* Rotate position by - 90 deg around the z axis */
+  Eigen::Vector3d eig_position(pos.X(), pos.Y(), pos.Z());
+  eig_position = rot.toRotationMatrix() * eig_position; 
+
+  position->set_x(eig_position.x());
+  position->set_y(eig_position.y());
+  position->set_z(eig_position.z());
+
   /* Then the Orientation */
   auto orientation = pose_msg.mutable_orientation();
   auto quat = pose->Data().Rot();
-  orientation->set_x(quat.X());
-  orientation->set_y(quat.Y());
-  orientation->set_z(quat.Z());
-  orientation->set_w(quat.W());
+  Eigen::Quaterniond eig_q(quat.W(),quat.X(),quat.Y(),quat.Z());
+  eig_q = rot * eig_q;
+
+  orientation->set_x(eig_q.x());
+  orientation->set_y(eig_q.y());
+  orientation->set_z(eig_q.z());
+  orientation->set_w(eig_q.w());
   
   this->dataPtr->pose_pub.Publish(pose_msg);
 }
