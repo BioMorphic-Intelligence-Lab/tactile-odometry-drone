@@ -107,6 +107,10 @@ void Planner::align_to_wall(float &yaw_IB, Eigen::Vector3d &pos_IB, Eigen::Vecto
         }
 
         yaw = mocap_yaw + increment;
+
+        auto &clk = *this->get_clock();
+        RCLCPP_INFO_THROTTLE(this->get_logger(), clk, 1000,
+                            "Mocap Yaw: %f  Yaw: %f", mocap_yaw, yaw);
     }
 
     // return position and orientation of uav
@@ -132,7 +136,8 @@ void Planner::_timer_callback()
     if (this->_in_contact)
     {
         /* check if UAV is aligned to all*/
-        this->_is_aligned = fabs(fmod(joint_pos[1], 2 * M_PI)) < this->_alignment_threshold;
+        this->_is_aligned = (this->_is_aligned) || 
+                            fabs(fmod(joint_pos[1], 2 * M_PI)) < this->_alignment_threshold;
     }
     else
     {
@@ -178,7 +183,7 @@ void Planner::_timer_callback()
                       this->_ee_offset + this->_curr_js.position[0] * Eigen::Vector3d::UnitY(),
                       this->_curr_js.position[1],
                       curr_yaw);
-                      
+
         /* Transform to start point */
         RCLCPP_DEBUG(this->get_logger(), "%f %f %f", aligned_position.x(), aligned_position.y(), aligned_position.z());
         aligned_position += this->_start_point;
