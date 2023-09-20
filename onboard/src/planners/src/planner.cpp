@@ -65,10 +65,10 @@ void Planner::get_uav_to_ee_position()
     if (this->_ee_offsets.size() <= 500)
     {
         this->_ee_offsets.push_back((ee_pos - mocap_pos));
-        RCLCPP_DEBUG_THROTTLE(this->get_logger(),
-                              clk,
-                              500,
-                              "ee-mocap: %f   %f   %f", this->_ee_offsets.back().x(), this->_ee_offsets.back().y(), this->_ee_offsets.back().z());
+        RCLCPP_INFO_THROTTLE(this->get_logger(),
+                             clk,
+                             500,
+                             "ee-mocap: %f   %f   %f", this->_ee_offsets.back().x(), this->_ee_offsets.back().y(), this->_ee_offsets.back().z());
     }
     if (this->_ee_offsets.size() == 500)
     {
@@ -77,10 +77,10 @@ void Planner::get_uav_to_ee_position()
         this->_ee_offset = q.toRotationMatrix() * std::reduce(this->_ee_offsets.begin(), this->_ee_offsets.end()) / this->_ee_offsets.size();
     }
 
-    RCLCPP_DEBUG_THROTTLE(this->get_logger(),
-                          clk,
-                          1000,
-                          "ee_offset: %f   %f   %f", this->_ee_offset.x(), this->_ee_offset.y(), this->_ee_offset.z());
+    RCLCPP_INFO_THROTTLE(this->get_logger(),
+                         clk,
+                         1000,
+                         "ee_offset: %f   %f   %f", this->_ee_offset.x(), this->_ee_offset.y(), this->_ee_offset.z());
 }
 
 // needs to be applied on unaligned position and need to be aligned afterwards
