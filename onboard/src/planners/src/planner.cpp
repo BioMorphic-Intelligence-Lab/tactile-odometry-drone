@@ -14,7 +14,7 @@ Planner::Planner()
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 10); // 10 Degree/s
     this->declare_parameter("align", true);
-    this->declare_parameter("start_point", std::vector<double>({0, 1.0, 1.8}));
+    this->declare_parameter("start_point", std::vector<double>({-1.05, 2.3, 1.87}));
     this->declare_parameter("joint_topic", "/joint_state");
     this->declare_parameter("pose_topic", "/mocap_pose");
     this->declare_parameter("ee_topic", "/ee_pose");
@@ -127,7 +127,7 @@ void Planner::_timer_callback()
     std::vector<double> joint_pos = this->_curr_js.position;
 
     /* Put in the position of the planner */
-    Eigen::Vector3d position = this->get_trajectory_setpoint() + this->_start_point; // Transform to start point
+    Eigen::Vector3d position = this->get_trajectory_setpoint();
 
     if (this->_in_contact)
     {
@@ -178,6 +178,10 @@ void Planner::_timer_callback()
                       this->_ee_offset + this->_curr_js.position[0] * Eigen::Vector3d::UnitY(),
                       this->_curr_js.position[1],
                       curr_yaw);
+                      
+        /* Transform to start point */
+        RCLCPP_DEBUG(this->get_logger(), "%f %f %f", aligned_position.x(), aligned_position.y(), aligned_position.z());
+        aligned_position += this->_start_point;
 
         /* Add it to the message */
         Eigen::Quaterniond output_q = common::quaternion_from_euler(0, 0, output_yaw);
@@ -192,11 +196,16 @@ void Planner::_timer_callback()
     }
     /* Otherwise we just forward the position */
     else
-    {
+    {      
+        RCLCPP_DEBUG(this->get_logger(), "%f %f %f", position.x(), position.y(), position.z());
+        /* Transform to start point */
+        position += this->_start_point;
+       
         msg.pose.position.x = position.x();
         msg.pose.position.y = position.y();
         msg.pose.position.z = position.z();
     }
+
 
     /* Finally publish the message */
     this->_setpoint_publisher->publish(msg);

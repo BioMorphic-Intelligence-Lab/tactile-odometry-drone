@@ -4,7 +4,7 @@
 
 LinePlanner::LinePlanner()
 {
-    this->declare_parameter("L_x", 1.0); // end position in m
+    this->declare_parameter("L_x", 1.5); // end position in m
     this->declare_parameter("L_z", 0.0); // end position in m
     this->declare_parameter("v", 0.1);   // velocity in m/s
     this->_L_x = this->get_parameter("L_x").as_double();
