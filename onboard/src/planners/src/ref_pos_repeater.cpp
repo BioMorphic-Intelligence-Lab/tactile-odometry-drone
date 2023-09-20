@@ -75,25 +75,37 @@ void RefPosRepeater::_ref_callback(const geometry_msgs::msg::PoseStamped::Shared
 {
     px4_msgs::msg::TrajectorySetpoint px4_msg{};
 
-    // Transform the position
-    Eigen::Vector3d enu_position = {msg->pose.position.x,
-                                    msg->pose.position.y,
-                                    msg->pose.position.z};
-    Eigen::Vector3d ned_position = common::enu_2_ned(enu_position);
+    /* In the beginning we just want to take off */
+    if((this->_beginning - this->now()).seconds() < 20.0)
+    {
+        px4_msg.position = {0.0, 0.0, -1.7};
+        px4_msg.yaw = 0.0;
+    }
+    /* Then we forward the transformed reference position */
+    else
+    {   
+        // Transform the position
+        Eigen::Vector3d enu_position = {msg->pose.position.x,
+                                        msg->pose.position.y,
+                                        msg->pose.position.z};
+        Eigen::Vector3d ned_position = common::enu_2_ned(enu_position);
 
-    // Transform the orientation    
-    Eigen::Quaterniond enu_q = {msg->pose.orientation.w,
-                                msg->pose.orientation.x,
-                                msg->pose.orientation.y,
-                                msg->pose.orientation.z};
-    Eigen::Quaternion ned_q = common::enu_2_ned(enu_q);
+        // Transform the orientation    
+        Eigen::Quaterniond enu_q = {msg->pose.orientation.w,
+                                    msg->pose.orientation.x,
+                                    msg->pose.orientation.y,
+                                    msg->pose.orientation.z};
+        Eigen::Quaternion ned_q = common::enu_2_ned(enu_q);
 
-    // Save to px4_msg
-    px4_msg.position = {(float)ned_position.x(),
-                        (float)ned_position.y(),
-                        (float)ned_position.z()};
-    // This assumes the quaternion only describes yaw.
-    px4_msg.yaw = 2 * acos(ned_q.w());
+        // Save to px4_msg
+        px4_msg.position = {(float)ned_position.x(),
+                            (float)ned_position.y(),
+                            (float)ned_position.z()};
+        // This assumes the quaternion only describes yaw.
+        px4_msg.yaw = 2 * acos(ned_q.w());
+    }
+ 
+
 
     // Get the current timestamp
     px4_msg.timestamp = this->get_timestamp();
