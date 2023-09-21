@@ -297,7 +297,7 @@ void Planner::_trackball_callback(const geometry_msgs::msg::PointStamped::Shared
 bool Planner::_detect_contact()
 {
     const bool force_over_threshold = fabs(this->_curr_js.position[0]) > JS_THRESHOLD;
-    const bool trackball_over_threshold = this->_trackball_pos.norm() > 0.01 * pi * 19 / 425; // 0.01 m (ticks2m = pi*19/425)
+    const bool trackball_over_threshold = this->_trackball_pos.norm() > 0.01;
 
     return force_over_threshold || trackball_over_threshold;
 }

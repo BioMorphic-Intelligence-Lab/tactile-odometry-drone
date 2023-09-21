@@ -26,10 +26,9 @@ public:
     unsigned char data[3];
     int counter = 0;
 
-
     std::string pDevice = "/dev/input/mouse0";
     std::cout << "trackball_name:" << trackball_name << " \n";
-    if (!trackball_name.compare("X19"))
+    if (trackball_radius == 19)
     {
       std::cout << "using trackball X19"
                 << "\n";
@@ -38,7 +37,7 @@ public:
                 << "\n";
       printf(" Opening  %s\n", pDevice.c_str());
     }
-    else if (!trackball_name.compare("X13"))
+    else if (trackball_radius == 13)
     {
       std::cout << "using trackball X13"
                 << "\n";
@@ -63,7 +62,7 @@ public:
       close(fd);
     }
 
-    //int left, middle, right;
+    // int left, middle, right;
     signed char x, y;
     rclcpp::Time start_time = this->get_clock()->now();
     rclcpp::Time publish_time = this->get_clock()->now();
@@ -92,7 +91,7 @@ public:
         deltaT = (this->get_clock()->now() - publish_time).nanoseconds() / 1000000;
 
         last_time = current_time;
-        
+
         counter = 0;
         if (deltaT >= 20)
         {
@@ -113,15 +112,15 @@ public:
   {
     printf("constructor...");
 
-    this->declare_parameter("trackball_name", "X19");
-
-    trackball_name = this->get_parameter("trackball_name").as_string();
+    this->declare_parameter("trackball_radius", 19);
+    trackball_name = "X";
+    trackball_name.append(std::to_string(this->get_parameter("trackball_radius").as_double()));
     std::string topic_name_prefix = "/trackball";
     // const str::string topic_name_suffix1 = "/position";
     std::string topic_name_position = topic_name_prefix;
     std::string topic_name_ticks = topic_name_prefix;
     // don't add trackball_name if it is "X19" ==> default topic
-    if (trackball_name.compare("X19"))
+    if (trackball_radius == 19)
     {
       topic_name_position.append(trackball_name);
       topic_name_ticks.append(trackball_name);
@@ -159,11 +158,14 @@ private:
     auto message = geometry_msgs::msg::PointStamped();
     message.point.x = (double)sum_x;
     message.point.y = (double)sum_y;
+    message.point.x = message.point.x * M_PI * 19 / 425;
+    message.point.y = message.point.y * M_PI * 19 / 425;
     message.point.z = 0;
     message.header.stamp = this->get_clock()->now();
     odom_publisher_->publish(message);
   }
-  std::string trackball_name;
+  std::string trackball_name = "X";
+  int trackball_radius = 19;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr zeroService;
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<std_msgs::msg::Header>::SharedPtr publisher_;
@@ -172,7 +174,7 @@ private:
 
   void setToZeroCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
   {
-    (void) request;
+    (void)request;
     std::cout << "setZero service" << std::endl;
     this->sum_x = 0;
     this->sum_y = 0;

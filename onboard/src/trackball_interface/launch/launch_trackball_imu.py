@@ -19,7 +19,7 @@ def generate_launch_description():
             package="trackball_interface",
             executable="trackball_interface",
             parameters=[
-                {"trackball_name": "X19"}
+                {"trackball_radius": 19}
             ],
             name="trackball_interface",
             output="screen",
@@ -29,7 +29,7 @@ def generate_launch_description():
             package="trackball_interface",
             executable="trackball_interface",
             parameters=[
-                {"trackball_name": "X13"}
+                {"trackball_radius": 13}
             ],
             name="trackball_interface_2",
             output="screen",
