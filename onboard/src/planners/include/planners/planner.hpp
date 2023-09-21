@@ -46,7 +46,7 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr _joint_subscription;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr _mocap_subscription, _ee_subscription;
     rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr _trackball_subscription;
-    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _setpoint_publisher;
+    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _setpoint_publisher, _setpoint_publisher_ee;
 
     /* Callback Functions */
     void _timer_callback();

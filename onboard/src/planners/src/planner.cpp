@@ -56,6 +56,8 @@ Planner::Planner()
     /* Init Publishers */
     this->_setpoint_publisher = this->create_publisher<geometry_msgs::msg::PoseStamped>(
         this->get_parameter("pub_topic").as_string(), 10);
+    this->_setpoint_publisher_ee = this->create_publisher<geometry_msgs::msg::PoseStamped>(
+        "/ref_pose/ee", 10);
 
     /* Init current joint state variable to avoid segmentation fault */
     this->_curr_js.position = {0.0, 0.0};
@@ -138,10 +140,22 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
 
     quat_IB = Eigen::Quaterniond(quat_IB_4d[0], quat_IB_4d[1], quat_IB_4d[2], quat_IB_4d[3]).normalized();
 
+    // get rotation about z-axis that preserves x-y-heading of y-axis
+    const Eigen::Matrix3d R_IB = quat_IB.toRotationMatrix();
+    double yaw = -atan2(R_IB(1, 2), R_IB(2, 2));
+    float yaw2 = common::yaw_from_quaternion(quat_IB);
+    auto &clk = *this->get_clock();
+    RCLCPP_INFO_THROTTLE(this->get_logger(),
+                         clk,
+                         500,
+                         "yaw1 %f, yaw2 %f", yaw, yaw2);
     // Rotation Matrix between World/Inertial (I) and Wall (W)
-    Eigen::Matrix3d R_IW = quat_IB.toRotationMatrix() * common::quaternion_from_euler(0.0, 0.0, -encoder_yaw);
+    // Eigen::Matrix3d R_IW = quat_IB.toRotationMatrix() * common::quaternion_from_euler(0.0, 0.0, -encoder_yaw);
+    const Eigen::Matrix3d R_IB_z = common::rot_z(yaw);
+    const Eigen::Matrix3d R_BW_z = common::rot_z(-encoder_yaw);
+    const Eigen::Matrix3d R_IW_z = R_IB_z * R_BW_z;
     // return position and orientation of uav
-    pos_IB = R_IW * (pos_WE - quat_IB.toRotationMatrix() * (pos_BE));
+    pos_IB = R_IW_z * pos_WE - R_IB_z * pos_BE;
 }
 
 /* Callback Functions */
@@ -158,6 +172,12 @@ void Planner::_timer_callback()
 
     /* Put in the position of the planner */
     Eigen::Vector3d position = this->get_trajectory_setpoint();
+
+    /*publish original trajectory pose*/
+    msg.pose.position.x = position.x();
+    msg.pose.position.y = position.y();
+    msg.pose.position.z = position.z();
+    this->_setpoint_publisher_ee->publish(msg);
 
     if (this->_in_contact)
     {
