@@ -6,7 +6,9 @@
 #include "common/common.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
+#include "geometry_msgs/msg/point_stamped.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
+#include "std_srvs/srv/trigger.hpp"
 
 using namespace std::chrono_literals;
 
@@ -33,22 +35,24 @@ private:
 
     std::vector<Eigen::Vector3d> _ee_offsets;
 
-    Eigen::Vector3d _ee_offset, _start_point;
+    Eigen::Vector3d _ee_offset, _start_point, _trackball_pos;
 
-    sensor_msgs::msg::JointState _curr_js;
-    geometry_msgs::msg::PoseStamped _curr_pos, _curr_ee_pos;
+    sensor_msgs::msg::JointState _curr_js, _last_js;
+    geometry_msgs::msg::PoseStamped _curr_pose, _curr_ee_pose;
 
     rclcpp::TimerBase::SharedPtr _timer;
 
     /* Publishers and Subscribers */
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr _joint_subscription;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr _mocap_subscription, _ee_subscription;
+    rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr _trackball_subscription;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _setpoint_publisher;
 
     /* Callback Functions */
     void _timer_callback();
     void _joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg);
     void _mocap_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
+    void _trackball_callback(const geometry_msgs::msg::PointStamped::SharedPtr msg);
     void _ee_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
     /**
@@ -62,11 +66,13 @@ private:
     *   pos_IB: updated position of UAV
     *   yaw_IB: updated yaw of UAV
     */
-    void align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap);
+    void _align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap);
 
-    double control_contact_force(float linear_joint, float desired_joint);
+    double _control_contact_force(float linear_joint, float desired_joint);
 
-    void get_uav_to_ee_position();
+    void _get_uav_to_ee_position();
+
+    bool _detect_contact();
 };
 
 #endif // PLANNER_H

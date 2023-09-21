@@ -11,7 +11,7 @@ Planner::Planner()
     /* Declare all the parameters */
     this->declare_parameter("frequency", 20.0);
     this->declare_parameter("desired_linear_joint_pos", -0.01); // position in m
-    this->declare_parameter("v_approach", 0.1); // Approach velocity
+    this->declare_parameter("v_approach", 0.1);                 // Approach velocity
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 10); // 10 Degree/s
     this->declare_parameter("align", true);
@@ -19,6 +19,7 @@ Planner::Planner()
     this->declare_parameter("joint_topic", "/joint_state");
     this->declare_parameter("pose_topic", "/mocap_pose");
     this->declare_parameter("ee_topic", "/ee_pose");
+    this->declare_parameter("trackball_topic", "/trackball/position");
     this->declare_parameter("pub_topic", "/ref_pose");
 
     /* Actually get all the parameters */
@@ -47,6 +48,10 @@ Planner::Planner()
         this->get_parameter("ee_topic").as_string(),
         rclcpp::SensorDataQoS(),
         std::bind(&Planner::_ee_callback, this, std::placeholders::_1));
+    this->_trackball_subscription = this->create_subscription<geometry_msgs::msg::PointStamped>(
+        this->get_parameter("trackball_topic").as_string(),
+        rclcpp::SensorDataQoS(),
+        std::bind(&Planner::_trackball_callback, this, std::placeholders::_1));
 
     /* Init Publishers */
     this->_setpoint_publisher = this->create_publisher<geometry_msgs::msg::PoseStamped>(
@@ -57,12 +62,27 @@ Planner::Planner()
 
     /* Init the timestamp to some time in the future value until we establish contact */
     this->_beginning = this->now() + rclcpp::Duration(10000, 0);
+
+    /* Services*/
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr trackball_set_zero =
+        this->create_client<std_srvs::srv::Trigger>("trackball_interface/setZero");
+
+    auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+    while (!trackball_set_zero->wait_for_service(1s))
+    {
+        if (!rclcpp::ok())
+        {
+            RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service.");
+        }
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "service not available, waiting again...");
+    }
+    trackball_set_zero->async_send_request(request);
 }
 
-void Planner::get_uav_to_ee_position()
+void Planner::_get_uav_to_ee_position()
 {
-    Eigen::Vector3d mocap_pos(this->_curr_pos.pose.position.x, this->_curr_pos.pose.position.y, this->_curr_pos.pose.position.z);
-    Eigen::Vector3d ee_pos(this->_curr_ee_pos.pose.position.x, this->_curr_ee_pos.pose.position.y, this->_curr_ee_pos.pose.position.z);
+    Eigen::Vector3d mocap_pos(this->_curr_pose.pose.position.x, this->_curr_pose.pose.position.y, this->_curr_pose.pose.position.z);
+    Eigen::Vector3d ee_pos(this->_curr_ee_pose.pose.position.x, this->_curr_ee_pose.pose.position.y, this->_curr_ee_pose.pose.position.z);
 
     if (this->_ee_offsets.size() <= 50)
     {
@@ -70,17 +90,20 @@ void Planner::get_uav_to_ee_position()
     }
     if (this->_ee_offsets.size() == 50)
     {
-        const auto pose = this->_curr_pos.pose.orientation;
+        const auto pose = this->_curr_pose.pose.orientation;
         const Eigen::Quaterniond q(pose.w, pose.x, pose.y, pose.z);
         this->_ee_offset = q.toRotationMatrix() * std::reduce(this->_ee_offsets.begin(), this->_ee_offsets.end()) / this->_ee_offsets.size();
     }
 }
 
 // needs to be applied on unaligned position and need to be aligned afterwards
-double Planner::control_contact_force(float linear_joint, float desired_joint)
+double Planner::_control_contact_force(float linear_joint, float desired_joint)
 {
-    float p_gain = 1; // should be less than 1, as joint values are in m
-    return p_gain * (linear_joint - desired_joint);
+    float p_gain = 1.0; // should be less than 1, as joint values are in m
+    float d_gain = 0.1;
+    float joint_velocity = 0.5 * (this->_curr_js.velocity[0] + this->_last_js.velocity[0]);
+
+    return p_gain * (linear_joint - desired_joint) - d_gain * joint_velocity;
 }
 
 /**
@@ -94,7 +117,7 @@ double Planner::control_contact_force(float linear_joint, float desired_joint)
 *   pos_IB: updated position of UAV
 *   yaw_IB: updated yaw of UAV
  */
-void Planner::align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap_q)
+void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap_q)
 {
 
     Eigen::Matrix4d W;
@@ -130,7 +153,7 @@ void Planner::_timer_callback()
     msg.header.stamp = this->now();
 
     /* Extract current state */
-    geometry_msgs::msg::PoseStamped curr_pos = this->_curr_pos;
+    geometry_msgs::msg::PoseStamped curr_pos = this->_curr_pose;
     std::vector<double> joint_pos = this->_curr_js.position;
 
     /* Put in the position of the planner */
@@ -148,14 +171,14 @@ void Planner::_timer_callback()
         this->_position_offset = 0.0;
 
         /* check if UAV is in contact*/
-        this->_in_contact = fabs(this->_curr_js.position[0]) > JS_THRESHOLD;
+        this->_in_contact = this->_detect_contact();
     }
 
     if (this->_is_aligned && this->_in_contact)
     {
         // if alignment is lost, _position_offset will remain at last value to pprevent jumps. it will be reset, if conact is lost
-        this->_position_offset = control_contact_force(joint_pos[0],
-                                                       this->_desired_linear_joint_pos);
+        this->_position_offset = _control_contact_force(joint_pos[0],
+                                                        this->_desired_linear_joint_pos);
     }
     else
     {
@@ -163,7 +186,7 @@ void Planner::_timer_callback()
         this->_beginning = this->now() + rclcpp::Duration(1, 0);
 
         /* get ee_offset*/
-        this->get_uav_to_ee_position();
+        this->_get_uav_to_ee_position();
     }
 
     // allways add position offset (it will be 0 if not wanted)
@@ -181,10 +204,10 @@ void Planner::_timer_callback()
 
         Eigen::Quaterniond output_q;
         /* Find the aligned position and orientation */
-        align_to_wall(output_q, aligned_position, position,
-                      this->_ee_offset + this->_curr_js.position[0] * Eigen::Vector3d::UnitY(),
-                      this->_curr_js.position[1],
-                      current_quat);
+        _align_to_wall(output_q, aligned_position, position,
+                       this->_ee_offset + this->_curr_js.position[0] * Eigen::Vector3d::UnitY(),
+                       this->_curr_js.position[1],
+                       current_quat);
 
         /* Transform to start point */
         RCLCPP_DEBUG(this->get_logger(), "%f %f %f", aligned_position.x(), aligned_position.y(), aligned_position.z());
@@ -201,7 +224,7 @@ void Planner::_timer_callback()
         msg.pose.position.y = aligned_position.y();
         msg.pose.position.z = aligned_position.z();
     }
-    /* Otherwise the trajectory has not started yet and 
+    /* Otherwise the trajectory has not started yet and
      * we fly towards the start position. For this we command reference positions that are
      * in the direction of the start position at a distance of v_approach * dt */
     else
@@ -234,9 +257,24 @@ void Planner::_joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
 
 void Planner::_mocap_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
 {
-    this->_curr_pos = *msg;
+    this->_curr_pose = *msg;
 }
 void Planner::_ee_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
 {
-    this->_curr_ee_pos = *msg;
+    this->_curr_ee_pose = *msg;
+}
+
+void Planner::_trackball_callback(const geometry_msgs::msg::PointStamped::SharedPtr msg)
+{
+    this->_trackball_pos.x() = msg->point.x;
+    this->_trackball_pos.y() = msg->point.y;
+    this->_trackball_pos.z() = msg->point.z;
+}
+
+bool Planner::_detect_contact()
+{
+    const bool force_over_threshold = fabs(this->_curr_js.position[0]) > JS_THRESHOLD;
+    const bool trackball_over_threshold = this->_trackball_pos.norm() > 0.01;
+
+    return force_over_threshold || trackball_over_threshold;
 }
