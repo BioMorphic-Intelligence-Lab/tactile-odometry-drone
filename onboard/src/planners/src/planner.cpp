@@ -249,16 +249,15 @@ void Planner::_timer_callback()
      * in the direction of the start position at a distance of v_approach * dt */
     else
     {
-        
+
         /* Transform to start point */
         auto curr_position = this->_curr_pos.pose.position;
         Eigen::Vector3d eigen_curr_pos(curr_position.x,
                                        curr_position.y,
                                        curr_position.z);
-        Eigen::Vector3d dir = (this->_start_point 
-                                        - eigen_curr_pos).normalized();
+        Eigen::Vector3d dir = (this->_start_point - eigen_curr_pos).normalized();
         double dt = 1.0 / this->_frequency;
-        
+
         position += eigen_curr_pos + this->_v_approach * dt * dir;
 
         msg.pose.position.x = position.x();
@@ -294,7 +293,7 @@ void Planner::_trackball_callback(const geometry_msgs::msg::PointStamped::Shared
 bool Planner::_detect_contact()
 {
     const bool force_over_threshold = fabs(this->_curr_js.position[0]) > JS_THRESHOLD;
-    const bool trackball_over_threshold = this->_trackball_pos.norm() > 0.01;
+    const bool trackball_over_threshold = this->_trackball_pos.norm() > 0.01 * pi * 19 / 425; // 0.01 m (ticks2m = pi*19/425)
 
     return force_over_threshold || trackball_over_threshold;
 }
