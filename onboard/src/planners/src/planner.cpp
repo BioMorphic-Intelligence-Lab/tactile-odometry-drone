@@ -61,6 +61,8 @@ Planner::Planner()
 
     /* Init current joint state variable to avoid segmentation fault */
     this->_curr_js.position = {0.0, 0.0};
+    this->_curr_js.velocity = {0.0, 0.0};
+    this->_last_js = this->_curr_js;
 
     /* Init the timestamp to some time in the future value until we establish contact */
     this->_beginning = this->now() + rclcpp::Duration(10000, 0);
@@ -104,6 +106,8 @@ double Planner::_control_contact_force(float linear_joint, float desired_joint)
     float p_gain = 1.0; // should be less than 1, as joint values are in m
     float d_gain = 0.1;
     float joint_velocity = 0.5 * (this->_curr_js.velocity[0] + this->_last_js.velocity[0]);
+
+    this->_last_js = this->_curr_js;
 
     return p_gain * (linear_joint - desired_joint) - d_gain * joint_velocity;
 }
@@ -167,7 +171,7 @@ void Planner::_timer_callback()
     msg.header.stamp = this->now();
 
     /* Extract current state */
-    geometry_msgs::msg::PoseStamped curr_pos = this->_curr_pose;
+    geometry_msgs::msg::PoseStamped curr_pose = this->_curr_pose;
     std::vector<double> joint_pos = this->_curr_js.position;
 
     /* Put in the position of the planner */
@@ -216,10 +220,10 @@ void Planner::_timer_callback()
     if (this->_align && this->_in_contact)
     {
         // float curr_yaw = common::yaw_from_quaternion(
-        Eigen::Quaterniond current_quat(curr_pos.pose.orientation.w,
-                                        curr_pos.pose.orientation.x,
-                                        curr_pos.pose.orientation.y,
-                                        curr_pos.pose.orientation.z);
+        Eigen::Quaterniond current_quat(curr_pose.pose.orientation.w,
+                                        curr_pose.pose.orientation.x,
+                                        curr_pose.pose.orientation.y,
+                                        curr_pose.pose.orientation.z);
         Eigen::Vector3d aligned_position;
 
         Eigen::Quaterniond output_q;
@@ -251,7 +255,7 @@ void Planner::_timer_callback()
     {
         
         /* Transform to start point */
-        auto curr_position = this->_curr_pos.pose.position;
+        auto curr_position = this->_curr_pose.pose.position;
         Eigen::Vector3d eigen_curr_pos(curr_position.x,
                                        curr_position.y,
                                        curr_position.z);
