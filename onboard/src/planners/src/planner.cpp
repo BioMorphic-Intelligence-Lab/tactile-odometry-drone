@@ -99,8 +99,11 @@ void Planner::_get_uav_to_ee_position()
 // needs to be applied on unaligned position and need to be aligned afterwards
 double Planner::_control_contact_force(float linear_joint, float desired_joint)
 {
-    float p_gain = 1; // should be less than 1, as joint values are in m
-    return p_gain * (linear_joint - desired_joint);
+    float p_gain = 1.0; // should be less than 1, as joint values are in m
+    float d_gain = 0.1;
+    float joint_velocity = 0.5 * (this->_curr_js.velocity[0] + this->_last_js.velocity[0]);
+
+    return p_gain * (linear_joint - desired_joint) - d_gain * joint_velocity;
 }
 
 /**

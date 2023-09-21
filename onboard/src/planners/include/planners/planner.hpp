@@ -37,7 +37,7 @@ private:
 
     Eigen::Vector3d _ee_offset, _start_point, _trackball_pos;
 
-    sensor_msgs::msg::JointState _curr_js;
+    sensor_msgs::msg::JointState _curr_js, _last_js;
     geometry_msgs::msg::PoseStamped _curr_pose, _curr_ee_pose;
 
     rclcpp::TimerBase::SharedPtr _timer;
