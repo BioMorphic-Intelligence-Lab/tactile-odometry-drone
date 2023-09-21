@@ -19,21 +19,23 @@ LinePlanner::LinePlanner()
     */
 Eigen::Vector3d LinePlanner::get_trajectory_setpoint()
 {
-    float time = (this->now() - this->_beginning).seconds();
-    Eigen::Vector3d position;
-
-    if (time > 0)
+    double time = (this->now() - this->_beginning).seconds();
+    Eigen::Vector3d ref_position;
+    ref_position << 0, 0, 0;
+    
+    if (time > 0.0)
     {
         const float angle = atan2(this->_L_z, this->_L_x);
 
         const float v_x = this->_v * cos(angle);
         const float v_z = this->_v * sin(angle);
 
-        position.x() = v_x * time;
-        position.z() = v_z * time;
+        ref_position.x() = v_x * time;
+        ref_position.z() = v_z * time;
+
     }
 
-    return position;
+    return ref_position;
 }
 
 int main(int argc, char **argv)

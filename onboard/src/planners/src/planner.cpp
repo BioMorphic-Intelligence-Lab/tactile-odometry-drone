@@ -249,16 +249,17 @@ void Planner::_timer_callback()
      * in the direction of the start position at a distance of v_approach * dt */
     else
     {
-        RCLCPP_DEBUG(this->get_logger(), "%f %f %f", position.x(), position.y(), position.z());
-
+        
         /* Transform to start point */
-        auto curr_position = this->_curr_pose.pose.position;
-        Eigen::Vector3d dir = (this->_start_point - Eigen::Vector3d(curr_position.x,
-                                                                    curr_position.y,
-                                                                    curr_position.z))
-                                  .normalized();
+        auto curr_position = this->_curr_pos.pose.position;
+        Eigen::Vector3d eigen_curr_pos(curr_position.x,
+                                       curr_position.y,
+                                       curr_position.z);
+        Eigen::Vector3d dir = (this->_start_point 
+                                        - eigen_curr_pos).normalized();
         double dt = 1.0 / this->_frequency;
-        position += this->_v_approach * dt * dir;
+        
+        position += eigen_curr_pos + this->_v_approach * dt * dir;
 
         msg.pose.position.x = position.x();
         msg.pose.position.y = position.y();
