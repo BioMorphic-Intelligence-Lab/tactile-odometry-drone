@@ -25,6 +25,7 @@ public:
 private:
     const double JS_THRESHOLD;
     double _frequency, _yaw_rate;
+    double _v_approach;               // velocity with which to approach the start position
     double _alignment_threshold;      // angle threshold in rad defining is_aligned
     double _desired_linear_joint_pos; // desired value for linear joint in m
     double _position_offset = 0.0;    // positon offset calculated by force controller in m

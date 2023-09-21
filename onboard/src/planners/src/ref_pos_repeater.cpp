@@ -78,7 +78,7 @@ void RefPosRepeater::_ref_callback(const geometry_msgs::msg::PoseStamped::Shared
     /* In the beginning we just want to take off */
     if((this->now() - this->_beginning).seconds() < 15.0)
     {
-        px4_msg.position = {1.0, 0.0, -1.85};
+        px4_msg.position = {0.0, 0.0, -1.85};
         px4_msg.yaw = 0.0;
     }
     /* Then we forward the transformed reference position */

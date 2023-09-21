@@ -5,12 +5,13 @@
 using namespace personal;
 
 Planner::Planner()
-    : Node("Planner"), JS_THRESHOLD(0.0005) // MS: make the threshold a paramteter
+    : Node("Planner"), JS_THRESHOLD(0.001) // MS: make the threshold a paramteter
 {
 
     /* Declare all the parameters */
     this->declare_parameter("frequency", 20.0);
     this->declare_parameter("desired_linear_joint_pos", -0.01); // position in m
+    this->declare_parameter("v_approach", 0.1); // Approach velocity
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 10); // 10 Degree/s
     this->declare_parameter("align", true);
@@ -24,6 +25,7 @@ Planner::Planner()
     this->_yaw_rate = this->get_parameter("yaw_rate").as_double();
     this->_frequency = this->get_parameter("frequency").as_double();
     this->_alignment_threshold = this->get_parameter("alignment_threshold").as_double();
+    this->_v_approach = this->get_parameter("v_approach").as_double();
     this->_desired_linear_joint_pos = this->get_parameter("desired_linear_joint_pos").as_double();
     this->_align = this->get_parameter("align").as_bool();
     this->_ee_offset << 0, 0.2, -0.1;
@@ -199,12 +201,21 @@ void Planner::_timer_callback()
         msg.pose.position.y = aligned_position.y();
         msg.pose.position.z = aligned_position.z();
     }
-    /* Otherwise we just forward the position */
+    /* Otherwise the trajectory has not started yet and 
+     * we fly towards the start position. For this we command reference positions that are
+     * in the direction of the start position at a distance of v_approach * dt */
     else
     {
         RCLCPP_DEBUG(this->get_logger(), "%f %f %f", position.x(), position.y(), position.z());
+        
         /* Transform to start point */
-        position += this->_start_point;
+        auto curr_position = this->_curr_pos.pose.position;
+        Eigen::Vector3d dir = (this->_start_point 
+                                        - Eigen::Vector3d(curr_position.x,
+                                                          curr_position.y,
+                                                          curr_position.z)).normalized();
+        double dt = 1.0 / this->_frequency;
+        position += this->_v_approach * dt * dir;
 
         msg.pose.position.x = position.x();
         msg.pose.position.y = position.y();
