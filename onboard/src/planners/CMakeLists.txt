@@ -14,6 +14,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(px4_msgs REQUIRED)
 find_package(common REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(std_srvs REQUIRED)
 
 
 # Add include directories
@@ -25,35 +26,35 @@ include_directories(include/common
 
 
 add_executable(circle_planner src/planner.cpp src/circle_planner.cpp)
-ament_target_dependencies(circle_planner rclcpp common geometry_msgs sensor_msgs)
+ament_target_dependencies(circle_planner rclcpp common geometry_msgs sensor_msgs std_srvs)
 target_include_directories(circle_planner PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
   $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
   $<INSTALL_INTERFACE:include>)
 
 add_executable(line_planner src/planner.cpp src/line_planner.cpp)
-ament_target_dependencies(line_planner rclcpp common geometry_msgs sensor_msgs)
+ament_target_dependencies(line_planner rclcpp common geometry_msgs sensor_msgs std_srvs)
 target_include_directories(line_planner PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
   $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
   $<INSTALL_INTERFACE:include>)
 
 add_executable(sin_planner src/planner.cpp src/sin_planner.cpp)
-ament_target_dependencies(sin_planner rclcpp common geometry_msgs sensor_msgs)
+ament_target_dependencies(sin_planner rclcpp common geometry_msgs sensor_msgs std_srvs)
 target_include_directories(sin_planner PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
   $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
   $<INSTALL_INTERFACE:include>)
 
 add_executable(rectangle_planner src/planner.cpp src/rectangle_planner.cpp)
-ament_target_dependencies(rectangle_planner rclcpp common geometry_msgs sensor_msgs)
+ament_target_dependencies(rectangle_planner rclcpp common geometry_msgs sensor_msgs std_srvs)
 target_include_directories(rectangle_planner PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
   $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
   $<INSTALL_INTERFACE:include>)
   
 add_executable(test_trajectory_publisher src/planner.cpp src/test_trajectory.cpp)
-ament_target_dependencies(test_trajectory_publisher common rclcpp geometry_msgs sensor_msgs)
+ament_target_dependencies(test_trajectory_publisher common rclcpp geometry_msgs sensor_msgs std_srvs)
 target_include_directories(test_trajectory_publisher PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
   $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
