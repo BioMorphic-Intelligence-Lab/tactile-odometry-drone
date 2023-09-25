@@ -114,7 +114,7 @@ public:
 
     this->declare_parameter("trackball_radius", 19);
     trackball_name = "X";
-    trackball_name.append(std::to_string(this->get_parameter("trackball_radius").as_double()));
+    trackball_name.append(std::to_string(this->get_parameter("trackball_radius").as_int()));
     std::string topic_name_prefix = "/trackball";
     // const str::string topic_name_suffix1 = "/position";
     std::string topic_name_position = topic_name_prefix;

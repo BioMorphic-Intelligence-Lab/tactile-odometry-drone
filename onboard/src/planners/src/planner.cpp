@@ -259,10 +259,20 @@ void Planner::_timer_callback()
         Eigen::Vector3d eigen_curr_pos(curr_position.x,
                                        curr_position.y,
                                        curr_position.z);
-        Eigen::Vector3d dir = (this->_start_point - eigen_curr_pos).normalized();
+        
+        double distance = (this->_start_point - eigen_curr_pos).norm();
         double dt = 1.0 / this->_frequency;
 
-        position += eigen_curr_pos + this->_v_approach * dt * dir;
+        if(distance <= this->_v_approach*dt)
+        {
+            position += this->_start_point;
+        }
+        else
+        {
+            Eigen::Vector3d dir = (this->_start_point - eigen_curr_pos).normalized();
+            position += eigen_curr_pos + this->_v_approach * dt * dir;
+        }
+
 
         msg.pose.position.x = position.x();
         msg.pose.position.y = position.y();

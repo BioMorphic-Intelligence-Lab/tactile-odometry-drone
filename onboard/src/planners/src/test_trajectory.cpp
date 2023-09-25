@@ -17,7 +17,7 @@ Eigen::Vector3d TestTrajectoryPublisher::get_trajectory_setpoint()
     {
         position.x() = 0;
         position.y() = -0.90;
-        position.z() = 1.75;
+        position.z() = 1.85;
 
         if (fabs((int)t - t) < 0.05)
         {
@@ -27,17 +27,15 @@ Eigen::Vector3d TestTrajectoryPublisher::get_trajectory_setpoint()
     /* After mission time ran out */
     else if (t >= 20 && t < 25)
     {
-
         position.x() = 1.97;
         position.y() = -0.90;
-        position.z() = 1.75;
+        position.z() = 1.85;
     }
     else
     {
-
         position.x() = 1.97;
         position.y() = -0.90f + (t - 25) * 0.1f;
-        position.z() = 1.75;
+        position.z() = 1.85;
     }
 
     if (fabs((int)t - t) < 0.05)
