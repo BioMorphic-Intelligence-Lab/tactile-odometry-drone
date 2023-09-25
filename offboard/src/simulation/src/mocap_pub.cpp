@@ -136,6 +136,7 @@ void MocapPub::PostUpdate(
   /* Then the Position */
   auto position = pose_msg.mutable_position();
   auto pos = pose->Data().Pos();
+
   /* Rotation quaternion */
   Eigen::Quaterniond rot = personal::common::quaternion_from_euler(0.0, 0.0, -M_PI_2).normalized();
   /* Rotate position by - 90 deg around the z axis */

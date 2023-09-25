@@ -57,7 +57,7 @@ def generate_launch_description():
         SetEnvironmentVariable('PX4_GZ_WORLD',
                                'cyberzoo'),
         SetEnvironmentVariable('PX4_GZ_MODEL_POSE',
-                               '0,0,0.75,0,0, -1.57079632679'),
+                               '0,0,0.75, 0.0, 0.0, 0.0'),
         
         # Launch MicroXRCEAgent to communicate between PX4 and ROS2
         ExecuteProcess(

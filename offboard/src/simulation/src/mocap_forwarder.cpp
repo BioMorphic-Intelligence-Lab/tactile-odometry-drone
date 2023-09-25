@@ -42,7 +42,7 @@ void MocapForwarder::_handle_visual_odometry(
     odom.pose_frame = px4_msgs::msg::VehicleOdometry::POSE_FRAME_NED;
 
     odom.position = {(float)ned_p.x(), (float)ned_p.y(), (float)ned_p.z()};
-    odom.q = {(float)ned_q.x(), (float)ned_q.y(), (float)ned_q.z(), (float)ned_q.w()};
+    odom.q = {(float)ned_q.w(),(float)ned_q.x(), (float)ned_q.y(), (float)ned_q.z()};
 
     this->_vehicle_odom_pub->publish(odom);
 }
