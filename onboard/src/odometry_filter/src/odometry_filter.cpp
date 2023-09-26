@@ -17,8 +17,14 @@ OdometryFilter::OdometryFilter()
       "/imu/data",
       rclcpp::SensorDataQoS(),
       std::bind(&OdometryFilter::_imu_callback, this, std::placeholders::_1));
+  this->_contact_subscription = this->create_subscription<std_msgs::msg::Bool>(
+      "/in_contact",
+      rclcpp::SensorDataQoS(),
+      std::bind(&OdometryFilter::_contact_callback, this, std::placeholders::_1));
 
   /* Init Publishers */
+  this->odom_pose_wall_publisher_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(
+      "/odometry/pose_wall", 10);
   this->odom_pose_publisher_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(
       "/odometry/pose", 10);
   this->_roll_publisher_ = this->create_publisher<std_msgs::msg::Float64>(
@@ -37,34 +43,24 @@ OdometryFilter::OdometryFilter()
         */
   this->R_EO = personal::common::rot_z(-M_PI / 2) * personal::common::rot_y(-M_PI / 2);
   this->R_WE_0 = personal::common::rot_y(M_PI);
-  this->pos_odom_last = Eigen::Vector3d(0, 0, 0);
-  this->pos_wall_last = Eigen::Vector3d(0, 0, 0);
   printf("starting...");
 }
 
-void OdometryFilter::_trackball_callback(const geometry_msgs::msg::PointStamped::SharedPtr msg)
+void OdometryFilter::evaluate_contact()
 {
-  this->_trackball_pos.x() = msg->point.x;
-  this->_trackball_pos.y() = msg->point.y;
-  this->_trackball_pos.z() = msg->point.z;
-
-  Eigen::Vector3d pos_wall = this->odom_to_wall(this->_trackball_pos, this->quat_imu);
-
-  geometry_msgs::msg::PoseStamped pose_msg;
-  pose_msg.header.stamp = this->now();
-  pose_msg.pose.position.x = pos_wall.x();
-  pose_msg.pose.position.y = pos_wall.y();
-  pose_msg.pose.position.z = pos_wall.z();
-
-  this->odom_pose_publisher_->publish(pose_msg);
+  if (this->in_contact && !this->in_contact_last) // positive edge
+  {
+    this->encoder_yaw_at_contact = this->encoder_yaw;
+    this->yaw_at_contact = personal::common::yaw_from_quaternion_y_align(this->quat_moCap);
+  }
+  this->in_contact_last = this->in_contact;
 }
 
-void OdometryFilter::_imu_callback(const sensor_msgs::msg::Imu::SharedPtr msg)
+Eigen::Vector3d OdometryFilter::wall_to_world(Eigen::Vector3d pos_wall)
 {
-  this->quat_imu.w() = msg->orientation.w;
-  this->quat_imu.x() = msg->orientation.x;
-  this->quat_imu.y() = msg->orientation.y;
-  this->quat_imu.z() = msg->orientation.z;
+  this->R_BW = personal::common::rot_z(-this->encoder_yaw);                                                        // ToDo: check signs
+  this->R_IB = personal::common::rot_z(this->yaw_at_contact - (this->encoder_yaw - this->encoder_yaw_at_contact)); // ToDo: check signs and unite R_IB*R_BW in one single, minimlal rot_z
+  return this->R_IB * this->R_BW * pos_wall;
 }
 Eigen::Vector3d OdometryFilter::odom_to_wall(Eigen::Vector3d pos_odom, Eigen::Quaterniond quat_imu)
 {
@@ -97,6 +93,51 @@ Eigen::Vector3d OdometryFilter::odom_to_wall(Eigen::Vector3d pos_odom, Eigen::Qu
   this->pos_wall_last = pos_wall;
 
   return pos_wall;
+}
+
+// #########################
+// ####### Callbacks #######
+// #########################
+
+void OdometryFilter::_trackball_callback(const geometry_msgs::msg::PointStamped::SharedPtr msg)
+{
+  this->_trackball_pos.x() = msg->point.x;
+  this->_trackball_pos.y() = msg->point.y;
+  this->_trackball_pos.z() = msg->point.z;
+
+  Eigen::Vector3d pos_wall = this->odom_to_wall(this->_trackball_pos, this->quat_imu);
+
+  Eigen::Vector3d pos_world = this->wall_to_world(pos_wall);
+
+  /*Publish Data*/
+  geometry_msgs::msg::PoseStamped pose_wall_msg;
+  pose_wall_msg.header.stamp = this->now();
+  pose_wall_msg.pose.position.x = pos_wall.x();
+  pose_wall_msg.pose.position.y = pos_wall.y();
+  pose_wall_msg.pose.position.z = pos_wall.z();
+
+  geometry_msgs::msg::PoseStamped pose_msg;
+  pose_msg.header.stamp = pose_wall_msg.header.stamp; // use same stamp to be able to match messages
+  pose_msg.pose.position.x = pos_world.x();
+  pose_msg.pose.position.y = pos_world.y();
+  pose_msg.pose.position.z = pos_world.z();
+
+  this->odom_pose_wall_publisher_->publish(pose_wall_msg);
+  this->odom_pose_publisher_->publish(pose_msg);
+}
+
+void OdometryFilter::_imu_callback(const sensor_msgs::msg::Imu::SharedPtr msg)
+{
+  this->quat_imu.w() = msg->orientation.w;
+  this->quat_imu.x() = msg->orientation.x;
+  this->quat_imu.y() = msg->orientation.y;
+  this->quat_imu.z() = msg->orientation.z;
+}
+
+void OdometryFilter::_contact_callback(const std_msgs::msg::Bool::SharedPtr msg)
+{
+  this->in_contact = msg->data;
+  this->evaluate_contact();
 }
 
 int main(int argc, char *argv[])

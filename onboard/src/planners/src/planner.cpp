@@ -145,8 +145,9 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
     quat_IB = Eigen::Quaterniond(quat_IB_4d[0], quat_IB_4d[1], quat_IB_4d[2], quat_IB_4d[3]).normalized();
 
     // get rotation about z-axis that preserves x-y-heading of y-axis
-    const Eigen::Matrix3d R_IB = quat_IB.toRotationMatrix();
-    double yaw = -atan2(R_IB(1, 2), R_IB(2, 2));
+    // const Eigen::Matrix3d R_IB = quat_IB.toRotationMatrix();
+    // double yaw = -atan2(R_IB(1, 2), R_IB(2, 2));
+    double yaw = common::yaw_from_quaternion_y_align(quat_IB);
     float yaw2 = common::yaw_from_quaternion(quat_IB);
     auto &clk = *this->get_clock();
     RCLCPP_INFO_THROTTLE(this->get_logger(),
@@ -259,11 +260,11 @@ void Planner::_timer_callback()
         Eigen::Vector3d eigen_curr_pos(curr_position.x,
                                        curr_position.y,
                                        curr_position.z);
-        
+
         double distance = (this->_start_point - eigen_curr_pos).norm();
         double dt = 1.0 / this->_frequency;
 
-        if(distance <= this->_v_approach*dt)
+        if (distance <= this->_v_approach * dt)
         {
             position += this->_start_point;
         }
@@ -272,7 +273,6 @@ void Planner::_timer_callback()
             Eigen::Vector3d dir = (this->_start_point - eigen_curr_pos).normalized();
             position += eigen_curr_pos + this->_v_approach * dt * dir;
         }
-
 
         msg.pose.position.x = position.x();
         msg.pose.position.y = position.y();
