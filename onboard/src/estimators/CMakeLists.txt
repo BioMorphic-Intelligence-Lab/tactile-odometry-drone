@@ -10,14 +10,14 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(common REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(px4_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
 add_executable(force_estimator src/force_estimator.cpp)
-target_include_directories(force_estimator PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
 ament_target_dependencies(force_estimator
   rclcpp
   sensor_msgs
@@ -27,8 +27,22 @@ target_include_directories(force_estimator PUBLIC
   $<INSTALL_INTERFACE:include>)
 target_compile_features(force_estimator PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
+add_executable(onboard_pose_estimate_repeater src/onboard_pose_estimate_repeater.cpp)
+ament_target_dependencies(onboard_pose_estimate_repeater
+                                  rclcpp
+                                  common
+                                  px4_msgs
+                                  Eigen3
+                                  geometry_msgs)
+target_include_directories(onboard_pose_estimate_repeater PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/estimators>
+  $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
+  $<INSTALL_INTERFACE:include>)
 
-install(TARGETS force_estimator
+
+install(TARGETS
+  force_estimator
+  onboard_pose_estimate_repeater
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
