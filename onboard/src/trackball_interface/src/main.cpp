@@ -158,8 +158,8 @@ private:
     auto message = geometry_msgs::msg::PointStamped();
     message.point.x = (double)sum_x;
     message.point.y = (double)sum_y;
-    message.point.x = message.point.x * M_PI * 19 / 425;
-    message.point.y = message.point.y * M_PI * 19 / 425;
+    message.point.x = message.point.x * M_PI * 0.019 / 425;
+    message.point.y = message.point.y * M_PI * 0.019 / 425;
     message.point.z = 0;
     message.header.stamp = this->get_clock()->now();
     odom_publisher_->publish(message);
