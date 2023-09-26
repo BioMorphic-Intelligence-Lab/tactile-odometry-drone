@@ -17,7 +17,7 @@ Eigen::Vector3d BlindSine::get_trajectory_setpoint()
     {
         position.x() = 0;
         position.y() = 0.0;
-        position.z() = 1.85;
+        position.z() = 1.7;
 
         if (fabs((int)t - t) < 0.05)
         {
@@ -25,25 +25,27 @@ Eigen::Vector3d BlindSine::get_trajectory_setpoint()
         }
     }
     /* Approach */
-    else if (t >= 20 && t < 25)
+    else if (t >= 20.0 && t < 20.0 + this->_approach_time)
     {
         position.x() = 0.0;
-        position.y() = 1.0/5.0 * (t - 20);
-        position.z() = 1.85;
+        position.y() = this->_depth / this->_approach_time * (t - 20);
+        position.z() = 1.7;
     }
     /* In Contact */
-    else if (t >=25 && t < 30)
+    else if (t >= 20.0 + this->_approach_time &&
+             t < 20.0 + this->_approach_time + 5.0)
     {
         position.x() = 0.0;
-        position.y() = 1.0;
-        position.z() = 1.85; 
+        position.y() = this->_depth;
+        position.z() = 1.7; 
     }
     /* Start Sine */
     else
     {
-        position.x() = (t - 30) * 0.1f;
-        position.y() = 1.00;
-        position.z() = 1.85 - (0.25 * sin(t - 30) + 0.25);
+        double time = t -  (20.0 + this->_approach_time + 5.0);
+        position.x() = time * 0.1f;
+        position.y() = this->_depth;
+        position.z() = 1.7 - (0.25 * sin(time));
     }
 
     if (fabs((int)t - t) < 0.05)

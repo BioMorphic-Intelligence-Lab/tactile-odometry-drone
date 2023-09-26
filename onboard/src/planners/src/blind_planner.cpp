@@ -10,7 +10,11 @@ BlindPlanner::BlindPlanner()
     /* Declare all the parameters */
     this->declare_parameter("frequency", 20.0);
     this->declare_parameter("pub_topic", "/ref_pose");
+    this->declare_parameter("depth", 1.0);
+    this->declare_parameter("approach_time", 10.0);
 
+    this->_depth = this->get_parameter("depth").as_double();
+    this->_approach_time = this->get_parameter("approach_time").as_double();
     this->_frequency = this->get_parameter("frequency").as_double();
 
     /* Init Timer and subscribers*/

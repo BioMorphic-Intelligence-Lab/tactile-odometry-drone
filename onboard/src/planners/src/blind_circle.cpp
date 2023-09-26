@@ -17,7 +17,7 @@ Eigen::Vector3d BlindCircle::get_trajectory_setpoint()
     {
         position.x() = 0.75;
         position.y() = 0.0;
-        position.z() = 1.95;
+        position.z() = 1.7;
 
         if (fabs((int)t - t) < 0.05)
         {
@@ -25,25 +25,27 @@ Eigen::Vector3d BlindCircle::get_trajectory_setpoint()
         }
     }
     /* Approach */
-    else if (t >= 20 && t < 25)
+    else if (t >= 20.0 && t < 20.0 + this->_approach_time)
     {
-        position.x() = 0.0;
-        position.y() = 1.0/5.0 * (t - 20);
-        position.z() = 1.85;
+        position.x() = 0.75;
+        position.y() = this->_depth / this->_approach_time * (t - 20);
+        position.z() = 1.7;
     }
     /* In Contact */
-    else if (t >=25 && t < 30)
+    else if (t >= 20.0 + this->_approach_time &&
+             t < 20.0 + this->_approach_time + 5.0)
     {
-        position.x() = 0.0;
-        position.y() = 1.0;
-        position.z() = 1.85; 
+        position.x() = 0.75;
+        position.y() = this->_depth;
+        position.z() = 1.7; 
     }
     /* Start Circle */
     else
     {
-        position.x() = 0.75 + 0.25 * sin(2*M_PI / 10.0 * (t - 30)) ;
-        position.y() = 1.00;
-        position.z() = 1.65 - (0.25 * cos(2*M_PI / 10.0 * (t - 30)));
+        double time = t -  (20.0 + this->_approach_time + 5.0);
+        position.x() = 0.75 + 0.25 * sin(2*M_PI / 10.0 * time + M_PI) ;
+        position.y() = this->_depth;
+        position.z() = 1.7 + (0.25 * cos(2*M_PI / 10.0 * time + M_PI));
     }
 
     if (fabs((int)t - t) < 0.05)

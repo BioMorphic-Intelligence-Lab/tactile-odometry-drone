@@ -13,12 +13,16 @@ class BlindPlanner : public rclcpp::Node
 public:
     BlindPlanner();
 
+protected:
+
     /**
      * @brief Publish a trajectory setpoint
      */
     virtual Eigen::Vector3d get_trajectory_setpoint() = 0;
 
     rclcpp::Time _beginning;
+    
+    double _depth, _approach_time;
 
 private:
     double _frequency;
