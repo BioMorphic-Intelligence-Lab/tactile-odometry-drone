@@ -29,7 +29,7 @@ Eigen::Vector3d BlindLine::get_trajectory_setpoint()
     {
         position.x() = 0.0;
         position.y() = this->_depth / this->_approach_time * (t - 20);
-        position.z() = 1.95;
+        position.z() = 1.85;
     }
     /* In Contact */
     else if (t >= 20.0 + this->_approach_time &&
@@ -37,7 +37,7 @@ Eigen::Vector3d BlindLine::get_trajectory_setpoint()
     {
         position.x() = 0.0;
         position.y() = this->_depth;
-        position.z() = 1.95; 
+        position.z() = 1.85; 
     }
     /* Start Line */
     else
