@@ -33,12 +33,19 @@ public:
     Eigen::Quaterniond quat_imu = Eigen::Quaterniond(1, 0, 0, 0);
     Eigen::Quaterniond quat_moCap = Eigen::Quaterniond(1, 0, 0, 0);
     Eigen::Quaterniond orientation_at_contact = Eigen::Quaterniond(1, 0, 0, 0);
-    Eigen::Vector3d pos_odom_last = Eigen::Vector3d(0, 0, 0), pos_wall_last = Eigen::Vector3d(0, 0, 0), _trackball_pos = Eigen::Vector3d(0, 0, 0);
+    Eigen::Vector3d pos_odom_last = Eigen::Vector3d(0, 0, 0);
+    Eigen::Vector3d pos_wall_last = Eigen::Vector3d(0, 0, 0);
+    Eigen::Vector3d _trackball_pos = Eigen::Vector3d(0, 0, 0);
+    Eigen::Vector3d pos_at_contact = Eigen::Vector3d(0, 0, 0);                  // freezed value of pos_ekf2 at time of contact
+    Eigen::Vector3d pos_ekf2 = Eigen::Vector3d(0, 0, 0);                        // position from EKF2 filter on PX4
+    Eigen::Vector3d ee_to_ball_offset = Eigen::Vector3d(-0.01875, 0.0423, 0.0); // in Frame E, located at the center of rotational axis
+    Eigen::Vector3d ee_to_base_offset = Eigen::Vector3d(-0.03, 0.33, 0.046);
 
     bool in_contact = false;
     bool in_contact_last = false;
 
     double encoder_yaw = 0.0, encoder_yaw_at_contact = 0.0, yaw_at_contact = 0.0;
+    double linear_joint = 0.0; // poti read in m
 
 private:
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr zeroService;
@@ -49,8 +56,10 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr _trackball_subscription;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr _imu_subscription;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr _contact_subscription;
+    rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr _state_subscription;
 
     void _trackball_callback(const geometry_msgs::msg::PointStamped::SharedPtr msg);
+    void _state_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
     void _imu_callback(const sensor_msgs::msg::Imu::SharedPtr msg);
     void _contact_callback(const std_msgs::msg::Bool::SharedPtr msg);
 };
