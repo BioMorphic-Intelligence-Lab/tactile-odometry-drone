@@ -1,10 +1,10 @@
 #include "rclcpp/rclcpp.hpp"
-#include "planner.hpp"
+#include "blind_planner.hpp"
 
-class TestTrajectoryPublisher : public Planner
+class BlindSine : public BlindPlanner
 {
 public:
-    TestTrajectoryPublisher();
+    BlindSine();
     /**
      * @brief Publish a trajectory setpoint
      */

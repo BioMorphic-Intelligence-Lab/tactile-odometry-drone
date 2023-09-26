@@ -67,7 +67,7 @@ Planner::Planner()
     /* Init the timestamp to some time in the future value until we establish contact */
     this->_beginning = this->now() + rclcpp::Duration(10000, 0);
 
-    /* Services*/
+    /* Services */
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr trackball_set_zero =
         this->create_client<std_srvs::srv::Trigger>("trackball_interface/setZero");
 

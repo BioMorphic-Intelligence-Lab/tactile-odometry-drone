@@ -53,9 +53,24 @@ target_include_directories(rectangle_planner PUBLIC
   $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
   $<INSTALL_INTERFACE:include>)
   
-add_executable(test_trajectory_publisher src/planner.cpp src/test_trajectory.cpp)
-ament_target_dependencies(test_trajectory_publisher common rclcpp geometry_msgs sensor_msgs std_srvs)
-target_include_directories(test_trajectory_publisher PUBLIC
+add_executable(blind_line src/blind_planner.cpp src/blind_line.cpp)
+ament_target_dependencies(blind_line common rclcpp geometry_msgs sensor_msgs std_srvs)
+target_include_directories(blind_line PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
+  $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
+  $<INSTALL_INTERFACE:include>)
+
+add_executable(blind_sine src/blind_planner.cpp src/blind_sine.cpp)
+ament_target_dependencies(blind_sine common rclcpp geometry_msgs sensor_msgs std_srvs)
+target_include_directories(blind_sine PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
+  $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
+  $<INSTALL_INTERFACE:include>)
+
+
+add_executable(blind_circle src/blind_planner.cpp src/blind_circle.cpp)
+ament_target_dependencies(blind_circle common rclcpp geometry_msgs sensor_msgs std_srvs)
+target_include_directories(blind_circle PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
   $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
   $<INSTALL_INTERFACE:include>)
@@ -80,7 +95,9 @@ if(BUILD_TESTING)
 endif()
 
 install(TARGETS 
-  test_trajectory_publisher
+  blind_line
+  blind_sine
+  blind_circle
   rectangle_planner
   sin_planner
   circle_planner
