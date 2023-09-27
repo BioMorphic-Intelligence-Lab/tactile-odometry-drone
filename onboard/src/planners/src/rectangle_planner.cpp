@@ -3,8 +3,8 @@
 
 RectanglePlanner::RectanglePlanner()
 {
-    this->declare_parameter("L_x", 1.0);
-    this->declare_parameter("L_z", 0.5);
+    this->declare_parameter("L_x", 0.45);
+    this->declare_parameter("L_z", 0.35);
     this->declare_parameter("v_x", 0.1);
     this->declare_parameter("v_z", 0.1);
     this->_L_x = this->get_parameter("L_x").as_double();
