@@ -43,9 +43,9 @@ Eigen::Vector3d BlindSine::get_trajectory_setpoint()
     else
     {
         double time = t -  (20.0 + this->_approach_time + 5.0);
-        position.x() = time * 0.1f;
+        position.x() = time * 0.05f;
         position.y() = this->_depth;
-        position.z() = 1.7 - (0.25 * sin(time));
+        position.z() = 1.7 - (0.2 * sin(2*M_PI/1.0 * position.x()));
     }
 
     if (fabs((int)t - t) < 0.05)
