@@ -23,6 +23,7 @@ public:
     virtual Eigen::Vector3d get_trajectory_setpoint() = 0;
 
     rclcpp::Time _beginning;
+    rclcpp::Time _approach_beginning;
 
 private:
     const double JS_THRESHOLD;
@@ -34,6 +35,8 @@ private:
     bool _align, _in_contact, _is_aligned;
 
     std::vector<Eigen::Vector3d> _ee_offsets;
+
+    Eigen::Quaterniond output_q;
 
     Eigen::Vector3d _ee_offset, _start_point, _trackball_pos;
 

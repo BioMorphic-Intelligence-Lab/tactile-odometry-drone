@@ -5,21 +5,22 @@
 using namespace personal;
 
 Planner::Planner()
-    : Node("Planner"), JS_THRESHOLD(0.001) // MS: make the threshold a paramteter
+    : Node("Planner"), JS_THRESHOLD(0.001),
+    output_q(0.0, 0.0, 0.0, 1.0) // MS: make the threshold a paramteter
 {
 
     /* Declare all the parameters */
     this->declare_parameter("frequency", 20.0);
     this->declare_parameter("desired_linear_joint_pos", -0.01); // position in m
-    this->declare_parameter("v_approach", 0.75);                 // Approach velocity
+    this->declare_parameter("v_approach", 0.25);                 // Approach velocity
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
-    this->declare_parameter("yaw_rate", M_PI / 180.0 * 10); // 10 Degree/s
+    this->declare_parameter("yaw_rate", M_PI / 180.0 * 3); // 10 Degree/s
     this->declare_parameter("align", true);
-    this->declare_parameter("start_point", std::vector<double>({-0.31, 1.95, 1.85}));
+    this->declare_parameter("start_point", std::vector<double>({0.52, 2.46, 1.68}/*{-0.31, 1.95, 1.85}*/));
     this->declare_parameter("joint_topic", "/joint_state");
     this->declare_parameter("pose_topic", "/mocap_pose");
     this->declare_parameter("ee_topic", "/ee_pose");
-    this->declare_parameter("trackball_topic", "/trackball/position");
+    this->declare_parameter("trackball_topic", "/trackballX19/position");
     this->declare_parameter("pub_topic", "/ref_pose");
 
     /* Actually get all the parameters */
@@ -66,6 +67,7 @@ Planner::Planner()
 
     /* Init the timestamp to some time in the future value until we establish contact */
     this->_beginning = this->now() + rclcpp::Duration(10000, 0);
+    this->_approach_beginning = this->now();
 
     /* Services */
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr trackball_set_zero =
@@ -126,39 +128,33 @@ double Planner::_control_contact_force(float linear_joint, float desired_joint)
 void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap_q)
 {
 
-    Eigen::Matrix4d W;
     Eigen::Vector4d quat_mocap(quat_mocap_q.w(), quat_mocap_q.x(), quat_mocap_q.y(), quat_mocap_q.z());
+    double yaw = common::yaw_from_quaternion_y_align(quat_IB);
+    
     double increment = this->_yaw_rate;
     increment = -copysign(increment, encoder_yaw);
     double dt = 1.0 / this->_frequency;
-    if (abs(increment * dt) > abs(encoder_yaw))
+    if (fabs(5.0 * M_PI/180.0) > fabs(encoder_yaw))
     {
-        increment = encoder_yaw / dt;
+        increment = 0.0;
     }
-    W << 1, 0, 0, -increment,
-        0, 1, increment, 0,
-        0, -increment, 1, 0,
-        increment, 0, 0, 1;
-
-    Eigen::Vector4d quat_IB_4d = (Eigen::Matrix4d::Identity() + 0.5 * W * dt) * quat_mocap;
-
-    quat_IB = Eigen::Quaterniond(quat_IB_4d[0], quat_IB_4d[1], quat_IB_4d[2], quat_IB_4d[3]).normalized();
 
     // get rotation about z-axis that preserves x-y-heading of y-axis
     // const Eigen::Matrix3d R_IB = quat_IB.toRotationMatrix();
     // double yaw = -atan2(R_IB(1, 2), R_IB(2, 2));
-    double yaw = common::yaw_from_quaternion_y_align(quat_IB);
-    float yaw2 = common::yaw_from_quaternion(quat_IB);
+    float yaw2 = yaw + increment*dt;
     auto &clk = *this->get_clock();
     RCLCPP_INFO_THROTTLE(this->get_logger(),
                          clk,
                          500,
-                         "yaw1 %f, yaw2 %f", yaw, yaw2);
+                         "yaw1 %f, yaw2 %f, increment %f, encoder yaw %f", yaw, yaw2, increment, encoder_yaw);
     // Rotation Matrix between World/Inertial (I) and Wall (W)
     // Eigen::Matrix3d R_IW = quat_IB.toRotationMatrix() * common::quaternion_from_euler(0.0, 0.0, -encoder_yaw);
-    const Eigen::Matrix3d R_IB_z = common::rot_z(yaw - M_PI);
+    const Eigen::Matrix3d R_IB_z = common::rot_z(yaw2);
     const Eigen::Matrix3d R_BW_z = common::rot_z(-encoder_yaw);
     const Eigen::Matrix3d R_IW_z = R_IB_z * R_BW_z;
+
+    quat_IB = common::quaternion_from_euler(0.0, 0.0, yaw2);
     // return position and orientation of uav
     pos_IB = R_IW_z * pos_WE - R_IB_z * pos_BE;
 }
@@ -210,6 +206,7 @@ void Planner::_timer_callback()
         // set beginning 1s to future, so it starts 1s after contact is established and alignment is done
         this->_beginning = this->now() + rclcpp::Duration(1, 0);
 
+
         /* get ee_offset*/
         this->_get_uav_to_ee_position();
     }
@@ -227,7 +224,6 @@ void Planner::_timer_callback()
                                         curr_pose.pose.orientation.z);
         Eigen::Vector3d aligned_position;
 
-        Eigen::Quaterniond output_q;
         /* Find the aligned position and orientation */
         _align_to_wall(output_q, aligned_position, position,
                        this->_ee_offset + this->_curr_js.position[0] * Eigen::Vector3d::UnitY(),
@@ -255,32 +251,24 @@ void Planner::_timer_callback()
     else
     {
 
-        /* Transform to start point */
-        auto curr_position = this->_curr_pose.pose.position;
-        Eigen::Vector3d eigen_curr_pos(curr_position.x,
-                                       curr_position.y,
-                                       curr_position.z);
+        double t = (this->now() - this->_approach_beginning).seconds() - 10.0;
 
-        double distance = (this->_start_point - eigen_curr_pos).norm();
-        double dt = 1.0 / this->_frequency;
-
-        if (distance <= 2*this->_v_approach * dt)
+        if(t > 0)
         {
-            position += this->_start_point;
+            position.z() += this->_start_point.z();
+            Eigen::Vector3d pos = this->_v_approach * t * Eigen::Vector3d(this->_start_point.x(), this->_start_point.y(), 0.0).normalized();
+            if(pos.y() > this->_start_point.y()) pos = this->_start_point;
+            position += pos;
         }
-        else
-        {
-
-            Eigen::Vector3d dir = (this->_start_point - eigen_curr_pos).normalized();
-            auto delta = this->_v_approach * dt * dir;
-            
-            RCLCPP_DEBUG(this->get_logger(), "Delta [%.2f, %.2f, %.2f]", delta.x(), delta.y(), delta.z());
-            position += eigen_curr_pos + delta;
-        }
-
+        
         msg.pose.position.x = position.x();
         msg.pose.position.y = position.y();
         msg.pose.position.z = position.z();
+        msg.pose.orientation.w = 0;
+        msg.pose.orientation.x = 0;
+        msg.pose.orientation.y = 0;
+        msg.pose.orientation.z = 1.0;
+        
     }
 
     /* Finally publish the message */
@@ -290,6 +278,7 @@ void Planner::_timer_callback()
 void Planner::_joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
 {
     this->_curr_js = *msg;
+    this->_curr_js.position[1] = common::normalize_angle(this->_curr_js.position[1]);
 }
 
 void Planner::_mocap_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
