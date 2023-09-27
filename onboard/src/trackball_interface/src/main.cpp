@@ -28,7 +28,7 @@ public:
 
     std::string pDevice = "/dev/input/mouse0";
     std::cout << "trackball_name:" << trackball_name << " \n";
-    if (trackball_radius == 19)
+    if (this->trackball_radius == 0.019)
     {
       std::cout << "using trackball X19"
                 << "\n";
@@ -37,7 +37,7 @@ public:
                 << "\n";
       printf(" Opening  %s\n", pDevice.c_str());
     }
-    else if (trackball_radius == 13)
+    else if (this->trackball_radius == 0.013)
     {
       std::cout << "using trackball X13"
                 << "\n";
@@ -112,19 +112,27 @@ public:
   {
     printf("constructor...");
 
-    this->declare_parameter("trackball_radius", 19);
-    trackball_name = "X";
-    trackball_name.append(std::to_string(this->get_parameter("trackball_radius").as_int()));
+    this->declare_parameter("trackball_radius", 0.019);
+    this->declare_parameter("trackball_resolution", 425.0);
+    this->trackball_radius = this->get_parameter("trackball_radius").as_double();
+    this->resolution = this->get_parameter("trackball_resolution").as_double();
+
+    if (trackball_radius == 0.013)
+    {
+      trackball_name = "X13";
+    }
+    else
+    {
+      trackball_name = "X19";
+    }
+
     std::string topic_name_prefix = "/trackball";
     // const str::string topic_name_suffix1 = "/position";
     std::string topic_name_position = topic_name_prefix;
     std::string topic_name_ticks = topic_name_prefix;
-    // don't add trackball_name if it is "X19" ==> default topic
-    if (trackball_radius == 19)
-    {
-      topic_name_position.append(trackball_name);
-      topic_name_ticks.append(trackball_name);
-    }
+    topic_name_position.append(trackball_name);
+    topic_name_ticks.append(trackball_name);
+
     topic_name_position.append("/position");
     topic_name_ticks.append("/ticks");
 
@@ -158,14 +166,15 @@ private:
     auto message = geometry_msgs::msg::PointStamped();
     message.point.x = (double)sum_x;
     message.point.y = (double)sum_y;
-    message.point.x = message.point.x * M_PI * 0.019 / 425;
-    message.point.y = message.point.y * M_PI * 0.019 / 425;
+    message.point.x = message.point.x * M_PI * this->trackball_radius / this->resolution;
+    message.point.y = message.point.y * M_PI * this->trackball_radius / this->resolution;
     message.point.z = 0;
     message.header.stamp = this->get_clock()->now();
     odom_publisher_->publish(message);
   }
-  std::string trackball_name = "X";
-  int trackball_radius = 19;
+  std::string trackball_name;
+  double trackball_radius = 0.019;
+  double resolution = 425.0; // ticks per revolution
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr zeroService;
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<std_msgs::msg::Header>::SharedPtr publisher_;

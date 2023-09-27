@@ -159,6 +159,11 @@ void OdometryFilter::_imu_callback(const sensor_msgs::msg::Imu::SharedPtr msg)
   this->quat_imu.z() = msg->orientation.z;
 }
 
+void OdometryFilter::_joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
+{
+  this->linear_joint = msg;
+}
+
 void OdometryFilter::_contact_callback(const std_msgs::msg::Bool::SharedPtr msg)
 {
   this->in_contact = msg->data;
