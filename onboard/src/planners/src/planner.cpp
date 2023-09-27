@@ -11,11 +11,11 @@ Planner::Planner()
     /* Declare all the parameters */
     this->declare_parameter("frequency", 20.0);
     this->declare_parameter("desired_linear_joint_pos", -0.01); // position in m
-    this->declare_parameter("v_approach", 0.1);                 // Approach velocity
+    this->declare_parameter("v_approach", 0.75);                 // Approach velocity
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 10); // 10 Degree/s
     this->declare_parameter("align", true);
-    this->declare_parameter("start_point", std::vector<double>({-1.05, 2.375, 1.87}));
+    this->declare_parameter("start_point", std::vector<double>({-0.31, 1.95, 1.85}));
     this->declare_parameter("joint_topic", "/joint_state");
     this->declare_parameter("pose_topic", "/mocap_pose");
     this->declare_parameter("ee_topic", "/ee_pose");
@@ -264,14 +264,18 @@ void Planner::_timer_callback()
         double distance = (this->_start_point - eigen_curr_pos).norm();
         double dt = 1.0 / this->_frequency;
 
-        if (distance <= this->_v_approach * dt)
+        if (distance <= 2*this->_v_approach * dt)
         {
             position += this->_start_point;
         }
         else
         {
+
             Eigen::Vector3d dir = (this->_start_point - eigen_curr_pos).normalized();
-            position += eigen_curr_pos + this->_v_approach * dt * dir;
+            auto delta = this->_v_approach * dt * dir;
+            
+            RCLCPP_DEBUG(this->get_logger(), "Delta [%.2f, %.2f, %.2f]", delta.x(), delta.y(), delta.z());
+            position += eigen_curr_pos + delta;
         }
 
         msg.pose.position.x = position.x();
