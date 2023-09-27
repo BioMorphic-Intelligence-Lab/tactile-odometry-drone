@@ -6,6 +6,7 @@ OdometryFilter::OdometryFilter()
 {
   printf("constructor...");
 
+  this->declare_parameter("pose_topic", "/mocap_pose");
   /* Init Timer and subscribers*/
   // this->_timer = this->create_wall_timer(1.0 / this->_frequency * 1s,
   //                                      std::bind(&OdometryFilter::_timer_callback, this));
@@ -22,9 +23,13 @@ OdometryFilter::OdometryFilter()
       rclcpp::SensorDataQoS(),
       std::bind(&OdometryFilter::_contact_callback, this, std::placeholders::_1));
   this->_state_subscription = this->create_subscription<geometry_msgs::msg::PoseStamped>(
-      "/onboard/pose_estimate",
+      this->get_parameter("pose_topic").as_string(),
       rclcpp::SensorDataQoS(),
       std::bind(&OdometryFilter::_state_callback, this, std::placeholders::_1));
+  this->_joint_subscription = this->create_subscription<sensor_msgs::msg::JointState>(
+      "/joint_state",
+      rclcpp::SensorDataQoS(),
+      std::bind(&OdometryFilter::_joint_callback, this, std::placeholders::_1));
 
   /* Init Publishers */
   this->odom_pose_wall_publisher_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(
@@ -33,6 +38,8 @@ OdometryFilter::OdometryFilter()
       "/odometry/pose", 10);
   this->_roll_publisher_ = this->create_publisher<std_msgs::msg::Float64>(
       "/odometry/roll", 10);
+  this->_yaw_publisher_ = this->create_publisher<std_msgs::msg::Float64>(
+      "/odometry/yaw", 10);
   /*service_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
         timer_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
 
@@ -50,6 +57,18 @@ OdometryFilter::OdometryFilter()
   printf("starting...");
 }
 
+void OdometryFilter::_detect_contact()
+{
+  // const bool force_over_threshold = fabs(this->linear_joint) > JS_THRESHOLD;
+  const bool trackball_over_threshold = this->_trackball_pos.norm() > 0.01;
+
+  // return force_over_threshold || trackball_over_threshold;
+  // return trackball_over_threshold;
+  this->in_contact = trackball_over_threshold;
+
+  this->evaluate_contact();
+}
+
 void OdometryFilter::evaluate_contact()
 {
   if (this->in_contact && !this->in_contact_last) // positive edge
@@ -63,13 +82,30 @@ void OdometryFilter::evaluate_contact()
 
 Eigen::Vector3d OdometryFilter::wall_to_world(Eigen::Vector3d pos_wall)
 {
-  this->R_BW = personal::common::rot_z(-this->encoder_yaw);                                                        // ToDo: check signs
-  this->R_IB = personal::common::rot_z(this->yaw_at_contact - (this->encoder_yaw - this->encoder_yaw_at_contact)); // ToDo: check signs and unite R_IB*R_BW in one single, minimlal rot_z
+  this->R_BW = personal::common::rot_z(-this->encoder_yaw);                                         // ToDo: check signs
+  double yaw_IB = this->yaw_at_contact + (this->encoder_yaw - this->encoder_yaw_at_contact) - M_PI; // ToDo: check signs and unite R_IB*R_BW in one single, minimlal rot_z
+  this->R_IB = personal::common::rot_z(yaw_IB);
+
+  std_msgs::msg::Float64 yaw_msg;
+  yaw_msg.data = yaw_IB;
+  this->_yaw_publisher_->publish(yaw_msg);
 
   Eigen::Vector3d pos_B = this->R_BW * (pos_wall - this->ee_to_ball_offset);
   pos_B = pos_B + this->ee_to_base_offset;
-  pos_B.y() -= this->linear_joint; // TODO Check sign
+  pos_B.y() += this->linear_joint; // TODO Check sign
   Eigen::Vector3d pos_world = this->R_IB * pos_B + this->pos_at_contact;
+  if (this->in_contact)
+  {
+    std::cout << "pos_wall" << std::endl
+              << pos_wall << std::endl;
+    std::cout << "pos_B" << std::endl
+              << pos_B << std::endl;
+    std::cout << "pos_world" << std::endl
+              << pos_world << std::endl;
+
+    std::cout << "pos_at_contact" << std::endl
+              << this->pos_at_contact << std::endl;
+  }
 
   // shift position to body frame
   return pos_world;
@@ -118,6 +154,15 @@ void OdometryFilter::_trackball_callback(const geometry_msgs::msg::PointStamped:
   this->_trackball_pos.y() = msg->point.y;
   this->_trackball_pos.z() = msg->point.z;
 
+  if (!this->is_init)
+  {
+    this->is_init = true;
+    this->pos_odom_at_init = this->_trackball_pos;
+  }
+  this->_trackball_pos -= this->pos_odom_at_init;
+
+  this->_detect_contact(); // TODO move to extra node
+
   Eigen::Vector3d pos_wall = this->odom_to_wall(this->_trackball_pos, this->quat_imu);
 
   Eigen::Vector3d pos_world = this->wall_to_world(pos_wall);
@@ -161,7 +206,8 @@ void OdometryFilter::_imu_callback(const sensor_msgs::msg::Imu::SharedPtr msg)
 
 void OdometryFilter::_joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
 {
-  this->linear_joint = msg;
+  this->linear_joint = msg->position[0];
+  this->encoder_yaw = msg->position[1];
 }
 
 void OdometryFilter::_contact_callback(const std_msgs::msg::Bool::SharedPtr msg)

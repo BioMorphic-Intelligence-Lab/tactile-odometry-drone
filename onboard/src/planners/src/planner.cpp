@@ -156,7 +156,7 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
                          "yaw1 %f, yaw2 %f", yaw, yaw2);
     // Rotation Matrix between World/Inertial (I) and Wall (W)
     // Eigen::Matrix3d R_IW = quat_IB.toRotationMatrix() * common::quaternion_from_euler(0.0, 0.0, -encoder_yaw);
-    const Eigen::Matrix3d R_IB_z = common::rot_z(yaw);
+    const Eigen::Matrix3d R_IB_z = common::rot_z(yaw - M_PI);
     const Eigen::Matrix3d R_BW_z = common::rot_z(-encoder_yaw);
     const Eigen::Matrix3d R_IW_z = R_IB_z * R_BW_z;
     // return position and orientation of uav
