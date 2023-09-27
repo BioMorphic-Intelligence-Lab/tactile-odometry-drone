@@ -52,6 +52,13 @@ target_include_directories(rectangle_planner PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
   $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
   $<INSTALL_INTERFACE:include>)
+
+add_executable(zero_planner src/planner.cpp src/zero_planner.cpp)
+ament_target_dependencies(zero_planner rclcpp common geometry_msgs sensor_msgs std_srvs)
+target_include_directories(zero_planner PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/planners>
+  $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
+  $<INSTALL_INTERFACE:include>)
   
 add_executable(blind_line src/blind_planner.cpp src/blind_line.cpp)
 ament_target_dependencies(blind_line common rclcpp geometry_msgs sensor_msgs std_srvs)
@@ -99,6 +106,7 @@ install(TARGETS
   blind_sine
   blind_circle
   rectangle_planner
+  zero_planner
   sin_planner
   circle_planner
   line_planner
