@@ -159,7 +159,7 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
     // return position and orientation of uav
     // pos_IB = R_IW_z * pos_WE - R_IB_z * pos_BE;
 
-    kinematics::inverse_kinematics(R_IW_z, this->start_point, pos_WE, this->_curr_js.position, joint_state_start, 0.0, 0.0,
+    kinematics::inverse_kinematics(R_IW_z, Eigen::Vector3d(0, 0, 0), pos_WE, this->_curr_js.position, 0.0, 0.0, 0.0,
                                    R_IB_z, pos_IB);
     quat_IB = Eigen::Quaterniond(R_IB_z);
 }
@@ -306,5 +306,17 @@ bool Planner::_detect_contact()
     const bool force_over_threshold = fabs(this->_curr_js.position[0]) > JS_THRESHOLD;
     const bool trackball_over_threshold = this->_trackball_pos.norm() > 0.01;
 
-    return force_over_threshold || trackball_over_threshold;
+    const bool all_over_threshold = force_over_threshold || trackball_over_threshold;
+
+    if (all_over_threshold && !this->_contact_temp) // rising edge
+    {
+        this->_time_of_first_contact = this->now();
+    }
+    if (!all_over_threshold)
+    {
+        this->_time_of_first_contact = this->now() + rclcpp::Duration(5, 0);
+    }
+    this->_contact_temp = all_over_threshold;
+
+    return ((this->now() - this->time_of_first_contact).seconds() > this->_minimum_contact_duration);
 }

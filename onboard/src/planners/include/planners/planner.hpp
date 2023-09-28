@@ -23,16 +23,18 @@ public:
     virtual Eigen::Vector3d get_trajectory_setpoint() = 0;
 
     rclcpp::Time _beginning;
+    rclcpp::Time _time_of_first_contact;
     rclcpp::Time _approach_beginning;
 
 private:
     const double JS_THRESHOLD;
     double _frequency, _yaw_rate;
-    double _v_approach;               // velocity with which to approach the start position
-    double _alignment_threshold;      // angle threshold in rad defining is_aligned
-    double _desired_linear_joint_pos; // desired value for linear joint in m
-    double _position_offset = 0.0;    // positon offset calculated by force controller in m
-    bool _align, _in_contact, _is_aligned;
+    double _v_approach;                     // velocity with which to approach the start position
+    double _alignment_threshold;            // angle threshold in rad defining is_aligned
+    double _desired_linear_joint_pos;       // desired value for linear joint in m
+    double _position_offset = 0.0;          // positon offset calculated by force controller in m
+    double _minimum_contact_duration = 3.0; // minimum duration of contact befor contact is enabled
+    bool _align, _in_contact, _is_aligned, _contact_temp;
 
     std::vector<Eigen::Vector3d> _ee_offsets;
 
