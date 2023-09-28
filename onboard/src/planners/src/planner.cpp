@@ -128,7 +128,7 @@ double Planner::_control_contact_force(float linear_joint, float desired_joint)
 void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap_q)
 {
     // Currently unused
-    (void) quat_mocap_q;
+    (void)quat_mocap_q;
 
     double yaw = common::yaw_from_quaternion_y_align(quat_IB);
     double dt = 1.0 / this->_frequency;
@@ -155,9 +155,13 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
     const Eigen::Matrix3d R_IW_z = R_IB_z * R_BW_z;
 
     // return valies quat_IB and pos_IB
-    quat_IB = common::quaternion_from_euler(0.0, 0.0, yaw2);
+    // quat_IB = common::quaternion_from_euler(0.0, 0.0, yaw2);
     // return position and orientation of uav
-    pos_IB = R_IW_z * pos_WE - R_IB_z * pos_BE;
+    // pos_IB = R_IW_z * pos_WE - R_IB_z * pos_BE;
+
+    kinematics::inverse_kinematics(R_IW_z, this->start_point, pos_WE, this->_curr_js.position, joint_state_start, 0.0, 0.0,
+                                   R_IB_z, pos_IB);
+    quat_IB = Eigen::Quaterniond(R_IB_z);
 }
 
 /* Callback Functions */
