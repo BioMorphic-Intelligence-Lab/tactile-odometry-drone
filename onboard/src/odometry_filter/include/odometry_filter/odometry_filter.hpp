@@ -21,6 +21,9 @@
 #include "std_srvs/srv/trigger.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 
+#include "geometry_msgs/msg/transform_stamped.hpp"
+#include "tf2_ros/transform_broadcaster.h"
+
 using namespace std::chrono_literals;
 
 class OdometryFilter : public rclcpp::Node
@@ -46,6 +49,8 @@ public:
     Eigen::Vector3d ee_to_ball_offset = Eigen::Vector3d(-0.01875, 0.0423, 0.0); // in Frame E, located at the center of rotational axis
     Eigen::Vector3d ee_to_base_offset = Eigen::Vector3d(-0.03, 0.33, 0.046);
 
+    std::unique_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;
+
     bool in_contact = false;
     bool in_contact_last = false;
     bool is_init = false;
@@ -64,12 +69,17 @@ private:
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr _contact_subscription;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr _state_subscription;
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr _joint_subscription;
+    geometry_msgs::msg::Transform _transform_from_eigen(Eigen::Quaterniond rot, Eigen::Vector3d pos);
 
     void _trackball_callback(const geometry_msgs::msg::PointStamped::SharedPtr msg);
     void _state_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
     void _imu_callback(const sensor_msgs::msg::Imu::SharedPtr msg);
     void _contact_callback(const std_msgs::msg::Bool::SharedPtr msg);
     void _joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg);
+
+    void _publish_tf(Eigen::Matrix3d R,
+                     Eigen::Vector3d p,
+                     std::string child_name);
 };
 
 #endif // ODOMETRY_H

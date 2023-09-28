@@ -54,6 +54,10 @@ OdometryFilter::OdometryFilter()
         */
   this->R_EO = personal::common::rot_z(-M_PI / 2) * personal::common::rot_y(-M_PI / 2);
   this->R_WE_0 = personal::common::rot_y(M_PI);
+
+  /* Init TF publisher */
+  this->_tf_broadcaster =
+      std::make_unique<tf2_ros::TransformBroadcaster>(*this);
   printf("starting...");
 }
 
@@ -187,6 +191,12 @@ void OdometryFilter::_trackball_callback(const geometry_msgs::msg::PointStamped:
   Eigen::Quaterniond quat_IB = Eigen::Quaterniond(R_IB);
   // Eigen::Vector3d pos_world = this->wall_to_world(pos_wall);
 
+  this->_publish_tf(R_IB, pos_world, "B");
+  this->_publish_tf(R_IE, p_IE, "E");
+  this->_publish_tf(R_IT, p_IT, "T");
+  this->_publish_tf(R_IO, p_IO, "O");
+  this->_publish_tf(R_IW, p_IO, "W");
+
   /*Publish Data*/
   geometry_msgs::msg::PoseStamped pose_wall_msg;
   pose_wall_msg.header.stamp = this->now();
@@ -206,6 +216,20 @@ void OdometryFilter::_trackball_callback(const geometry_msgs::msg::PointStamped:
 
   this->odom_pose_wall_publisher_->publish(pose_wall_msg);
   this->odom_pose_publisher_->publish(pose_msg);
+}
+
+geometry_msgs::msg::Transform OdometryFilter::_transform_from_eigen(Eigen::Quaterniond rot, Eigen::Vector3d pos)
+{
+  geometry_msgs::msg::Transform T;
+  T.translation.x = pos.x();
+  T.translation.y = pos.y();
+  T.translation.z = pos.z();
+  T.rotation.w = rot.w();
+  T.rotation.x = rot.x();
+  T.rotation.y = rot.y();
+  T.rotation.z = rot.z();
+
+  return T;
 }
 
 void OdometryFilter::_state_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
@@ -238,6 +262,19 @@ void OdometryFilter::_contact_callback(const std_msgs::msg::Bool::SharedPtr msg)
 {
   this->in_contact = msg->data;
   this->evaluate_contact();
+}
+
+void OdometryFilter::_publish_tf(Eigen::Matrix3d R,
+                                 Eigen::Vector3d p,
+                                 std::string child_name)
+{
+  geometry_msgs::msg::TransformStamped T;
+  T.header.stamp = this->now();
+  T.header.frame_id = "world";
+  T.child_frame_id = child_name;
+
+  T.transform = this->_transform_from_eigen(Eigen::Quaterniond(R), p);
+  this->_tf_broadcaster->sendTransform(T);
 }
 
 int main(int argc, char *argv[])

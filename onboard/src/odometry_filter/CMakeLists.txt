@@ -14,6 +14,8 @@ find_package(sensor_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(common REQUIRED)
 find_package(kinematics REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 find_package(Eigen3 REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
@@ -24,7 +26,7 @@ include_directories(include/common
                     $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>)
 
 add_executable(odometry_filter src/odometry_filter.cpp)
-ament_target_dependencies(odometry_filter rclcpp std_msgs std_msgs std_srvs geometry_msgs kinematics common sensor_msgs) 
+ament_target_dependencies(odometry_filter rclcpp std_msgs std_msgs tf2 tf2_ros std_srvs geometry_msgs kinematics common sensor_msgs) 
 target_include_directories(odometry_filter PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/odometry_filter>
   $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
