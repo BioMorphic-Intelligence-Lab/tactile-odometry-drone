@@ -7,6 +7,7 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(common REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 # Add include directories
@@ -18,7 +19,7 @@ include_directories(include/kinematics
 # https://github.com/ros2/eigen3_cmake_module
 # -
 add_library(kinematics src/kinematics.cpp)
-ament_target_dependencies(kinematics Eigen3)
+ament_target_dependencies(kinematics common Eigen3)
 
 # Build and export library
 ament_export_targets(kinematics HAS_LIBRARY_TARGET)

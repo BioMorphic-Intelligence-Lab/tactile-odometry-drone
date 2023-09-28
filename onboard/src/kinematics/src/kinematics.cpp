@@ -1,9 +1,9 @@
 #include "kinematics.hpp"
+#include "common/common.hpp"
 
-namespace personal
+using namespace personal::common;
+
+namespace kinematics
 {
-    namespace kinematics
-    {
-        
-    }
+    
 }
