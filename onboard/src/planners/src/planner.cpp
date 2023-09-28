@@ -162,20 +162,27 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
     // quat_IB = common::quaternion_from_euler(0.0, 0.0, yaw2);
     // return position and orientation of uav
     // pos_IB = R_IW_z * pos_WE - R_IB_z * pos_BE;
-    Eigen::Matrix3d R_IE, R_IT, R_IO, R_IW;
-    Eigen::Vector3d p_IE, p_IT, p_IO;
+    Eigen::Matrix3d R_IE, R_IT, R_IO, R_IW, R_IO_0;
+    Eigen::Vector3d p_IE, p_IT, p_IO, p_IO_0;
 
     double joint_state[2] = {this->_curr_js.position[0],
                              this->_curr_js.position[1]};
     double joint_state_start[2] = {0.0, 0.0};
-    kinematics::inverse_kinematics(R_IW_z,
-                                   Eigen::Vector3d(0, 0, 0),
+    R_IO_0 = R_IW_z;
+    p_IO_0 = this->start_point;
+
+    kinematics::inverse_kinematics(R_IO_0,
+                                   p_IO_0,
                                    pos_WE,
                                    joint_state,
                                    joint_state_start,
                                    0.0,
                                    0.0,
                                    R_IB_z, R_IE, R_IT, R_IO, R_IW, p_IE, p_IT, p_IO, pos_IB);
+
+    quat_IB = Eigen::Quaterniond(R_IB_z);
+    yaw_IB = common::yaw_from_quaternion_y_align(quat_IB);
+    R_IB_z = common::rot_z(yaw_IB);
     quat_IB = Eigen::Quaterniond(R_IB_z);
     this->_publish_tf(R_IB_z, pos_IB, "B_inv");
     this->_publish_tf(R_IE, p_IE, "E_inv");
