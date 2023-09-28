@@ -3,13 +3,9 @@
 
 #include <Eigen/Dense>
 
-namespace personal
+namespace kinematics
 {
-
-    namespace kinematics
-    {
-        void forward_kinematics(Eigen::Matrix3d R_IB, Eigen::Vector3d p_IB, double joint_state[2], double imu_roll);
-    }
-
+    void forward_kinematics(Eigen::Matrix3d R_IB, Eigen::Vector3d p_IB, double joint_state[2], double imu_roll);
 }
+
 #endif // KINEMATICS_H

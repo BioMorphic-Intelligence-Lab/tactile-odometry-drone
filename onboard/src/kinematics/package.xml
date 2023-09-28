@@ -7,6 +7,7 @@
   <maintainer email="a.bredenbeck@tudelft.nl">anton</maintainer>
   <license>TODO: License declaration</license>
 
+  <build_depend>common</build_depend>
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <test_depend>ament_lint_auto</test_depend>
