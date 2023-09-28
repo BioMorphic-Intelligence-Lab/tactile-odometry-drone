@@ -58,6 +58,11 @@ def generate_launch_description():
                                              get_package_share_directory(pkg_name),
                                              "config","sin_params.yaml")]
                                     )
+        case "zero":
+            planner_launch_action = Node(package = pkg_name,
+                                         name = "zero_planner",
+                                         executable = "zero_planner"
+            )
         case _:
             sys.exit(f"Error: This planner ({planner}) does not exist. Try again")
     
