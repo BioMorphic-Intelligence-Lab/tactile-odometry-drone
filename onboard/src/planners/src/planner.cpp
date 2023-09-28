@@ -127,6 +127,8 @@ double Planner::_control_contact_force(float linear_joint, float desired_joint)
  */
 void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap_q)
 {
+    // Currently unused
+    (void) quat_mocap_q;
 
     double yaw = common::yaw_from_quaternion_y_align(quat_IB);
     double dt = 1.0 / this->_frequency;
