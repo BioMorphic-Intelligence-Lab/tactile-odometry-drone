@@ -1,6 +1,7 @@
 #include "planner.hpp"
 
 #include "rclcpp/time.hpp"
+#include "kinematics/kinematics.hpp"
 
 using namespace personal;
 
@@ -60,6 +61,10 @@ Planner::Planner()
     this->_setpoint_publisher_ee = this->create_publisher<geometry_msgs::msg::PoseStamped>(
         "/ref_pose/ee", 10);
 
+    /* Init TF publisher */
+    this->_tf_broadcaster =
+      std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+
     /* Init current joint state variable to avoid segmentation fault */
     this->_curr_js.position = {0.0, 0.0};
     this->_curr_js.velocity = {0.0, 0.0};
@@ -87,8 +92,8 @@ Planner::Planner()
 
 void Planner::_get_uav_to_ee_position()
 {
-    Eigen::Vector3d mocap_pos(this->_curr_pose.pose.position.x, this->_curr_pose.pose.position.y, this->_curr_pose.pose.position.z);
-    Eigen::Vector3d ee_pos(this->_curr_ee_pose.pose.position.x, this->_curr_ee_pose.pose.position.y, this->_curr_ee_pose.pose.position.z);
+    Eigen::Vector3d mocap_pos = this->_current_position;
+    Eigen::Vector3d ee_pos= this->_current_ee_position;
 
     if (this->_ee_offsets.size() <= 50)
     {
@@ -96,9 +101,7 @@ void Planner::_get_uav_to_ee_position()
     }
     if (this->_ee_offsets.size() == 50)
     {
-        const auto pose = this->_curr_pose.pose.orientation;
-        const Eigen::Quaterniond q(pose.w, pose.x, pose.y, pose.z);
-        this->_ee_offset = q.toRotationMatrix() * std::reduce(this->_ee_offsets.begin(), this->_ee_offsets.end()) / this->_ee_offsets.size();
+        this->_ee_offset = this->_current_quat.toRotationMatrix() * std::reduce(this->_ee_offsets.begin(), this->_ee_offsets.end()) / this->_ee_offsets.size();
     }
 }
 
@@ -169,7 +172,8 @@ void Planner::_timer_callback()
     msg.header.stamp = this->now();
 
     /* Extract current state */
-    geometry_msgs::msg::PoseStamped curr_pose = this->_curr_pose;
+    Eigen::Vector3d curr_position = this->_current_position;
+    Eigen::Quaterniond curr_quat = this->_current_quat;
     std::vector<double> joint_pos = this->_curr_js.position;
 
     /* Put in the position of the planner */
@@ -217,18 +221,14 @@ void Planner::_timer_callback()
     /* Check if we already are in contact and if we want to align with the wall */
     if (this->_align && this->_in_contact)
     {
-        // float curr_yaw = common::yaw_from_quaternion(
-        Eigen::Quaterniond current_quat(curr_pose.pose.orientation.w,
-                                        curr_pose.pose.orientation.x,
-                                        curr_pose.pose.orientation.y,
-                                        curr_pose.pose.orientation.z);
+
         Eigen::Vector3d aligned_position;
 
         /* Find the aligned position and orientation */
         _align_to_wall(output_q, aligned_position, position,
                        this->_ee_offset + this->_curr_js.position[0] * Eigen::Vector3d::UnitY(),
                        this->_curr_js.position[1],
-                       current_quat);
+                       curr_quat);
 
         /* Transform to start point */
         RCLCPP_DEBUG(this->get_logger(), "%f %f %f", aligned_position.x(), aligned_position.y(), aligned_position.z());
@@ -273,6 +273,69 @@ void Planner::_timer_callback()
 
     /* Finally publish the message */
     this->_setpoint_publisher->publish(msg);
+
+    /* Publish TF */
+    double joint_state[2] = {this->_curr_js.position[0], this->_curr_js.position[1]};
+    this->_publish_tf(curr_quat.toRotationMatrix(), curr_position,
+                      joint_state);
+}
+
+void Planner::_publish_tf(Eigen::Matrix3d R_IB, 
+                          Eigen::Vector3d p_IB,
+                          double joint_state[2])
+{
+    Eigen::Matrix3d R_IE, R_IT, R_IO, R_IW;
+    Eigen::Vector3d p_IE, p_IT, p_IO; 
+
+    kinematics::forward_kinematics(R_IB, p_IB, joint_state, 0.0, 0.0,
+                        R_IE, R_IT, R_IO, R_IW, p_IE, p_IT, p_IO);
+
+
+    geometry_msgs::msg::TransformStamped IE, IT, IO, IW;
+    
+    // Set Timestamps
+    auto ts = this->now();
+    IE.header.stamp = ts;
+    IT.header.stamp = ts;
+    IO.header.stamp = ts;
+    IW.header.stamp = ts;
+
+    // Set Frame IDs
+    IE.header.frame_id = "world";
+    IT.header.frame_id = "world";
+    IO.header.frame_id = "world";
+    IW.header.frame_id = "world";
+
+    // Set Child Frame ID
+    IE.child_frame_id = "EE";
+    IT.child_frame_id = "TCP";
+    IO.child_frame_id = "Odom";
+    IW.child_frame_id = "Wall";
+
+    // Set Transform
+    IE.transform = this->_transform_from_eigen(Eigen::Quaterniond(R_IE), p_IE);
+    IT.transform = this->_transform_from_eigen(Eigen::Quaterniond(R_IT), p_IT);
+    IO.transform = this->_transform_from_eigen(Eigen::Quaterniond(R_IO), p_IO);
+    IW.transform = this->_transform_from_eigen(Eigen::Quaterniond(R_IW), p_IO);
+
+    this->_tf_broadcaster->sendTransform(IE);
+    this->_tf_broadcaster->sendTransform(IT);
+    this->_tf_broadcaster->sendTransform(IO);
+    this->_tf_broadcaster->sendTransform(IW);
+}
+
+geometry_msgs::msg::Transform Planner::_transform_from_eigen(Eigen::Quaterniond rot, Eigen::Vector3d pos)
+{
+    geometry_msgs::msg::Transform T;
+    T.translation.x = pos.x();
+    T.translation.y = pos.y();
+    T.translation.z = pos.z();
+    T.rotation.w = rot.w();
+    T.rotation.x = rot.x();
+    T.rotation.y = rot.y();
+    T.rotation.z = rot.z();
+
+    return T;
 }
 
 void Planner::_joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
@@ -283,11 +346,27 @@ void Planner::_joint_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
 
 void Planner::_mocap_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
 {
-    this->_curr_pose = *msg;
+    auto pose = *msg;
+    this->_current_position = Eigen::Vector3d(pose.pose.position.x,
+                                           pose.pose.position.y,
+                                           pose.pose.position.z);
+    
+    this->_current_quat = Eigen::Quaterniond(pose.pose.orientation.w,
+                                            pose.pose.orientation.x,
+                                            pose.pose.orientation.y,
+                                            pose.pose.orientation.z);
 }
 void Planner::_ee_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
 {
-    this->_curr_ee_pose = *msg;
+    auto pose = *msg;
+    this->_current_ee_position = Eigen::Vector3d(pose.pose.position.x,
+                                              pose.pose.position.y,
+                                              pose.pose.position.z);
+    
+    this->_current_ee_quat = Eigen::Quaterniond(pose.pose.orientation.w,
+                                               pose.pose.orientation.x,
+                                               pose.pose.orientation.y,
+                                               pose.pose.orientation.z);
 }
 
 void Planner::_trackball_callback(const geometry_msgs::msg::PointStamped::SharedPtr msg)
