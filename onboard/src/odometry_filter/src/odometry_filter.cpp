@@ -174,6 +174,9 @@ void OdometryFilter::_trackball_callback(const geometry_msgs::msg::PointStamped:
   Eigen::Matrix3d R_IE, R_IT, R_IO_0, R_IO, R_IW, R_IB_0;
   Eigen::Vector3d p_IE, p_IT, p_IO_0, p_IO, p_IB_0, pos_world;
 
+  R_IB_0 = this->orientation_at_contact.toRotationMatrix();
+  p_IB_0 = this->pos_at_contact;
+
   double joint_state[2] = {this->linear_joint, this->encoder_yaw};
 
   double joint_state_start[2] = {0.0, this->encoder_yaw_at_contact};
