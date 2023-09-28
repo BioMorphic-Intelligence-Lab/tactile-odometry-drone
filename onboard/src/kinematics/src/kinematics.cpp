@@ -89,6 +89,18 @@ namespace kinematics
         p_IB = p_IE - R_IB * p_BE;
     }
 
+    void inverse_kinematics(Eigen::Matrix3d R_IO_0, Eigen::Vector3d p_IO_0, Eigen::Vector3d p_WO,
+                            double joint_state[2], double joint_state_start[2], double imu_roll, double uav_roll,
+                            Eigen::Matrix3d &R_IB,
+                            Eigen::Vector3d &p_IB)
+    {
+        Eigen::Matrix3d R_IE, R_IT, R_IO, R_IW;
+        Eigen::Vector3d p_IE, p_IT, p_IO;
+        
+        inverse_kinematics(R_IO_0, p_IO_0, p_WO, joint_state, joint_state_start, imu_roll, uav_roll,
+                           R_IB, R_IE, R_IT, R_IO, R_IW, p_IE, p_IT, p_IO, p_IB);
+    }
+
     void forward_kinematics(Eigen::Matrix3d R_IB,
                             Eigen::Vector3d p_IB,
                             double joint_state[2],
