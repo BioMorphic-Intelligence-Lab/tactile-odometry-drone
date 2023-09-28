@@ -1,5 +1,6 @@
 #include "kinematics.hpp"
 #include "common/common.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 using namespace personal;
 
@@ -67,14 +68,18 @@ namespace kinematics
     // the orientaion of the wall frame is parallel to the orientation of the
     // odometry-frame at contactn (with roll=0): R_IW = R_IO_0*R_OW;
     {
+        // R_IO_0 is the initial rotation of the Odometry frame (e.g. at contact).
+        // We find the current yaw rotation (R_IO) by rotating according the initial orientation
+        // about its z axis with an angle of  to the encoder rotate it about its z-axis to 
         R_IO = R_IO_0 * common::rot_z(joint_state[1] - joint_state_start[1]);
+        // We extract the yaw from that matrix 
         double yaw = common::yaw_from_quaternion_y_align(Eigen::Quaterniond(R_IO));
 
-        // R_IW = R_IO*R_OW; //R_IW nicht aus R_IO ableiten, sondern nur yaw aus R_IO nehmen
+        // We compute the wall orientation in the inertial frame. Axis are rotated by 90 degrees
         R_IW = common::rot_z(-(yaw + M_PI / 2));
         Eigen::Matrix3d R_OW = R_IO.transpose() * R_IW;
 
-        Eigen::Matrix3d R_TO = common::rot_x(M_PI / 2) * common::rot_z(-M_PI / 2) * common::rot_z(uav_roll - imu_roll);
+        Eigen::Matrix3d R_TO = Eigen::Matrix3d::Identity(); //common::rot_x(M_PI / 2) * common::rot_z(-M_PI / 2) * common::rot_z(uav_roll - imu_roll);
         Eigen::Matrix3d R_OT = R_TO.transpose();
 
         Eigen::Matrix3d R_ET = common::rot_z(-joint_state[1]);
