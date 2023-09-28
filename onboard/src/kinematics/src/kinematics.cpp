@@ -46,4 +46,19 @@ namespace kinematics
         // Eigen::Matrix3d R_OW = R_IO.transpose() * R_IW;
     }
 
+
+    void forward_kinematics(Eigen::Matrix3d R_IB,
+                        Eigen::Vector3d p_IB,
+                        double joint_state[2],
+                        double imu_roll,
+                        Eigen::Matrix3d &R_IO,
+                        Eigen::Vector3d &p_IO)
+    {
+        Eigen::Matrix3d R_IE, R_IT, R_IW;
+        Eigen::Vector3d p_IE, p_IT;
+
+        forward_kinematics(R_IB, p_IB, joint_state, imu_roll, R_IE, R_IT,
+                           R_IO, R_IW, p_IE, p_IT, p_IO);
+    }
+
 }
