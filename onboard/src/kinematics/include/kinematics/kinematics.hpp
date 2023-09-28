@@ -2,14 +2,13 @@
 #define KINEMATICS_H
 
 #include <Eigen/Dense>
-#include "constants.hpp"
 
 namespace personal
 {
 
     namespace kinematics
     {
-        
+        void forward_kinematics(Eigen::Matrix3d R_IB, Eigen::Vector3d p_IB, double joint_state[2], double imu_roll);
     }
 
 }
