@@ -120,7 +120,7 @@ double Planner::_control_contact_force(float linear_joint, float desired_joint)
 /**
  * @brief Align UAV to be perpendicular to wall (i.e. encoderYaw == 0). The function is designed to run permanentely after the trajectory position has been set
  * Inputs:
- *      pos_WE: position of End-Effector-Tip in Wall-Frame from trajectory_setpoint()
+ *      pos_WO: position of End-Effector-Tip in Wall-Frame from trajectory_setpoint()
         encoderYaw: reading of encoder (in rad)
         quat_mocap_q: current mocap orientation
         pos_BE:  position offset from UAV to End-Effector
@@ -128,7 +128,7 @@ double Planner::_control_contact_force(float linear_joint, float desired_joint)
 *   pos_IB: desired position of UAV-Body in world-frame
 *   quat_IB: new desired orientation of UAV
  */
-void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap_q)
+void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WO, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap_q)
 {
     // Currently unused
     (void)quat_mocap_q;
@@ -147,11 +147,7 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
     // const Eigen::Matrix3d R_IB = quat_IB.toRotationMatrix();
     // double yaw = -atan2(R_IB(1, 2), R_IB(2, 2));
     float yaw2 = yaw + increment;
-    auto &clk = *this->get_clock();
-    RCLCPP_INFO_THROTTLE(this->get_logger(),
-                         clk,
-                         500,
-                         "yaw1 %f, yaw2 %f, increment %f, encoder yaw %f", yaw, yaw2, increment, encoder_yaw);
+    
     // Rotation Matrix between World/Inertial (I) and Wall (W)
     // Eigen::Matrix3d R_IW = quat_IB.toRotationMatrix() * common::quaternion_from_euler(0.0, 0.0, -encoder_yaw);
     Eigen::Matrix3d R_IB_z = common::rot_z(yaw2);
@@ -161,29 +157,32 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
     // return valies quat_IB and pos_IB
     // quat_IB = common::quaternion_from_euler(0.0, 0.0, yaw2);
     // return position and orientation of uav
-    // pos_IB = R_IW_z * pos_WE - R_IB_z * pos_BE;
-    Eigen::Matrix3d R_IE, R_IT, R_IO, R_IW, R_IO_0;
-    Eigen::Vector3d p_IE, p_IT, p_IO, p_IO_0;
+    // pos_IB = R_IW_z * pos_WO - R_IB_z * pos_BE;
+    Eigen::Matrix3d R_IE, R_IT, R_IO, R_IW, R_IO_0 = common::rot_z(M_PI);
+    Eigen::Vector3d p_IE, p_IT, p_IO, p_IO_0 = this->_start_point;
 
     double joint_state[2] = {this->_curr_js.position[0],
-                             this->_curr_js.position[1]};
+                             encoder_yaw};
     double joint_state_start[2] = {0.0, 0.0};
-    R_IO_0 = R_IW_z;
-    p_IO_0 = this->start_point;
 
-    kinematics::inverse_kinematics(R_IO_0,
+    // Get the base des base pose from the desired ee pose
+    kinematics::inverse_kinematics(R_IW_z,
                                    p_IO_0,
-                                   pos_WE,
+                                   pos_WO,
                                    joint_state,
-                                   joint_state_start,
+                                   joint_state,
                                    0.0,
                                    0.0,
                                    R_IB_z, R_IE, R_IT, R_IO, R_IW, p_IE, p_IT, p_IO, pos_IB);
 
+    // Get Quaternion that only represents the desired yaw to 
+    // achieve a planar goal pose
     quat_IB = Eigen::Quaterniond(R_IB_z);
-    yaw_IB = common::yaw_from_quaternion_y_align(quat_IB);
+    double yaw_IB = common::yaw_from_quaternion_y_align(quat_IB);
     R_IB_z = common::rot_z(yaw_IB);
     quat_IB = Eigen::Quaterniond(R_IB_z);
+
+    // Publish the TFs
     this->_publish_tf(R_IB_z, pos_IB, "B_inv");
     this->_publish_tf(R_IE, p_IE, "E_inv");
     this->_publish_tf(R_IT, p_IT, "T_inv");
@@ -260,7 +259,6 @@ void Planner::_timer_callback()
 
         /* Transform to start point */
         RCLCPP_DEBUG(this->get_logger(), "%f %f %f", aligned_position.x(), aligned_position.y(), aligned_position.z());
-        aligned_position += this->_start_point;
 
         /* Add it to the message */
         // Eigen::Quaterniond output_q = common::quaternion_from_euler(0, 0, output_yaw);

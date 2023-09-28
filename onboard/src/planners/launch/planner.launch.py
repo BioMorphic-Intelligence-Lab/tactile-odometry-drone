@@ -32,7 +32,9 @@ def generate_launch_description():
                                          executable = "rectangle_planner",
                                          parameters = [os.path.join(
                                              get_package_share_directory(pkg_name),
-                                             "config","rectangle_params.yaml")]
+                                             "config","rectangle_params.yaml")],
+                                         output="screen",
+                                         emulate_tty=True
                                     )
         case "line":
             planner_launch_action = Node(package = pkg_name,
@@ -40,7 +42,9 @@ def generate_launch_description():
                                          executable = "line_planner",
                                          parameters = [os.path.join(
                                              get_package_share_directory(pkg_name),
-                                             "config","line_params.yaml")]
+                                             "config","line_params.yaml")],
+                                         output="screen",
+                                         emulate_tty=True
                                     )
         case "circle":
             planner_launch_action = Node(package = pkg_name,
@@ -48,7 +52,9 @@ def generate_launch_description():
                                          executable = "circle_planner",
                                          parameters = [os.path.join(
                                              get_package_share_directory(pkg_name),
-                                             "config","circle_params.yaml")]
+                                             "config","circle_params.yaml")],
+                                         output="screen",
+                                         emulate_tty=True
                                     )
         case "sin":
             planner_launch_action = Node(package = pkg_name,
@@ -56,12 +62,16 @@ def generate_launch_description():
                                          executable = "sin_planner",
                                          parameters = [os.path.join(
                                              get_package_share_directory(pkg_name),
-                                             "config","sin_params.yaml")]
+                                             "config","sin_params.yaml")],
+                                         output="screen",
+                                         emulate_tty=True
                                     )
         case "zero":
             planner_launch_action = Node(package = pkg_name,
                                          name = "zero_planner",
-                                         executable = "zero_planner"
+                                         executable = "zero_planner",
+                                         output="screen",
+                                         emulate_tty=True
             )
         case _:
             sys.exit(f"Error: This planner ({planner}) does not exist. Try again")
