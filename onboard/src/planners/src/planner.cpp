@@ -6,17 +6,17 @@ using namespace personal;
 
 Planner::Planner()
     : Node("Planner"), JS_THRESHOLD(0.001),
-    output_q(0.0, 0.0, 0.0, 1.0) // MS: make the threshold a paramteter
+      output_q(0.0, 0.0, 0.0, 1.0) // MS: make the threshold a paramteter
 {
 
     /* Declare all the parameters */
     this->declare_parameter("frequency", 20.0);
     this->declare_parameter("desired_linear_joint_pos", -0.01); // position in m
-    this->declare_parameter("v_approach", 0.25);                 // Approach velocity
+    this->declare_parameter("v_approach", 0.25);                // Approach velocity
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 3); // 10 Degree/s
     this->declare_parameter("align", true);
-    this->declare_parameter("start_point", std::vector<double>({0.52, 2.46, 1.68}/*{-0.31, 1.95, 1.85}*/));
+    this->declare_parameter("start_point", std::vector<double>({0.52, 2.46, 1.68} /*{-0.31, 1.95, 1.85}*/));
     this->declare_parameter("joint_topic", "/joint_state");
     this->declare_parameter("pose_topic", "/mocap_pose");
     this->declare_parameter("ee_topic", "/ee_pose");
@@ -117,24 +117,22 @@ double Planner::_control_contact_force(float linear_joint, float desired_joint)
 /**
  * @brief Align UAV to be perpendicular to wall (i.e. encoderYaw == 0). The function is designed to run permanentely after the trajectory position has been set
  * Inputs:
- *      pos_IE: position of End-Effector-Tip in World-Frame
+ *      pos_WE: position of End-Effector-Tip in Wall-Frame from trajectory_setpoint()
         encoderYaw: reading of encoder (in rad)
-        mocapYaw: current yaw angle of UAV
+        quat_mocap_q: current mocap orientation
         pos_BE:  position offset from UAV to End-Effector
 * Outputs:
-*   pos_IB: updated position of UAV
-*   yaw_IB: updated yaw of UAV
+*   pos_IB: desired position of UAV-Body in world-frame
+*   quat_IB: new desired orientation of UAV
  */
 void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap_q)
 {
 
-    Eigen::Vector4d quat_mocap(quat_mocap_q.w(), quat_mocap_q.x(), quat_mocap_q.y(), quat_mocap_q.z());
     double yaw = common::yaw_from_quaternion_y_align(quat_IB);
-    
-    double increment = this->_yaw_rate;
-    increment = -copysign(increment, encoder_yaw);
     double dt = 1.0 / this->_frequency;
-    if (fabs(5.0 * M_PI/180.0) > fabs(encoder_yaw))
+    double increment = -copysign(this->_yaw_rate, encoder_yaw) * dt;
+
+    if (fabs(5.0 * M_PI / 180.0) > fabs(encoder_yaw))
     {
         increment = 0.0;
     }
@@ -142,7 +140,7 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
     // get rotation about z-axis that preserves x-y-heading of y-axis
     // const Eigen::Matrix3d R_IB = quat_IB.toRotationMatrix();
     // double yaw = -atan2(R_IB(1, 2), R_IB(2, 2));
-    float yaw2 = yaw + increment*dt;
+    float yaw2 = yaw + increment;
     auto &clk = *this->get_clock();
     RCLCPP_INFO_THROTTLE(this->get_logger(),
                          clk,
@@ -154,6 +152,7 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
     const Eigen::Matrix3d R_BW_z = common::rot_z(-encoder_yaw);
     const Eigen::Matrix3d R_IW_z = R_IB_z * R_BW_z;
 
+    // return valies quat_IB and pos_IB
     quat_IB = common::quaternion_from_euler(0.0, 0.0, yaw2);
     // return position and orientation of uav
     pos_IB = R_IW_z * pos_WE - R_IB_z * pos_BE;
@@ -206,7 +205,6 @@ void Planner::_timer_callback()
         // set beginning 1s to future, so it starts 1s after contact is established and alignment is done
         this->_beginning = this->now() + rclcpp::Duration(1, 0);
 
-
         /* get ee_offset*/
         this->_get_uav_to_ee_position();
     }
@@ -253,14 +251,15 @@ void Planner::_timer_callback()
 
         double t = (this->now() - this->_approach_beginning).seconds() - 10.0;
 
-        if(t > 0)
+        if (t > 0)
         {
             position.z() += this->_start_point.z();
             Eigen::Vector3d pos = this->_v_approach * t * Eigen::Vector3d(this->_start_point.x(), this->_start_point.y(), 0.0).normalized();
-            if(pos.y() > this->_start_point.y()) pos = this->_start_point;
+            if (pos.y() > this->_start_point.y())
+                pos = this->_start_point;
             position += pos;
         }
-        
+
         msg.pose.position.x = position.x();
         msg.pose.position.y = position.y();
         msg.pose.position.z = position.z();
@@ -268,7 +267,6 @@ void Planner::_timer_callback()
         msg.pose.orientation.x = 0;
         msg.pose.orientation.y = 0;
         msg.pose.orientation.z = 1.0;
-        
     }
 
     /* Finally publish the message */
