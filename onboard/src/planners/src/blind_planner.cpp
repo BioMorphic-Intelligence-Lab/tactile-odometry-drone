@@ -45,10 +45,10 @@ void BlindPlanner::_timer_callback()
     msg.pose.position.z = position.z();
 
     /* Assume zero yaw as reference */
-    msg.pose.orientation.w = 1.0;
+    msg.pose.orientation.w = 0.0;
     msg.pose.orientation.x = 0.0;
     msg.pose.orientation.y = 0.0;
-    msg.pose.orientation.z = 0.0;
+    msg.pose.orientation.z = 1.0;
     
 
     /* Finally publish the message */
