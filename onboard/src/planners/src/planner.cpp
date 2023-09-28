@@ -287,7 +287,8 @@ void Planner::_timer_callback()
             Eigen::Vector3d pos = this->_v_approach * t * Eigen::Vector3d(this->_start_point.x(), this->_start_point.y(), 0.0).normalized();
             if (pos.y() > this->_start_point.y())
                 pos = this->_start_point;
-            position += pos;
+            position.x() += pos.x();
+            position.y() += pos.y();
         }
 
         msg.pose.position.x = position.x();
