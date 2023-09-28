@@ -46,4 +46,47 @@ namespace kinematics
         // Eigen::Matrix3d R_OW = R_IO.transpose() * R_IW;
     }
 
+    void inverse_kinematics(Eigen::Matrix3d R_IO_0, Eigen::Vector3d p_IO_0, Eigen::Vector3d p_WO,
+                            double joint_state[2], double joint_state_start[2], double imu_roll, double uav_roll,
+                            Eigen::Matrix3d &R_IB,
+                            Eigen::Matrix3d &R_IE,
+                            Eigen::Matrix3d &R_IT,
+                            Eigen::Matrix3d &R_IO,
+                            Eigen::Matrix3d &R_IW,
+                            Eigen::Vector3d &p_IE,
+                            Eigen::Vector3d &p_IT,
+                            Eigen::Vector3d &p_IO,
+                            Eigen::Vector3d &p_IB)
+    // inverse_kinematics aka wall_to_world
+    // p_WO aka pos_wall
+    // the origin of the wall frame is at the point of first contact: p_IW = p_IO_0
+    // the orientaion of the wall frame is parallel to the orientation of the
+    // odometry-frame at contactn (with roll=0): R_IW = R_IO_0*R_OW;
+    {
+        R_IO = R_IO_0 * common::rot_z(joint_state[1] - joint_state_start[1]);
+        double yaw = common::yaw_from_quaternion_y_align(Eigen::Quaterniond(R_IO));
+
+        // R_IW = R_IO*R_OW; //R_IW nicht aus R_IO ableiten, sondern nur yaw aus R_IO nehmen
+        R_IW = common::rot_z(-(yaw + M_PI / 2));
+        Eigen::Matrix3d R_OW = R_IO.transpose() * R_IW;
+
+        Eigen::Matrix3d R_TO = common::rot_x(M_PI / 2) * common::rot_z(-M_PI / 2) * common::rot_z(uav_roll - imu_roll);
+        Eigen::Matrix3d R_OT = R_TO.transpose();
+
+        Eigen::Matrix3d R_ET = common::rot_z(joint_state[1]);
+        Eigen::Matrix3d R_TE = R_ET.transpose();
+        Eigen::Matrix3d R_EB = Eigen::Matrix3d::Identity();
+
+        R_IT = R_IO * R_OT;
+        R_IE = R_IT * R_TE;
+        R_IB = R_IE * R_EB;
+
+        Eigen::Vector3d p_ET = p_ET_0 - Eigen::Vector3d(0, joint_state[0], 0); // compression of spring is negative joint_state
+
+        p_IO = p_IO_0 + R_IO * R_OW * p_WO;
+        p_IT = p_IO - R_IT * p_TO;
+        p_IE = p_IT - R_IE * p_ET;
+        p_IB = p_IE - R_IB * p_BE;
+    }
+
 }
