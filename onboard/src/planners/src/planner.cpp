@@ -132,6 +132,7 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
 {
     // Currently unused
     (void)quat_mocap_q;
+    (void)pos_BE;
 
     double yaw = common::yaw_from_quaternion_y_align(quat_IB);
     double dt = 1.0 / this->_frequency;
@@ -153,7 +154,7 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
                          "yaw1 %f, yaw2 %f, increment %f, encoder yaw %f", yaw, yaw2, increment, encoder_yaw);
     // Rotation Matrix between World/Inertial (I) and Wall (W)
     // Eigen::Matrix3d R_IW = quat_IB.toRotationMatrix() * common::quaternion_from_euler(0.0, 0.0, -encoder_yaw);
-    const Eigen::Matrix3d R_IB_z = common::rot_z(yaw2);
+    Eigen::Matrix3d R_IB_z = common::rot_z(yaw2);
     const Eigen::Matrix3d R_BW_z = common::rot_z(-encoder_yaw);
     const Eigen::Matrix3d R_IW_z = R_IB_z * R_BW_z;
 
@@ -162,8 +163,18 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
     // return position and orientation of uav
     // pos_IB = R_IW_z * pos_WE - R_IB_z * pos_BE;
 
-    kinematics::inverse_kinematics(R_IW_z, Eigen::Vector3d(0, 0, 0), pos_WE, this->_curr_js.position, 0.0, 0.0, 0.0,
-                                   R_IB_z, pos_IB);
+    double joint_state[2] = {this->_curr_js.position[0],
+                             this->_curr_js.position[1]};
+    double joint_state_start[2] = {0.0,0.0};
+    kinematics::inverse_kinematics(R_IW_z,
+                                   Eigen::Vector3d(0, 0, 0),
+                                   pos_WE,
+                                   joint_state,
+                                   joint_state_start,
+                                   0.0,
+                                   0.0,
+                                   R_IB_z,
+                                   pos_IB);
     quat_IB = Eigen::Quaterniond(R_IB_z);
 }
 
@@ -397,5 +408,5 @@ bool Planner::_detect_contact()
     }
     this->_contact_temp = all_over_threshold;
 
-    return ((this->now() - this->time_of_first_contact).seconds() > this->_minimum_contact_duration);
+    return ((this->now() - this->_time_of_first_contact).seconds() > this->_minimum_contact_duration);
 }
