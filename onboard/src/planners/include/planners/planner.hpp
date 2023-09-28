@@ -7,8 +7,13 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
+#include "geometry_msgs/msg/transform_stamped.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "std_srvs/srv/trigger.hpp"
+
+
+#include "tf2/transform_datatypes.h"
+#include "tf2_ros/transform_broadcaster.h"
 
 using namespace std::chrono_literals;
 
@@ -38,10 +43,10 @@ private:
 
     Eigen::Quaterniond output_q;
 
-    Eigen::Vector3d _ee_offset, _start_point, _trackball_pos;
+    Eigen::Vector3d _ee_offset, _start_point, _trackball_pos, _current_position, _current_ee_position;
+    Eigen::Quaterniond _current_quat, _current_ee_quat;
 
     sensor_msgs::msg::JointState _curr_js, _last_js;
-    geometry_msgs::msg::PoseStamped _curr_pose, _curr_ee_pose;
 
     rclcpp::TimerBase::SharedPtr _timer;
 
@@ -50,6 +55,9 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr _mocap_subscription, _ee_subscription;
     rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr _trackball_subscription;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _setpoint_publisher, _setpoint_publisher_ee;
+
+    /* TF publisher */
+    std::unique_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;
 
     /* Callback Functions */
     void _timer_callback();
@@ -76,6 +84,12 @@ private:
     void _get_uav_to_ee_position();
 
     bool _detect_contact();
+
+    void _publish_tf(Eigen::Matrix3d R_IB, 
+                     Eigen::Vector3d p_IB,
+                     double joint_state[2]);
+                     
+    geometry_msgs::msg::Transform _transform_from_eigen(Eigen::Quaterniond rot, Eigen::Vector3d pos);
 };
 
 #endif // PLANNER_H
