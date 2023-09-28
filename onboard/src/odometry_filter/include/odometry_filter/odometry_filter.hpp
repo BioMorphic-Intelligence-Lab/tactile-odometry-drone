@@ -11,6 +11,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include <Eigen/Dense>
 #include "common/common.hpp"
+#include "kinematics/kinematics.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"

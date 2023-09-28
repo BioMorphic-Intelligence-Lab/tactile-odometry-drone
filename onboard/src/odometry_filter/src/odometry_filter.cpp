@@ -165,7 +165,27 @@ void OdometryFilter::_trackball_callback(const geometry_msgs::msg::PointStamped:
 
   Eigen::Vector3d pos_wall = this->odom_to_wall(this->_trackball_pos, this->quat_imu);
 
-  Eigen::Vector3d pos_world = this->wall_to_world(pos_wall);
+  double imu_roll = 0.0;
+  double uav_roll = 0.0;
+  Eigen::Matrix3d R_IE, R_IT, R_IO_0, R_IO, R_IW, R_IB_0;
+  Eigen::Vector3d p_IE, p_IT, p_IO_0, p_IO, p_IB_0, pos_world;
+
+  double joint_state[2] = {this->linear_joint, this->encoder_yaw};
+
+  double joint_state_start[2] = {0.0, this->encoder_yaw_at_contact};
+  // shift pos_wall, so that pos_IB is zero before contact
+  kinematics::forward_kinematics(R_IB_0, p_IB_0, joint_state_start, imu_roll, uav_roll, R_IO_0, p_IO_0);
+
+  kinematics::inverse_kinematics(R_IO_0,
+                                 p_IO_0,
+                                 pos_wall,
+                                 joint_state,
+                                 joint_state_start,
+                                 imu_roll,
+                                 uav_roll,
+                                 R_IB, R_IE, R_IT, R_IO, R_IW, p_IE, p_IT, p_IO, pos_world);
+  Eigen::Quaterniond quat_IB = Eigen::Quaterniond(R_IB);
+  // Eigen::Vector3d pos_world = this->wall_to_world(pos_wall);
 
   /*Publish Data*/
   geometry_msgs::msg::PoseStamped pose_wall_msg;
@@ -179,6 +199,10 @@ void OdometryFilter::_trackball_callback(const geometry_msgs::msg::PointStamped:
   pose_msg.pose.position.x = pos_world.x();
   pose_msg.pose.position.y = pos_world.y();
   pose_msg.pose.position.z = pos_world.z();
+  pose_msg.pose.orientation.w = quat_IB.w();
+  pose_msg.pose.orientation.x = quat_IB.x();
+  pose_msg.pose.orientation.y = quat_IB.y();
+  pose_msg.pose.orientation.z = quat_IB.z();
 
   this->odom_pose_wall_publisher_->publish(pose_wall_msg);
   this->odom_pose_publisher_->publish(pose_msg);
