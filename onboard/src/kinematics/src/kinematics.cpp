@@ -10,11 +10,18 @@ namespace kinematics
     const Eigen::Vector3d p_BE = -Eigen::Vector3d(-0.03, 0.33, 0.046);                         // aka ee_to_base_offset normal_spring_length = 0.1;
     const Eigen::Vector3d p_ET_0 = Eigen::Vector3d(0, -normal_spring_length, 0);               // todo to be replaced
 
-    void forward_kinematics(Eigen::Matrix3d R_IB,
-                            Eigen::Vector3d p_IB,
+    // I = Inertial
+    // B = Body
+    // E = EE- marker
+    // T = Tool-Center Point (Rotational Axis)
+    // O = Odometry (Ball Tip)
+    // W = Wall
+    void forward_kinematics(Eigen::Matrix3d R_IB, // Micap Orientation
+                            Eigen::Vector3d p_IB, // Mocap Position
                             double joint_state[2],
                             double imu_roll,
-                            Eigen::Matrix3d &R_IE,
+                            double uav_roll,
+                            Eigen::Matrix3d &R_IE, 
                             Eigen::Matrix3d &R_IT,
                             Eigen::Matrix3d &R_IO,
                             Eigen::Matrix3d &R_IW,
@@ -26,9 +33,7 @@ namespace kinematics
            variable name: p
             indices: first: start frame, second: end frame
         expressed in frame: first index, if not specified otherwise */
-        Eigen::Vector3d uav_eul = R_IB.eulerAngles(2, 1, 0);
-        double uav_roll = uav_eul.y();
-
+        
         R_IE = R_IB;
         p_IE = p_IB + R_IB * p_BE;
         Eigen::Vector3d p_ET = p_ET_0 - Eigen::Vector3d(0, joint_state[0], 0); // compression of spring is negative joint_state
@@ -105,14 +110,15 @@ namespace kinematics
                             Eigen::Vector3d p_IB,
                             double joint_state[2],
                             double imu_roll,
+                            double uav_roll,
                             Eigen::Matrix3d &R_IO,
                             Eigen::Vector3d &p_IO)
     {
         Eigen::Matrix3d R_IE, R_IT, R_IW;
         Eigen::Vector3d p_IE, p_IT;
 
-        forward_kinematics(R_IB, p_IB, joint_state, imu_roll, R_IE, R_IT,
-                           R_IO, R_IW, p_IE, p_IT, p_IO);
+        forward_kinematics(R_IB, p_IB, joint_state, imu_roll, uav_roll,
+                           R_IE, R_IT, R_IO, R_IW, p_IE, p_IT, p_IO);
     }
 
 }

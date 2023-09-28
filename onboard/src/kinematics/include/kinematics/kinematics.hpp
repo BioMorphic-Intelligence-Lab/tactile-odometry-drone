@@ -10,6 +10,7 @@ namespace kinematics
                         Eigen::Vector3d p_IB,
                         double joint_state[2],
                         double imu_roll,
+                        double uav_roll,
                         Eigen::Matrix3d &R_IE,
                         Eigen::Matrix3d &R_IT,
                         Eigen::Matrix3d &R_IO,
@@ -22,6 +23,7 @@ namespace kinematics
                         Eigen::Vector3d p_IB,
                         double joint_state[2],
                         double imu_roll,
+                        double uav_roll,
                         Eigen::Matrix3d &R_IO,
                         Eigen::Vector3d &p_IO);
 
