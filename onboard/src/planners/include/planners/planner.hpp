@@ -11,7 +11,6 @@
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "std_srvs/srv/trigger.hpp"
 
-
 #include "tf2/transform_datatypes.h"
 #include "tf2_ros/transform_broadcaster.h"
 
@@ -87,10 +86,14 @@ private:
 
     bool _detect_contact();
 
-    void _publish_tf(Eigen::Matrix3d R_IB, 
-                     Eigen::Vector3d p_IB,
-                     double joint_state[2]);
-                     
+    void _publish_forward_kinematics(Eigen::Matrix3d R_IB,
+                                     Eigen::Vector3d p_IB,
+                                     double joint_state[2]);
+
+    void _publish_tf(Eigen::Matrix3d R,
+                     Eigen::Vector3d p,
+                     std::string child_name);
+
     geometry_msgs::msg::Transform _transform_from_eigen(Eigen::Quaterniond rot, Eigen::Vector3d pos);
 };
 

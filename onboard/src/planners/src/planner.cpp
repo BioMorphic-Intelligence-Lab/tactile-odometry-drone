@@ -63,7 +63,7 @@ Planner::Planner()
 
     /* Init TF publisher */
     this->_tf_broadcaster =
-      std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+        std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 
     /* Init current joint state variable to avoid segmentation fault */
     this->_curr_js.position = {0.0, 0.0};
@@ -93,7 +93,7 @@ Planner::Planner()
 void Planner::_get_uav_to_ee_position()
 {
     Eigen::Vector3d mocap_pos = this->_current_position;
-    Eigen::Vector3d ee_pos= this->_current_ee_position;
+    Eigen::Vector3d ee_pos = this->_current_ee_position;
 
     if (this->_ee_offsets.size() <= 50)
     {
@@ -162,10 +162,12 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
     // quat_IB = common::quaternion_from_euler(0.0, 0.0, yaw2);
     // return position and orientation of uav
     // pos_IB = R_IW_z * pos_WE - R_IB_z * pos_BE;
+    Eigen::Matrix3d R_IE, R_IT, R_IO, R_IW;
+    Eigen::Vector3d p_IE, p_IT, p_IO;
 
     double joint_state[2] = {this->_curr_js.position[0],
                              this->_curr_js.position[1]};
-    double joint_state_start[2] = {0.0,0.0};
+    double joint_state_start[2] = {0.0, 0.0};
     kinematics::inverse_kinematics(R_IW_z,
                                    Eigen::Vector3d(0, 0, 0),
                                    pos_WE,
@@ -173,9 +175,13 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
                                    joint_state_start,
                                    0.0,
                                    0.0,
-                                   R_IB_z,
-                                   pos_IB);
+                                   R_IB_z, R_IE, R_IT, R_IO, R_IW, p_IE, p_IT, p_IO, pos_IB);
     quat_IB = Eigen::Quaterniond(R_IB_z);
+    this->_publish_tf(R_IB_z, pos_IB, "B_inv");
+    this->_publish_tf(R_IE, p_IE, "E_inv");
+    this->_publish_tf(R_IT, p_IT, "T_inv");
+    this->_publish_tf(R_IO, p_IO, "O_inv");
+    this->_publish_tf(R_IW, p_IO, "W_inv");
 }
 
 /* Callback Functions */
@@ -291,52 +297,37 @@ void Planner::_timer_callback()
 
     /* Publish TF */
     double joint_state[2] = {this->_curr_js.position[0], this->_curr_js.position[1]};
-    this->_publish_tf(curr_quat.toRotationMatrix(), curr_position,
-                      joint_state);
+    this->_publish_forward_kinematics(curr_quat.toRotationMatrix(), curr_position,
+                                      joint_state);
 }
 
-void Planner::_publish_tf(Eigen::Matrix3d R_IB, 
-                          Eigen::Vector3d p_IB,
-                          double joint_state[2])
+void Planner::_publish_tf(Eigen::Matrix3d R,
+                          Eigen::Vector3d p,
+                          std::string child_name)
+{
+    geometry_msgs::msg::TransformStamped T;
+    T.header.stamp = this->now();
+    T.header.frame_id = "world";
+    T.child_frame_id = child_name;
+
+    T.transform = this->_transform_from_eigen(Eigen::Quaterniond(R), p);
+    this->_tf_broadcaster->sendTransform(T);
+}
+void Planner::_publish_forward_kinematics(Eigen::Matrix3d R_IB,
+                                          Eigen::Vector3d p_IB,
+                                          double joint_state[2])
 {
     Eigen::Matrix3d R_IE, R_IT, R_IO, R_IW;
-    Eigen::Vector3d p_IE, p_IT, p_IO; 
+    Eigen::Vector3d p_IE, p_IT, p_IO;
 
     kinematics::forward_kinematics(R_IB, p_IB, joint_state, 0.0, 0.0,
-                        R_IE, R_IT, R_IO, R_IW, p_IE, p_IT, p_IO);
+                                   R_IE, R_IT, R_IO, R_IW, p_IE, p_IT, p_IO);
 
-
-    geometry_msgs::msg::TransformStamped IE, IT, IO, IW;
-    
-    // Set Timestamps
-    auto ts = this->now();
-    IE.header.stamp = ts;
-    IT.header.stamp = ts;
-    IO.header.stamp = ts;
-    IW.header.stamp = ts;
-
-    // Set Frame IDs
-    IE.header.frame_id = "world";
-    IT.header.frame_id = "world";
-    IO.header.frame_id = "world";
-    IW.header.frame_id = "world";
-
-    // Set Child Frame ID
-    IE.child_frame_id = "EE";
-    IT.child_frame_id = "TCP";
-    IO.child_frame_id = "Odom";
-    IW.child_frame_id = "Wall";
-
-    // Set Transform
-    IE.transform = this->_transform_from_eigen(Eigen::Quaterniond(R_IE), p_IE);
-    IT.transform = this->_transform_from_eigen(Eigen::Quaterniond(R_IT), p_IT);
-    IO.transform = this->_transform_from_eigen(Eigen::Quaterniond(R_IO), p_IO);
-    IW.transform = this->_transform_from_eigen(Eigen::Quaterniond(R_IW), p_IO);
-
-    this->_tf_broadcaster->sendTransform(IE);
-    this->_tf_broadcaster->sendTransform(IT);
-    this->_tf_broadcaster->sendTransform(IO);
-    this->_tf_broadcaster->sendTransform(IW);
+    this->_publish_tf(R_IB, p_IB, "B");
+    this->_publish_tf(R_IE, p_IE, "EE");
+    this->_publish_tf(R_IT, p_IT, "TCP");
+    this->_publish_tf(R_IO, p_IO, "Odom");
+    this->_publish_tf(R_IW, p_IO, "Wall");
 }
 
 geometry_msgs::msg::Transform Planner::_transform_from_eigen(Eigen::Quaterniond rot, Eigen::Vector3d pos)
@@ -363,25 +354,25 @@ void Planner::_mocap_callback(const geometry_msgs::msg::PoseStamped::SharedPtr m
 {
     auto pose = *msg;
     this->_current_position = Eigen::Vector3d(pose.pose.position.x,
-                                           pose.pose.position.y,
-                                           pose.pose.position.z);
-    
+                                              pose.pose.position.y,
+                                              pose.pose.position.z);
+
     this->_current_quat = Eigen::Quaterniond(pose.pose.orientation.w,
-                                            pose.pose.orientation.x,
-                                            pose.pose.orientation.y,
-                                            pose.pose.orientation.z);
+                                             pose.pose.orientation.x,
+                                             pose.pose.orientation.y,
+                                             pose.pose.orientation.z);
 }
 void Planner::_ee_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
 {
     auto pose = *msg;
     this->_current_ee_position = Eigen::Vector3d(pose.pose.position.x,
-                                              pose.pose.position.y,
-                                              pose.pose.position.z);
-    
+                                                 pose.pose.position.y,
+                                                 pose.pose.position.z);
+
     this->_current_ee_quat = Eigen::Quaterniond(pose.pose.orientation.w,
-                                               pose.pose.orientation.x,
-                                               pose.pose.orientation.y,
-                                               pose.pose.orientation.z);
+                                                pose.pose.orientation.x,
+                                                pose.pose.orientation.y,
+                                                pose.pose.orientation.z);
 }
 
 void Planner::_trackball_callback(const geometry_msgs::msg::PointStamped::SharedPtr msg)
