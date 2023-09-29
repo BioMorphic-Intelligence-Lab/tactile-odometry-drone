@@ -17,7 +17,7 @@ Planner::Planner()
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 1); // 10 Degree/s
     this->declare_parameter("align", true);
-    this->declare_parameter("start_point", std::vector<double>({0.40, 2.69, 1.65} /*{-0.31, 1.95, 1.85}*/));
+    this->declare_parameter("start_point", std::vector<double>({0.40, 2.67, 1.65} /*{-0.31, 1.95, 1.85}*/));
     this->declare_parameter("joint_topic", "/joint_state");
     this->declare_parameter("pose_topic", "/mocap_pose");
     this->declare_parameter("ee_topic", "/ee_pose");
@@ -136,7 +136,7 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
 
     double yaw = common::yaw_from_quaternion_y_align(quat_IB);
     double dt = 1.0 / this->_frequency;
-    double increment = -copysign(this->_yaw_rate, encoder_yaw) * dt;
+    double increment = copysign(this->_yaw_rate, encoder_yaw) * dt; // DOuble check sign??
 
     if (fabs(2.0 * M_PI / 180.0) > fabs(encoder_yaw))
     {
@@ -206,12 +206,16 @@ void Planner::_timer_callback()
     std::vector<double> joint_pos = this->_curr_js.position;
 
     /* Put in the position of the planner */
-    Eigen::Vector3d position = this->get_trajectory_setpoint();
+    Eigen::Vector3d position = common::rot_z(-0.5 * M_PI) * this->get_trajectory_setpoint(); // This is still to be determined??
 
     /*publish original trajectory pose*/
     msg.pose.position.x = position.x();
     msg.pose.position.y = position.y();
     msg.pose.position.z = position.z();
+    msg.pose.orientation.w = 0;
+    msg.pose.orientation.x = 0;
+    msg.pose.orientation.y = 0;
+    msg.pose.orientation.z = 1;
     this->_setpoint_publisher_ee->publish(msg);
 
     if (this->_in_contact)
