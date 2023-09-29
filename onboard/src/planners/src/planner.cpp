@@ -15,9 +15,9 @@ Planner::Planner()
     this->declare_parameter("desired_linear_joint_pos", -0.01); // position in m
     this->declare_parameter("v_approach", 0.25);                // Approach velocity
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
-    this->declare_parameter("yaw_rate", M_PI / 180.0 * 3); // 10 Degree/s
+    this->declare_parameter("yaw_rate", M_PI / 180.0 * 1); // 10 Degree/s
     this->declare_parameter("align", true);
-    this->declare_parameter("start_point", std::vector<double>({0.52, 2.46, 1.68} /*{-0.31, 1.95, 1.85}*/));
+    this->declare_parameter("start_point", std::vector<double>({0.40, 2.69, 1.65} /*{-0.31, 1.95, 1.85}*/));
     this->declare_parameter("joint_topic", "/joint_state");
     this->declare_parameter("pose_topic", "/mocap_pose");
     this->declare_parameter("ee_topic", "/ee_pose");
@@ -138,7 +138,7 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
     double dt = 1.0 / this->_frequency;
     double increment = -copysign(this->_yaw_rate, encoder_yaw) * dt;
 
-    if (fabs(5.0 * M_PI / 180.0) > fabs(encoder_yaw))
+    if (fabs(2.0 * M_PI / 180.0) > fabs(encoder_yaw))
     {
         increment = 0.0;
     }
@@ -175,6 +175,8 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
                                    0.0,
                                    R_IB_z, R_IE, R_IT, R_IO, R_IW, p_IE, p_IT, p_IO, pos_IB);
 
+    auto &clk = *this->get_clock();
+    RCLCPP_INFO_THROTTLE(this->get_logger(),clk, 1000, "encoder_yaw: %f", encoder_yaw);
     // Get Quaternion that only represents the desired yaw to 
     // achieve a planar goal pose
     quat_IB = Eigen::Quaterniond(R_IB_z);
@@ -287,6 +289,9 @@ void Planner::_timer_callback()
                 pos = this->_start_point;
             position.x() += pos.x();
             position.y() += pos.y();
+
+            // Transform to base reference 
+            position += common::rot_z(common::yaw_from_quaternion_y_align(curr_quat)) * (Eigen::Vector3d(0, 0.14, 0) - this->_ee_offset);
         }
 
         msg.pose.position.x = position.x();
@@ -393,17 +398,17 @@ bool Planner::_detect_contact()
     const bool force_over_threshold = fabs(this->_curr_js.position[0]) > JS_THRESHOLD;
     const bool trackball_over_threshold = this->_trackball_pos.norm() > 0.01;
 
-    const bool all_over_threshold = force_over_threshold || trackball_over_threshold;
+    const bool either_over_threshold = force_over_threshold || trackball_over_threshold;
 
-    if (all_over_threshold && !this->_contact_temp) // rising edge
+    if (either_over_threshold && !this->_contact_temp) // rising edge
     {
         this->_time_of_first_contact = this->now();
     }
-    if (!all_over_threshold)
+    if (!either_over_threshold)
     {
         this->_time_of_first_contact = this->now() + rclcpp::Duration(5, 0);
     }
-    this->_contact_temp = all_over_threshold;
+    this->_contact_temp = either_over_threshold;
 
     return ((this->now() - this->_time_of_first_contact).seconds() > this->_minimum_contact_duration);
 }

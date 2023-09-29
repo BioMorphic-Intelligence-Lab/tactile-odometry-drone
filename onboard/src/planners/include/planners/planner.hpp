@@ -38,7 +38,7 @@ private:
     double _desired_linear_joint_pos;       // desired value for linear joint in m
     double _position_offset = 0.0;          // positon offset calculated by force controller in m
     double _minimum_contact_duration = 3.0; // minimum duration of contact befor contact is enabled
-    bool _align, _in_contact, _is_aligned, _contact_temp;
+    bool _align, _in_contact, _is_aligned, _contact_temp=false;
 
     std::vector<Eigen::Vector3d> _ee_offsets;
 
