@@ -12,12 +12,12 @@ Planner::Planner()
 
     /* Declare all the parameters */
     this->declare_parameter("frequency", 20.0);
-    this->declare_parameter("desired_linear_joint_pos", -0.01); // position in m
+    this->declare_parameter("desired_linear_joint_pos", -0.003); // position in m
     this->declare_parameter("v_approach", 0.25);                // Approach velocity
-    this->declare_parameter("alignment_threshold", M_PI / 180.0 * 15);
+    this->declare_parameter("alignment_threshold", M_PI / 180.0 * 5);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 1); // 10 Degree/s
     this->declare_parameter("align", true);
-    this->declare_parameter("start_point", std::vector<double>({0.40, 2.67, 1.65} /*{-0.31, 1.95, 1.85}*/));
+    this->declare_parameter("start_point", std::vector<double>({0.00, 2.50, 1.65} /*{0.40, 2.62, 1.65}*/));
     this->declare_parameter("joint_topic", "/joint_state");
     this->declare_parameter("pose_topic", "/mocap_pose");
     this->declare_parameter("ee_topic", "/ee_pose");
@@ -60,6 +60,9 @@ Planner::Planner()
         this->get_parameter("pub_topic").as_string(), 10);
     this->_setpoint_publisher_ee = this->create_publisher<geometry_msgs::msg::PoseStamped>(
         "/ref_pose/ee", 10);
+    this->_force_publisher = this->create_publisher<std_msgs::msg::Float64>(
+        "/ref_pose/force_ctrl_offset", 10);
+
 
     /* Init TF publisher */
     this->_tf_broadcaster =
@@ -108,13 +111,24 @@ void Planner::_get_uav_to_ee_position()
 // needs to be applied on unaligned position and need to be aligned afterwards
 double Planner::_control_contact_force(float linear_joint, float desired_joint)
 {
-    float p_gain = 1.0; // should be less than 1, as joint values are in m
+    float p_gain = 7.50;
     float d_gain = 0.1;
+    float i_gain = 0.3;
+
     float joint_velocity = 0.5 * (this->_curr_js.velocity[0] + this->_last_js.velocity[0]);
 
     this->_last_js = this->_curr_js;
 
-    return p_gain * (linear_joint - desired_joint) - d_gain * joint_velocity;
+    double error = (linear_joint - desired_joint);
+    double dt = 1.0/ this->_frequency;
+    this->_linear_axis_error_integral += error * dt;
+
+    double force_offset = p_gain * error - d_gain * joint_velocity + i_gain * this->_linear_axis_error_integral;
+
+    std_msgs::msg::Float64 msg;
+    msg.data = force_offset;
+    this->_force_publisher->publish(msg);
+    return force_offset;
 }
 
 /**
@@ -249,7 +263,7 @@ void Planner::_timer_callback()
     }
 
     // allways add position offset (it will be 0 if not wanted)
-    position.y() += this->_position_offset;
+    position.x() += this->_position_offset;
 
     /* Check if we already are in contact and if we want to align with the wall */
     if (this->_align && this->_in_contact)
@@ -295,7 +309,7 @@ void Planner::_timer_callback()
             position.y() += pos.y();
 
             // Transform to base reference 
-            position += common::rot_z(common::yaw_from_quaternion_y_align(curr_quat)) * (Eigen::Vector3d(0, 0.14, 0) - this->_ee_offset);
+            position += common::rot_z(common::yaw_from_quaternion_y_align(curr_quat)) * (Eigen::Vector3d(0, 0.24, -0.0135) - this->_ee_offset);
         }
 
         msg.pose.position.x = position.x();
@@ -400,7 +414,7 @@ void Planner::_trackball_callback(const geometry_msgs::msg::PointStamped::Shared
 bool Planner::_detect_contact()
 {
     const bool force_over_threshold = fabs(this->_curr_js.position[0]) > JS_THRESHOLD;
-    const bool trackball_over_threshold = this->_trackball_pos.norm() > 0.01;
+    const bool trackball_over_threshold = this->_trackball_pos.norm() > 0.03;
 
     const bool either_over_threshold = force_over_threshold || trackball_over_threshold;
 

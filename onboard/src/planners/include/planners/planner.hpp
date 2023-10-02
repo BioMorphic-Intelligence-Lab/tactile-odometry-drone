@@ -10,6 +10,7 @@
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "std_srvs/srv/trigger.hpp"
+#include "std_msgs/msg/float64.hpp"
 
 #include "tf2/transform_datatypes.h"
 #include "tf2_ros/transform_broadcaster.h"
@@ -38,6 +39,7 @@ private:
     double _desired_linear_joint_pos;       // desired value for linear joint in m
     double _position_offset = 0.0;          // positon offset calculated by force controller in m
     double _minimum_contact_duration = 3.0; // minimum duration of contact befor contact is enabled
+    double _linear_axis_error_integral = 0.0;
     bool _align, _in_contact, _is_aligned, _contact_temp=false;
 
     std::vector<Eigen::Vector3d> _ee_offsets;
@@ -56,6 +58,7 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr _mocap_subscription, _ee_subscription;
     rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr _trackball_subscription;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _setpoint_publisher, _setpoint_publisher_ee;
+    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr _force_publisher;
 
     /* TF publisher */
     std::unique_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;
