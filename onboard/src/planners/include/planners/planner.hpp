@@ -40,11 +40,11 @@ private:
     double _position_offset = 0.0;          // positon offset calculated by force controller in m
     double _minimum_contact_duration = 3.0; // minimum duration of contact befor contact is enabled
     double _linear_axis_error_integral = 0.0;
-    bool _align, _in_contact, _is_aligned, _contact_temp=false;
+    bool _align, _in_contact, _in_contact_old, _is_aligned, _contact_temp = false;
 
     std::vector<Eigen::Vector3d> _ee_offsets;
 
-    Eigen::Quaterniond output_q;
+    Eigen::Quaterniond quat_IB_des_old;
 
     Eigen::Vector3d _ee_offset, _start_point, _trackball_pos, _current_position, _current_ee_position;
     Eigen::Quaterniond _current_quat, _current_ee_quat;
@@ -81,7 +81,7 @@ private:
     *   pos_IB: updated position of UAV
     *   yaw_IB: updated yaw of UAV
     */
-    void _align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap);
+    void _align_to_wall(Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des);
 
     double _control_contact_force(float linear_joint, float desired_joint);
 

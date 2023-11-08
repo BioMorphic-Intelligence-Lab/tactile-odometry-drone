@@ -7,13 +7,13 @@ using namespace personal;
 
 Planner::Planner()
     : Node("Planner"), JS_THRESHOLD(0.001),
-      output_q(0.0, 0.0, 0.0, 1.0) // MS: make the threshold a paramteter
+      quat_IB_des_old(0.0, 0.0, 0.0, 1.0) // MS: make the threshold a paramteter
 {
 
     /* Declare all the parameters */
     this->declare_parameter("frequency", 20.0);
     this->declare_parameter("desired_linear_joint_pos", -0.003); // position in m
-    this->declare_parameter("v_approach", 0.25);                // Approach velocity
+    this->declare_parameter("v_approach", 0.25);                 // Approach velocity
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 5);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 1); // 10 Degree/s
     this->declare_parameter("align", true);
@@ -63,7 +63,6 @@ Planner::Planner()
     this->_force_publisher = this->create_publisher<std_msgs::msg::Float64>(
         "/ref_pose/force_ctrl_offset", 10);
 
-
     /* Init TF publisher */
     this->_tf_broadcaster =
         std::make_unique<tf2_ros::TransformBroadcaster>(*this);
@@ -108,7 +107,10 @@ void Planner::_get_uav_to_ee_position()
     }
 }
 
-// needs to be applied on unaligned position and need to be aligned afterwards
+/**
+ *  needs to be applied on unaligned position in wall frame (before alignment)
+ *  if uav is to far away from wall, the controller output is negative
+ */
 double Planner::_control_contact_force(float linear_joint, float desired_joint)
 {
     float p_gain = 7.50;
@@ -120,7 +122,7 @@ double Planner::_control_contact_force(float linear_joint, float desired_joint)
     this->_last_js = this->_curr_js;
 
     double error = (linear_joint - desired_joint);
-    double dt = 1.0/ this->_frequency;
+    double dt = 1.0 / this->_frequency;
     this->_linear_axis_error_integral += error * dt;
 
     double force_offset = p_gain * error - d_gain * joint_velocity + i_gain * this->_linear_axis_error_integral;
@@ -134,82 +136,62 @@ double Planner::_control_contact_force(float linear_joint, float desired_joint)
 /**
  * @brief Align UAV to be perpendicular to wall (i.e. encoderYaw == 0). The function is designed to run permanentely after the trajectory position has been set
  * Inputs:
+    *   quat_IB_des: last desired orientation of UAV
  *      pos_WO: position of End-Effector-Tip in Wall-Frame from trajectory_setpoint()
         encoderYaw: reading of encoder (in rad)
-        quat_mocap_q: current mocap orientation
-        pos_BE:  position offset from UAV to End-Effector
 * Outputs:
 *   pos_IB: desired position of UAV-Body in world-frame
-*   quat_IB: new desired orientation of UAV
+*   quat_IB_des_new: desired orientation of UAV
  */
-void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WO, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap_q)
+void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des)
 {
-    // Currently unused
-    (void)quat_mocap_q;
-    (void)pos_BE;
 
-    double yaw = common::yaw_from_quaternion_y_align(quat_IB);
+    double yaw_des_old = common::yaw_from_quaternion_y_align(quat_IB_des_old);
     double dt = 1.0 / this->_frequency;
-    double increment = copysign(this->_yaw_rate, encoder_yaw) * dt; // DOuble check sign??
+    double yaw_increment = copysign(this->_yaw_rate, encoder_yaw) * dt;
 
     if (fabs(2.0 * M_PI / 180.0) > fabs(encoder_yaw))
     {
-        increment = 0.0;
+        yaw_increment = 0.0;
     }
+    float yaw_des_new = yaw_des_old + yaw_increment;
 
-    // get rotation about z-axis that preserves x-y-heading of y-axis
-    // const Eigen::Matrix3d R_IB = quat_IB.toRotationMatrix();
-    // double yaw = -atan2(R_IB(1, 2), R_IB(2, 2));
-    float yaw2 = yaw + increment;
-    
-    // Rotation Matrix between World/Inertial (I) and Wall (W)
-    // Eigen::Matrix3d R_IW = quat_IB.toRotationMatrix() * common::quaternion_from_euler(0.0, 0.0, -encoder_yaw);
-    Eigen::Matrix3d R_IB_z = common::rot_z(yaw2);
-    const Eigen::Matrix3d R_BW_z = common::rot_z(-encoder_yaw);
-    const Eigen::Matrix3d R_IW_z = R_IB_z * R_BW_z;
-
-    // return valies quat_IB and pos_IB
-    // quat_IB = common::quaternion_from_euler(0.0, 0.0, yaw2);
-    // return position and orientation of uav
-    // pos_IB = R_IW_z * pos_WO - R_IB_z * pos_BE;
-    Eigen::Matrix3d R_IE, R_IT, R_IO, R_IW, R_IO_0 = common::rot_z(M_PI);
-    Eigen::Vector3d p_IE, p_IT, p_IO, p_IO_0 = this->_start_point;
+    // desired Rotation Matrix between World/Inertial (I) and Body (B)
+    Eigen::Matrix3d R_IB_des = common::rot_z(yaw_des_new);
+    quat_IB_des_new = Eigen::Quaterniond(R_IB_des);
 
     double joint_state[2] = {this->_curr_js.position[0],
                              encoder_yaw};
-    double joint_state_start[2] = {0.0, 0.0};
+
+    Eigen::Matrix3d R_IW = Eigen::Matrix3d::Identity(); // wall orientation equals odom-orientation at first contact
+    // get position of odometry w.r.t. the world frame
+    Eigen::Vector3d p_IO_des = kinematics::transform_wall_to_world(pos_IO_des_0, pos_WO, R_IW);
 
     // Get the base des base pose from the desired ee pose
-    kinematics::inverse_kinematics(R_IW_z,
-                                   p_IO_0,
-                                   pos_WO,
-                                   joint_state,
+    Eigen::Matrix3d R_IB, R_IE, R_IT, R_IO;
+    Eigen::Vector3d p_IE_des, p_IT_des, p_IB_des;
+    kinematics::inverse_kinematics(R_IB_des,
+                                   p_IO_des,
                                    joint_state,
                                    0.0,
                                    0.0,
-                                   R_IB_z, R_IE, R_IT, R_IO, R_IW, p_IE, p_IT, p_IO, pos_IB);
+                                   R_IB, R_IE, R_IT, R_IW, p_IE_des, p_IT_des, pos_IB_des);
 
     auto &clk = *this->get_clock();
-    RCLCPP_INFO_THROTTLE(this->get_logger(),clk, 1000, "encoder_yaw: %f", encoder_yaw);
-    // Get Quaternion that only represents the desired yaw to 
-    // achieve a planar goal pose
-    quat_IB = Eigen::Quaterniond(R_IB_z);
-    double yaw_IB = common::yaw_from_quaternion_y_align(quat_IB);
-    R_IB_z = common::rot_z(yaw_IB);
-    quat_IB = Eigen::Quaterniond(R_IB_z);
+    RCLCPP_INFO_THROTTLE(this->get_logger(), clk, 1000, "encoder_yaw: %f", encoder_yaw);
 
     // Publish the TFs
-    this->_publish_tf(R_IB_z, pos_IB, "B_inv");
-    this->_publish_tf(R_IE, p_IE, "E_inv");
-    this->_publish_tf(R_IT, p_IT, "T_inv");
-    this->_publish_tf(R_IO, p_IO, "O_inv");
-    this->_publish_tf(R_IW, p_IO, "W_inv");
+    this->_publish_tf(R_IB_des, p_IB_des, "B_des");
+    this->_publish_tf(R_IE, p_IE_des, "E_des");
+    this->_publish_tf(R_IT, p_IT_des, "T_des");
+    this->_publish_tf(R_IO, p_IO_des, "O_des");
+    this->_publish_tf(R_IW, pos_IO_des_0, "W");
 }
 
 /* Callback Functions */
 void Planner::_timer_callback()
 {
-    /* Init the Message and time stamp it */
+    /* Init the Pose Message and time stamp it */
     geometry_msgs::msg::PoseStamped msg{};
     msg.header.frame_id = "world";
     msg.header.stamp = this->now();
@@ -220,23 +202,29 @@ void Planner::_timer_callback()
     std::vector<double> joint_pos = this->_curr_js.position;
 
     /* Put in the position of the planner */
-    Eigen::Vector3d position = common::rot_z(-0.5 * M_PI) * this->get_trajectory_setpoint(); // This is still to be determined??
+    Eigen::Vector3d pos_WO_des = this->get_trajectory_setpoint();
 
     /*publish original trajectory pose*/
-    msg.pose.position.x = position.x();
-    msg.pose.position.y = position.y();
-    msg.pose.position.z = position.z();
+    msg.pose.position.x = pos_WO_des.x();
+    msg.pose.position.y = pos_WO_des.y();
+    msg.pose.position.z = pos_WO_des.z();
     msg.pose.orientation.w = 0;
     msg.pose.orientation.x = 0;
     msg.pose.orientation.y = 0;
     msg.pose.orientation.z = 1;
     this->_setpoint_publisher_ee->publish(msg);
 
+    double joint_state[2] = {this->_curr_js.position[0], this->_curr_js.position[1]};
+
     if (this->_in_contact)
     {
         /* check if UAV is aligned to all*/
         this->_is_aligned = (this->_is_aligned) ||
                             fabs(fmod(joint_pos[1], 2 * M_PI)) < this->_alignment_threshold;
+
+        if (this->_in_contact_old == false) // rising edge
+        {
+        }
     }
     else
     {
@@ -245,6 +233,7 @@ void Planner::_timer_callback()
 
         /* check if UAV is in contact*/
         this->_in_contact = this->_detect_contact();
+        // TODO: publish _in_contact, _is_aligned, ...
     }
 
     if (this->_is_aligned && this->_in_contact)
@@ -263,33 +252,33 @@ void Planner::_timer_callback()
     }
 
     // allways add position offset (it will be 0 if not wanted)
-    position.x() += this->_position_offset;
+    pos_WO_des.y() += this->_position_offset; // here, position is defined in wall-frame (y pointing away from wall)
 
     /* Check if we already are in contact and if we want to align with the wall */
     if (this->_align && this->_in_contact)
     {
 
-        Eigen::Vector3d aligned_position;
+        Eigen::Vector3d pos_IB_des; // desired position of uab body (B) w.r.t. world (I)
 
         /* Find the aligned position and orientation */
-        _align_to_wall(output_q, aligned_position, position,
-                       this->_ee_offset + this->_curr_js.position[0] * Eigen::Vector3d::UnitY(),
-                       this->_curr_js.position[1],
-                       curr_quat);
+        Eigen::Quaterniond quat_IB_des_new;
+        _align_to_wall(quat_IB_des_old, this->_start_point, pos_WO_des,
+                       this->_curr_js.position[1], quat_IB_des_new, pos_IB_des);
+        quat_IB_des_old = quat_IB_des_new;
 
         /* Transform to start point */
-        RCLCPP_DEBUG(this->get_logger(), "%f %f %f", aligned_position.x(), aligned_position.y(), aligned_position.z());
+        RCLCPP_DEBUG(this->get_logger(), "%f %f %f", pos_IB_des.x(), pos_IB_des.y(), pos_IB_des.z());
 
         /* Add it to the message */
-        // Eigen::Quaterniond output_q = common::quaternion_from_euler(0, 0, output_yaw);
-        msg.pose.orientation.w = output_q.w();
-        msg.pose.orientation.x = output_q.x();
-        msg.pose.orientation.y = output_q.y();
-        msg.pose.orientation.z = output_q.z();
+        // Eigen::Quaterniond quat_IB_des = common::quaternion_from_euler(0, 0, output_yaw);
+        msg.pose.orientation.w = quat_IB_des_new.w();
+        msg.pose.orientation.x = quat_IB_des_new.x();
+        msg.pose.orientation.y = quat_IB_des_new.y();
+        msg.pose.orientation.z = quat_IB_des_new.z();
 
-        msg.pose.position.x = aligned_position.x();
-        msg.pose.position.y = aligned_position.y();
-        msg.pose.position.z = aligned_position.z();
+        msg.pose.position.x = pos_IB_des.x();
+        msg.pose.position.y = pos_IB_des.y();
+        msg.pose.position.z = pos_IB_des.z();
     }
     /* Otherwise the trajectory has not started yet and
      * we fly towards the start position. For this we command reference positions that are
@@ -301,20 +290,20 @@ void Planner::_timer_callback()
 
         if (t > 0)
         {
-            position.z() += this->_start_point.z();
+            pos_WO_des.z() += this->_start_point.z();
             Eigen::Vector3d pos = this->_v_approach * t * Eigen::Vector3d(this->_start_point.x(), this->_start_point.y(), 0.0).normalized();
             if (pos.y() > this->_start_point.y())
                 pos = this->_start_point;
-            position.x() += pos.x();
-            position.y() += pos.y();
+            pos_WO_des.x() += pos.x();
+            pos_WO_des.y() += pos.y();
 
-            // Transform to base reference 
-            position += common::rot_z(common::yaw_from_quaternion_y_align(curr_quat)) * (Eigen::Vector3d(0, 0.24, -0.0135) - this->_ee_offset);
+            // Transform to base reference
+            pos_WO_des += common::rot_z(common::yaw_from_quaternion_y_align(curr_quat)) * (Eigen::Vector3d(0, 0.24, -0.0135) - this->_ee_offset);
         }
 
-        msg.pose.position.x = position.x();
-        msg.pose.position.y = position.y();
-        msg.pose.position.z = position.z();
+        msg.pose.position.x = pos_WO_des.x();
+        msg.pose.position.y = pos_WO_des.y();
+        msg.pose.position.z = pos_WO_des.z();
         msg.pose.orientation.w = 0;
         msg.pose.orientation.x = 0;
         msg.pose.orientation.y = 0;
@@ -325,7 +314,7 @@ void Planner::_timer_callback()
     this->_setpoint_publisher->publish(msg);
 
     /* Publish TF */
-    double joint_state[2] = {this->_curr_js.position[0], this->_curr_js.position[1]};
+
     this->_publish_forward_kinematics(curr_quat.toRotationMatrix(), curr_position,
                                       joint_state);
 }
@@ -350,13 +339,13 @@ void Planner::_publish_forward_kinematics(Eigen::Matrix3d R_IB,
     Eigen::Vector3d p_IE, p_IT, p_IO;
 
     kinematics::forward_kinematics(R_IB, p_IB, joint_state, 0.0, 0.0,
-                                   R_IE, R_IT, R_IO, R_IW, p_IE, p_IT, p_IO);
+                                   R_IE, R_IT, R_IO, p_IE, p_IT, p_IO);
 
     this->_publish_tf(R_IB, p_IB, "B");
     this->_publish_tf(R_IE, p_IE, "EE");
     this->_publish_tf(R_IT, p_IT, "TCP");
     this->_publish_tf(R_IO, p_IO, "Odom");
-    this->_publish_tf(R_IW, p_IO, "Wall");
+    // this->_publish_tf(R_IW, p_IO, "Wall");
 }
 
 geometry_msgs::msg::Transform Planner::_transform_from_eigen(Eigen::Quaterniond rot, Eigen::Vector3d pos)
