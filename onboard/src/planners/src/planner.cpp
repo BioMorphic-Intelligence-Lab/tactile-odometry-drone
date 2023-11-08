@@ -7,7 +7,7 @@ using namespace personal;
 
 Planner::Planner()
     : Node("Planner"), JS_THRESHOLD(0.001),
-      quat_IB_des_old(0.0, 0.0, 0.0, 1.0) // MS: make the threshold a paramteter
+      quat_IB_des_old(0.0, 0.0, 0.0, 1.0) // yaw 180°
 {
 
     /* Declare all the parameters */
@@ -62,6 +62,10 @@ Planner::Planner()
         "/ref_pose/ee", 10);
     this->_force_publisher = this->create_publisher<std_msgs::msg::Float64>(
         "/ref_pose/force_ctrl_offset", 10);
+    this->_contact_publisher = this->create_publisher<std_msgs::msg::Bool>(
+        "/planner/in_contact", 10);
+    this->_aligned_publisher = this->create_publisher<std_msgs::msg::Bool>(
+        "/planner/is_aligned", 10);
 
     /* Init TF publisher */
     this->_tf_broadcaster =
@@ -216,6 +220,12 @@ void Planner::_timer_callback()
 
     double joint_state[2] = {this->_curr_js.position[0], this->_curr_js.position[1]};
 
+    std_msgs::msg::Bool msg_bool;
+    msg_bool.data = this->_in_contact;
+    this->_contact_publisher->publish(msg_bool);
+    msg_bool.data = this->_is_aligned;
+    this->_aligned_publisher->publish(msg_bool);
+
     if (this->_in_contact)
     {
         /* check if UAV is aligned to all*/
@@ -233,7 +243,6 @@ void Planner::_timer_callback()
 
         /* check if UAV is in contact*/
         this->_in_contact = this->_detect_contact();
-        // TODO: publish _in_contact, _is_aligned, ...
     }
 
     if (this->_is_aligned && this->_in_contact)

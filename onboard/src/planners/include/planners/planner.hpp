@@ -11,6 +11,7 @@
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "std_srvs/srv/trigger.hpp"
 #include "std_msgs/msg/float64.hpp"
+#include "std_msgs/msg/bool.hpp"
 
 #include "tf2/transform_datatypes.h"
 #include "tf2_ros/transform_broadcaster.h"
@@ -59,6 +60,7 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr _trackball_subscription;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _setpoint_publisher, _setpoint_publisher_ee;
     rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr _force_publisher;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr _contact_publisher, _aligned_publisher;
 
     /* TF publisher */
     std::unique_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;
