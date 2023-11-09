@@ -15,9 +15,13 @@ Planner::Planner()
     this->declare_parameter("desired_linear_joint_pos", -0.003); // position in m
     this->declare_parameter("v_approach", 0.25);                // Approach velocity
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 5);
-    this->declare_parameter("yaw_rate", M_PI / 180.0 * 1); // 10 Degree/s
+    this->declare_parameter("yaw_rate", M_PI / 180.0 * 1); // 1 Degree/s
     this->declare_parameter("align", true);
-    this->declare_parameter("start_point", std::vector<double>({0.00, 2.50, 1.65} /*{0.40, 2.62, 1.65}*/));
+    /* -10 Deg {0.40, 2.62, 1.65}
+       +10 Deg {0.00, 2.50, 1.65}
+       -20 Deg {0.40, 2.89, 1.65}
+       +20 Deg {0.00, 2.55, 1.65}*/
+    this->declare_parameter("start_point", std::vector<double>({0.00, 2.0, 1.65}));
     this->declare_parameter("joint_topic", "/joint_state");
     this->declare_parameter("pose_topic", "/mocap_pose");
     this->declare_parameter("ee_topic", "/ee_pose");
@@ -111,8 +115,8 @@ void Planner::_get_uav_to_ee_position()
 // needs to be applied on unaligned position and need to be aligned afterwards
 double Planner::_control_contact_force(float linear_joint, float desired_joint)
 {
-    float p_gain = 7.50;
-    float d_gain = 0.1;
+    float p_gain = 8.5;//8.5;
+    float d_gain = 2.0;//0.1;
     float i_gain = 0.3;
 
     float joint_velocity = 0.5 * (this->_curr_js.velocity[0] + this->_last_js.velocity[0]);
@@ -168,7 +172,7 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
     const Eigen::Matrix3d R_BW_z = common::rot_z(-encoder_yaw);
     const Eigen::Matrix3d R_IW_z = R_IB_z * R_BW_z;
 
-    // return valies quat_IB and pos_IB
+    // return values quat_IB and pos_IB
     // quat_IB = common::quaternion_from_euler(0.0, 0.0, yaw2);
     // return position and orientation of uav
     // pos_IB = R_IW_z * pos_WO - R_IB_z * pos_BE;
@@ -177,8 +181,7 @@ void Planner::_align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_I
 
     double joint_state[2] = {this->_curr_js.position[0],
                              encoder_yaw};
-    double joint_state_start[2] = {0.0, 0.0};
-
+                             
     // Get the base des base pose from the desired ee pose
     kinematics::inverse_kinematics(R_IW_z,
                                    p_IO_0,
@@ -220,7 +223,7 @@ void Planner::_timer_callback()
     std::vector<double> joint_pos = this->_curr_js.position;
 
     /* Put in the position of the planner */
-    Eigen::Vector3d position = common::rot_z(-0.5 * M_PI) * this->get_trajectory_setpoint(); // This is still to be determined??
+    Eigen::Vector3d position = common::rot_z(-M_PI_2) * this->get_trajectory_setpoint(); // This is still to be determined??
 
     /*publish original trajectory pose*/
     msg.pose.position.x = position.x();
@@ -249,7 +252,7 @@ void Planner::_timer_callback()
 
     if (this->_is_aligned && this->_in_contact)
     {
-        // if alignment is lost, _position_offset will remain at last value to pprevent jumps. it will be reset, if conact is lost
+        // if alignment is lost, _position_offset will remain at last value to prevent jumps. it will be reset, if contact is lost
         this->_position_offset = _control_contact_force(joint_pos[0],
                                                         this->_desired_linear_joint_pos);
     }
