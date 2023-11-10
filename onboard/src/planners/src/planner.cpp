@@ -147,7 +147,7 @@ double Planner::_control_contact_force(float linear_joint, float desired_joint)
 *   pos_IB: desired position of UAV-Body in world-frame
 *   quat_IB_des_new: desired orientation of UAV
  */
-void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_at_contact, Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des)
+void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_at_contact, Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des.Eigen::Matrix3d &R_IW)
 {
 
     double yaw_des_old = common::yaw_from_quaternion_y_align(quat_IB_des_old);
@@ -168,7 +168,7 @@ void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_at_contact, Eigen::Quate
                              encoder_yaw};
 
     double yaw_IB_at_contact = common::yaw_from_quaternion_y_align(quat_IB_at_contact);
-    Eigen::Matrix3d R_IW = common::rot_z(yaw_IB_at_contact); // wall orientation equals odom-orientation at first contact
+    R_IW = common::rot_z(yaw_IB_at_contact); // wall orientation equals odom-orientation at first contact
     // get position of odometry w.r.t. the world frame
     Eigen::Vector3d p_IO_des = kinematics::transform_wall_to_world(pos_IO_des_0, pos_WO, R_IW);
 
@@ -237,6 +237,13 @@ void Planner::_timer_callback()
         if (this->_in_contact_old == false) // rising edge
         {
             _quat_IB_at_contact = _current_quat;
+            Eigen::Matrix3d R_IO_temp; // unused
+            forward_kinematics(_quat_IB_at_contact.normalized().toRotationMatrix(),
+                               this->_current_position,
+                               this->_curr_js.position[1] 0,
+                               0,
+                               R_IO_temp,
+                               _pos_IO_at_contact);
         }
     }
     else
@@ -264,7 +271,7 @@ void Planner::_timer_callback()
     }
 
     // allways add position offset (it will be 0 if not wanted)
-    pos_WO_des.y() += this->_position_offset; // here, position is defined in wall-frame (y pointing away from wall)
+    // pos_WO_des.y() += this->_position_offset; // here, position is defined in wall-frame (y pointing away from wall)
 
     /* Check if we already are in contact and if we want to align with the wall */
     if (this->_align && this->_in_contact)
@@ -274,9 +281,13 @@ void Planner::_timer_callback()
 
         /* Find the aligned position and orientation */
         Eigen::Quaterniond quat_IB_des_new;
-        _align_to_wall(_quat_IB_at_contact, quat_IB_des_old, this->_start_point, pos_WO_des,
-                       this->_curr_js.position[1], quat_IB_des_new, pos_IB_des);
+        Eigen::Matrix3d R_IW;
+        _align_to_wall(_quat_IB_at_contact, quat_IB_des_old, _pos_IO_at_contact, pos_WO_des,
+                       this->_curr_js.position[1], quat_IB_des_new, pos_IB_des, R_IW);
         quat_IB_des_old = quat_IB_des_new;
+
+        Eigen::Vector3d force_offset(0, this->_position_offset, 0);
+        pos_IB_des += R_IW * force_offset; // rotate offset to world frame and add it
 
         /* Transform to start point */
         RCLCPP_DEBUG(this->get_logger(), "%f %f %f", pos_IB_des.x(), pos_IB_des.y(), pos_IB_des.z());
