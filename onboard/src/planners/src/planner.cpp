@@ -147,7 +147,7 @@ double Planner::_control_contact_force(float linear_joint, float desired_joint)
 *   pos_IB: desired position of UAV-Body in world-frame
 *   quat_IB_des_new: desired orientation of UAV
  */
-void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_at_contact, Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des.Eigen::Matrix3d &R_IW)
+void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_at_contact, Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des, Eigen::Matrix3d &R_IW)
 {
 
     double yaw_des_old = common::yaw_from_quaternion_y_align(quat_IB_des_old);
@@ -238,12 +238,17 @@ void Planner::_timer_callback()
         {
             _quat_IB_at_contact = _current_quat;
             Eigen::Matrix3d R_IO_temp; // unused
-            forward_kinematics(_quat_IB_at_contact.normalized().toRotationMatrix(),
-                               this->_current_position,
-                               this->_curr_js.position[1] 0,
-                               0,
-                               R_IO_temp,
-                               _pos_IO_at_contact);
+            Eigen::Matrix3d R_IB_at_contact = _quat_IB_at_contact.normalized().toRotationMatrix();
+            double encoder_yaw = this->_curr_js.position[1];
+            double joint_state[2] = {this->_curr_js.position[0],
+                                     encoder_yaw};
+            kinematics::forward_kinematics(R_IB_at_contact,
+                                           this->_current_position,
+                                           joint_state,
+                                           0.0,
+                                           0.0,
+                                           R_IO_temp,
+                                           _pos_IO_at_contact);
         }
     }
     else
