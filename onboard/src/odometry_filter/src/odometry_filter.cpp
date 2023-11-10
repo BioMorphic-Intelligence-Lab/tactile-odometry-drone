@@ -172,7 +172,7 @@ void OdometryFilter::_trackball_callback(const geometry_msgs::msg::PointStamped:
   double imu_roll = 0.0;
   double uav_roll = 0.0;
   Eigen::Matrix3d R_IE, R_IT, R_IO_0, R_IO, R_IW, R_IB_0;
-  Eigen::Vector3d p_IE, p_IT, p_IO_0, p_IO, p_IB_0, pos_world;
+  Eigen::Vector3d p_IE, p_IT, p_IO_0, p_IO, p_IB_0, p_IB, pos_world;
 
   R_IB_0 = this->orientation_at_contact.toRotationMatrix();
   p_IB_0 = this->pos_at_contact;
@@ -183,18 +183,18 @@ void OdometryFilter::_trackball_callback(const geometry_msgs::msg::PointStamped:
   // shift pos_wall, so that pos_IB is zero before contact
   kinematics::forward_kinematics(R_IB_0, p_IB_0, joint_state_start, imu_roll, uav_roll, R_IO_0, p_IO_0);
 
+  p_IO = kinematics::transform_wall_to_world(p_IO_0, pos_wall, R_IO_0);
   kinematics::inverse_kinematics(R_IO_0,
-                                 p_IO_0,
-                                 pos_wall,
+                                 p_IO,
                                  joint_state,
-                                 joint_state_start,
                                  imu_roll,
                                  uav_roll,
-                                 R_IB, R_IE, R_IT, R_IO, R_IW, p_IE, p_IT, p_IO, pos_world);
+                                 R_IB, R_IE, R_IT, R_IW, p_IE, p_IT, p_IB);
   Eigen::Quaterniond quat_IB = Eigen::Quaterniond(R_IB);
+
   // Eigen::Vector3d pos_world = this->wall_to_world(pos_wall);
 
-  this->_publish_tf(R_IB, pos_world, "Body_est");
+  this->_publish_tf(R_IB, p_IB, "Body_est");
   this->_publish_tf(R_IE, p_IE, "EE_est");
   this->_publish_tf(R_IT, p_IT, "TCP_est");
   this->_publish_tf(R_IO, p_IO, "Odom_est");
