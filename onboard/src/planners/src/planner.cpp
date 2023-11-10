@@ -147,7 +147,7 @@ double Planner::_control_contact_force(float linear_joint, float desired_joint)
 *   pos_IB: desired position of UAV-Body in world-frame
 *   quat_IB_des_new: desired orientation of UAV
  */
-void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des)
+void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_at_contact, Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des)
 {
 
     double yaw_des_old = common::yaw_from_quaternion_y_align(quat_IB_des_old);
@@ -167,28 +167,30 @@ void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d
     double joint_state[2] = {this->_curr_js.position[0],
                              encoder_yaw};
 
-    Eigen::Matrix3d R_IW = Eigen::Matrix3d::Identity(); // wall orientation equals odom-orientation at first contact
+    double yaw_IB_at_contact = common::yaw_from_quaternion_y_align(quat_IB_at_contact);
+    Eigen::Matrix3d R_IW = common::rot_z(yaw_IB_at_contact); // wall orientation equals odom-orientation at first contact
     // get position of odometry w.r.t. the world frame
     Eigen::Vector3d p_IO_des = kinematics::transform_wall_to_world(pos_IO_des_0, pos_WO, R_IW);
 
     // Get the base des base pose from the desired ee pose
-    Eigen::Matrix3d R_IB, R_IE, R_IT, R_IO;
+    Eigen::Matrix3d R_IB_dummy, R_IE_des, R_IT_des, R_IO, R_IW_des;
     Eigen::Vector3d p_IE_des, p_IT_des, p_IB_des;
-    kinematics::inverse_kinematics(R_IB_des,
+    Eigen::Matrix3d R_IO_des = R_IB_des;
+    kinematics::inverse_kinematics(R_IO_des,
                                    p_IO_des,
                                    joint_state,
                                    0.0,
                                    0.0,
-                                   R_IB, R_IE, R_IT, R_IW, p_IE_des, p_IT_des, pos_IB_des);
+                                   R_IB_dummy, R_IE_des, R_IT_des, R_IW_des, p_IE_des, p_IT_des, pos_IB_des);
 
     auto &clk = *this->get_clock();
     RCLCPP_INFO_THROTTLE(this->get_logger(), clk, 1000, "encoder_yaw: %f", encoder_yaw);
 
     // Publish the TFs
     this->_publish_tf(R_IB_des, p_IB_des, "B_des");
-    this->_publish_tf(R_IE, p_IE_des, "E_des");
-    this->_publish_tf(R_IT, p_IT_des, "T_des");
-    this->_publish_tf(R_IO, p_IO_des, "O_des");
+    this->_publish_tf(R_IE_des, p_IE_des, "E_des");
+    this->_publish_tf(R_IT_des, p_IT_des, "T_des");
+    this->_publish_tf(R_IO_des, p_IO_des, "O_des");
     this->_publish_tf(R_IW, pos_IO_des_0, "W");
 }
 
@@ -234,6 +236,7 @@ void Planner::_timer_callback()
 
         if (this->_in_contact_old == false) // rising edge
         {
+            _quat_IB_at_contact = _current_quat;
         }
     }
     else
@@ -271,7 +274,7 @@ void Planner::_timer_callback()
 
         /* Find the aligned position and orientation */
         Eigen::Quaterniond quat_IB_des_new;
-        _align_to_wall(quat_IB_des_old, this->_start_point, pos_WO_des,
+        _align_to_wall(_quat_IB_at_contact, quat_IB_des_old, this->_start_point, pos_WO_des,
                        this->_curr_js.position[1], quat_IB_des_new, pos_IB_des);
         quat_IB_des_old = quat_IB_des_new;
 

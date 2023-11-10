@@ -45,7 +45,7 @@ private:
 
     std::vector<Eigen::Vector3d> _ee_offsets;
 
-    Eigen::Quaterniond quat_IB_des_old;
+    Eigen::Quaterniond quat_IB_des_old, _quat_IB_at_contact;
 
     Eigen::Vector3d _ee_offset, _start_point, _trackball_pos, _current_position, _current_ee_position;
     Eigen::Quaterniond _current_quat, _current_ee_quat;
@@ -83,7 +83,7 @@ private:
     *   pos_IB: updated position of UAV
     *   yaw_IB: updated yaw of UAV
     */
-    void _align_to_wall(Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des);
+    void _align_to_wall(Eigen::Quaterniond quat_IB_at_contact, Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des);
 
     double _control_contact_force(float linear_joint, float desired_joint);
 
