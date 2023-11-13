@@ -102,7 +102,7 @@ void RefPosRepeater::_ref_callback(const geometry_msgs::msg::PoseStamped::Shared
                             (float)ned_position.y(),
                             (float)ned_position.z()};
         // This assumes the quaternion only describes yaw.
-        px4_msg.yaw = common::normalize_angle(2 * acos(enu_q.w()) - M_PI);
+        px4_msg.yaw = common::normalize_angle(-2 * acos(enu_q.w()) - M_PI);
     }
  
 

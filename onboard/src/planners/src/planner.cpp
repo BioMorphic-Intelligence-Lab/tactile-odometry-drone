@@ -17,7 +17,7 @@ Planner::Planner()
     this->declare_parameter("alignment_threshold", M_PI / 180.0 * 5);
     this->declare_parameter("yaw_rate", M_PI / 180.0 * 1); // 10 Degree/s
     this->declare_parameter("align", true);
-    this->declare_parameter("start_point", std::vector<double>({0.00, 2.50, 1.65} /*{0.40, 2.62, 1.65}*/));
+    this->declare_parameter("start_point", std::vector<double>({0.00, 2.00, 1.65} /*{0.40, 2.62, 1.65}*/));
     this->declare_parameter("joint_topic", "/joint_state");
     this->declare_parameter("pose_topic", "/mocap_pose");
     this->declare_parameter("ee_topic", "/ee_pose");
@@ -152,9 +152,10 @@ void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_at_contact, Eigen::Quate
 
     double yaw_des_old = common::yaw_from_quaternion_y_align(quat_IB_des_old);
     double dt = 1.0 / this->_frequency;
-    double yaw_increment = copysign(this->_yaw_rate, encoder_yaw) * dt;
+    double yaw_increment = -copysign(this->_yaw_rate, encoder_yaw) * dt;
 
-    if (fabs(2.0 * M_PI / 180.0) > fabs(encoder_yaw))
+    // Don't do anything if we are within two decree of the neutral position
+    if (2.0 * M_PI / 180.0 > fabs(encoder_yaw))
     {
         yaw_increment = 0.0;
     }
@@ -239,9 +240,8 @@ void Planner::_timer_callback()
             _quat_IB_at_contact = _current_quat;
             Eigen::Matrix3d R_IO_temp; // unused
             Eigen::Matrix3d R_IB_at_contact = _quat_IB_at_contact.normalized().toRotationMatrix();
-            double encoder_yaw = this->_curr_js.position[1];
             double joint_state[2] = {this->_curr_js.position[0],
-                                     encoder_yaw};
+                                     this->_curr_js.position[1]};
             kinematics::forward_kinematics(R_IB_at_contact,
                                            this->_current_position,
                                            joint_state,
@@ -249,6 +249,7 @@ void Planner::_timer_callback()
                                            0.0,
                                            R_IO_temp,
                                            _pos_IO_at_contact);
+            this->_in_contact_old = true;
         }
     }
     else
@@ -306,7 +307,7 @@ void Planner::_timer_callback()
 
         msg.pose.position.x = pos_IB_des.x();
         msg.pose.position.y = pos_IB_des.y();
-        msg.pose.position.z = pos_IB_des.z();
+        msg.pose.position.z = this->_start_point.z();
     }
     /* Otherwise the trajectory has not started yet and
      * we fly towards the start position. For this we command reference positions that are

@@ -67,7 +67,7 @@ namespace kinematics
         Eigen::Matrix3d R_TO = common::rot_y(uav_roll - imu_roll);
         Eigen::Matrix3d R_OT = R_TO.transpose();
 
-        Eigen::Matrix3d R_ET = common::rot_z(-joint_state[1]);
+        Eigen::Matrix3d R_ET = common::rot_z(joint_state[1]);
         Eigen::Matrix3d R_TE = R_ET.transpose();
         Eigen::Matrix3d R_EB = Eigen::Matrix3d::Identity();
 
