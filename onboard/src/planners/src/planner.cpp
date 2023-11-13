@@ -167,9 +167,8 @@ void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_at_contact, Eigen::Quate
     Eigen::Matrix3d R_IB_des = common::rot_z(yaw_des_new);
     quat_IB_des_new = Eigen::Quaterniond(R_IB_des);
 
-    double joint_state[2] = {this->_curr_js.position[0],
-                             encoder_yaw};
-    // double joint_state_des[2] = {this->_desired_linear_joint_pos, 0.0};
+    //double joint_state[2] = {this->_curr_js.position[0],encoder_yaw};
+    double joint_state_des[2] = {this->_desired_linear_joint_pos, 0.0};
 
     double yaw_IB_at_contact = common::yaw_from_quaternion_y_align(quat_IB_at_contact);
     R_IW = common::rot_z(yaw_IB_at_contact); // wall orientation equals odom-orientation at first contact
