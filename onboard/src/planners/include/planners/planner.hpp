@@ -58,7 +58,7 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr _joint_subscription;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr _mocap_subscription, _ee_subscription;
     rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr _trackball_subscription;
-    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _setpoint_publisher, _setpoint_publisher_ee;
+    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _setpoint_publisher, _setpoint_publisher_ee, _contact_pose_publisher;
     rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr _force_publisher;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr _contact_publisher, _aligned_publisher;
 
@@ -71,6 +71,7 @@ private:
     void _mocap_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
     void _trackball_callback(const geometry_msgs::msg::PointStamped::SharedPtr msg);
     void _ee_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
+    geometry_msgs::msg::Pose eigen_pose_to_geometry_pose(Eigen::Vector3d position, Eigen::Quaterniond quat);
 
     /**
      * @brief Align UAV to be perpendicular to wall (i.e. encoderYaw == 0). The function is designed to run permanentely after the trajectory position has been set

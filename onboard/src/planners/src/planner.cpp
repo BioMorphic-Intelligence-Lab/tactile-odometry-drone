@@ -60,6 +60,8 @@ Planner::Planner()
         this->get_parameter("pub_topic").as_string(), 10);
     this->_setpoint_publisher_ee = this->create_publisher<geometry_msgs::msg::PoseStamped>(
         "/ref_pose/ee", 10);
+    this->_contact_pose_publisher = this->create_publisher<geometry_msgs::msg::PoseStamped>(
+        "/planner/pose_at_contact", 10);
     this->_force_publisher = this->create_publisher<std_msgs::msg::Float64>(
         "/ref_pose/force_ctrl_offset", 10);
     this->_contact_publisher = this->create_publisher<std_msgs::msg::Bool>(
@@ -167,6 +169,7 @@ void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_at_contact, Eigen::Quate
 
     double joint_state[2] = {this->_curr_js.position[0],
                              encoder_yaw};
+    // double joint_state_des[2] = {this->_desired_linear_joint_pos, 0.0};
 
     double yaw_IB_at_contact = common::yaw_from_quaternion_y_align(quat_IB_at_contact);
     R_IW = common::rot_z(yaw_IB_at_contact); // wall orientation equals odom-orientation at first contact
@@ -176,10 +179,10 @@ void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_at_contact, Eigen::Quate
     // Get the base des base pose from the desired ee pose
     Eigen::Matrix3d R_IB_dummy, R_IE_des, R_IT_des, R_IO, R_IW_des;
     Eigen::Vector3d p_IE_des, p_IT_des, p_IB_des;
-    Eigen::Matrix3d R_IO_des = R_IB_des;
+    Eigen::Matrix3d R_IO_des = R_IB_des; // desired encoder_yaw = 0;
     kinematics::inverse_kinematics(R_IO_des,
                                    p_IO_des,
-                                   joint_state,
+                                   joint_state_des,
                                    0.0,
                                    0.0,
                                    R_IB_dummy, R_IE_des, R_IT_des, R_IW_des, p_IE_des, p_IT_des, pos_IB_des);
@@ -212,13 +215,7 @@ void Planner::_timer_callback()
     Eigen::Vector3d pos_WO_des = this->get_trajectory_setpoint();
 
     /*publish original trajectory pose*/
-    msg.pose.position.x = pos_WO_des.x();
-    msg.pose.position.y = pos_WO_des.y();
-    msg.pose.position.z = pos_WO_des.z();
-    msg.pose.orientation.w = 0;
-    msg.pose.orientation.x = 0;
-    msg.pose.orientation.y = 0;
-    msg.pose.orientation.z = 1;
+    msg.pose = eigen_pose_to_geometry_pose(pos_WO_des, Eigen::Quaterniond(0.0, 0.0, 0.0, 1.0));
     this->_setpoint_publisher_ee->publish(msg);
 
     double joint_state[2] = {this->_curr_js.position[0], this->_curr_js.position[1]};
@@ -237,7 +234,7 @@ void Planner::_timer_callback()
 
         if (this->_in_contact_old == false) // rising edge
         {
-            _quat_IB_at_contact = _current_quat;
+            this->_quat_IB_at_contact = this->_current_quat;
             Eigen::Matrix3d R_IO_temp; // unused
             Eigen::Matrix3d R_IB_at_contact = _quat_IB_at_contact.normalized().toRotationMatrix();
             double joint_state[2] = {this->_curr_js.position[0],
@@ -248,7 +245,7 @@ void Planner::_timer_callback()
                                            0.0,
                                            0.0,
                                            R_IO_temp,
-                                           _pos_IO_at_contact);
+                                           this->_pos_IO_at_contact);
             this->_in_contact_old = true;
         }
     }
@@ -288,7 +285,13 @@ void Planner::_timer_callback()
         /* Find the aligned position and orientation */
         Eigen::Quaterniond quat_IB_des_new;
         Eigen::Matrix3d R_IW;
-        _align_to_wall(_quat_IB_at_contact, quat_IB_des_old, _pos_IO_at_contact, pos_WO_des,
+        geometry_msgs::msg::PoseStamped contact_msg{};
+        contact_msg.header.stamp = this->now();
+        contact_msg.header.frame_id = "pose at contact";
+        contact_msg.pose = eigen_pose_to_geometry_pose(this->_pos_IO_at_contact, this->_quat_IB_at_contact);
+
+        this->_contact_pose_publisher->publish(contact_msg);
+        _align_to_wall(this->_quat_IB_at_contact, quat_IB_des_old, this->_pos_IO_at_contact, pos_WO_des,
                        this->_curr_js.position[1], quat_IB_des_new, pos_IB_des, R_IW);
         quat_IB_des_old = quat_IB_des_new;
 
@@ -300,14 +303,9 @@ void Planner::_timer_callback()
 
         /* Add it to the message */
         // Eigen::Quaterniond quat_IB_des = common::quaternion_from_euler(0, 0, output_yaw);
-        msg.pose.orientation.w = quat_IB_des_new.w();
-        msg.pose.orientation.x = quat_IB_des_new.x();
-        msg.pose.orientation.y = quat_IB_des_new.y();
-        msg.pose.orientation.z = quat_IB_des_new.z();
-
-        msg.pose.position.x = pos_IB_des.x();
-        msg.pose.position.y = pos_IB_des.y();
+        msg.pose = eigen_pose_to_geometry_pose(pos_IB_des, quat_IB_des_new);
         msg.pose.position.z = this->_start_point.z();
+        msg.header.frame_id = "aligned pose";
     }
     /* Otherwise the trajectory has not started yet and
      * we fly towards the start position. For this we command reference positions that are
@@ -330,13 +328,8 @@ void Planner::_timer_callback()
             pos_WO_des += common::rot_z(common::yaw_from_quaternion_y_align(curr_quat)) * (Eigen::Vector3d(0, 0.24, -0.0135) - this->_ee_offset);
         }
 
-        msg.pose.position.x = pos_WO_des.x();
-        msg.pose.position.y = pos_WO_des.y();
-        msg.pose.position.z = pos_WO_des.z();
-        msg.pose.orientation.w = 0;
-        msg.pose.orientation.x = 0;
-        msg.pose.orientation.y = 0;
-        msg.pose.orientation.z = 1.0;
+        msg.pose = eigen_pose_to_geometry_pose(pos_WO_des, Eigen::Quaterniond(0.0, 0.0, 0.0, 1.0)); // z = 1
+        msg.header.frame_id = "unaligned pose";
     }
 
     /* Finally publish the message */
@@ -422,6 +415,19 @@ void Planner::_ee_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
                                                 pose.pose.orientation.z);
 }
 
+geometry_msgs::msg::Pose Planner::eigen_pose_to_geometry_pose(Eigen::Vector3d position, Eigen::Quaterniond quat)
+{
+    geometry_msgs::msg::Pose pose;
+    pose.position.x = position.x();
+    pose.position.y = position.y();
+    pose.position.z = position.z();
+    pose.orientation.w = quat.w();
+    pose.orientation.x = quat.x();
+    pose.orientation.y = quat.y();
+    pose.orientation.z = quat.z();
+
+    return pose;
+}
 void Planner::_trackball_callback(const geometry_msgs::msg::PointStamped::SharedPtr msg)
 {
     this->_trackball_pos.x() = msg->point.x;
