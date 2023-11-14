@@ -62,11 +62,11 @@ Planner::Planner()
         "/ref_pose/ee", 10);
     this->_contact_pose_publisher = this->create_publisher<geometry_msgs::msg::PoseStamped>(
         "/planner/pose_at_contact", 10);
-    this->_force_publisher = this->create_publisher<std_msgs::msg::Float64>(
+    this->_force_publisher = this->create_publisher<std_msgs_stamped::msg::Float64Stamped>(
         "/ref_pose/force_ctrl_offset", 10);
-    this->_contact_publisher = this->create_publisher<std_msgs::msg::Bool>(
+    this->_contact_publisher = this->create_publisher<std_msgs_stamped::msg::BoolStamped>(
         "/planner/in_contact", 10);
-    this->_aligned_publisher = this->create_publisher<std_msgs::msg::Bool>(
+    this->_aligned_publisher = this->create_publisher<std_msgs_stamped::msg::BoolStamped>(
         "/planner/is_aligned", 10);
 
     /* Init TF publisher */
@@ -133,8 +133,9 @@ double Planner::_control_contact_force(float linear_joint, float desired_joint)
 
     double force_offset = p_gain * error - d_gain * joint_velocity + i_gain * this->_linear_axis_error_integral;
 
-    std_msgs::msg::Float64 msg;
+    std_msgs_stamped::msg::Float64Stamped msg;
     msg.data = force_offset;
+    msg.header.stamp = this->now();
     this->_force_publisher->publish(msg);
     return force_offset;
 }
@@ -149,7 +150,7 @@ double Planner::_control_contact_force(float linear_joint, float desired_joint)
 *   pos_IB: desired position of UAV-Body in world-frame
 *   quat_IB_des_new: desired orientation of UAV
  */
-void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_at_contact, Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des, Eigen::Matrix3d &R_IW)
+void Planner::_align_to_wall(Eigen::Quaterniond quat_IO_at_contact, Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des, Eigen::Matrix3d &R_IW)
 {
 
     double yaw_des_old = common::yaw_from_quaternion_y_align(quat_IB_des_old);
@@ -167,11 +168,11 @@ void Planner::_align_to_wall(Eigen::Quaterniond quat_IB_at_contact, Eigen::Quate
     Eigen::Matrix3d R_IB_des = common::rot_z(yaw_des_new);
     quat_IB_des_new = Eigen::Quaterniond(R_IB_des);
 
-    //double joint_state[2] = {this->_curr_js.position[0],encoder_yaw};
+    // double joint_state[2] = {this->_curr_js.position[0],encoder_yaw};
     double joint_state_des[2] = {this->_desired_linear_joint_pos, 0.0};
 
-    double yaw_IB_at_contact = common::yaw_from_quaternion_y_align(quat_IB_at_contact);
-    R_IW = common::rot_z(yaw_IB_at_contact); // wall orientation equals odom-orientation at first contact
+    double yaw_IO_at_contact = common::yaw_from_quaternion_y_align(quat_IO_at_contact);
+    R_IW = common::rot_z(yaw_IO_at_contact); // wall orientation equals odom-orientation at first contact
     // get position of odometry w.r.t. the world frame
     Eigen::Vector3d p_IO_des = kinematics::transform_wall_to_world(pos_IO_des_0, pos_WO, R_IW);
 
@@ -219,8 +220,9 @@ void Planner::_timer_callback()
 
     double joint_state[2] = {this->_curr_js.position[0], this->_curr_js.position[1]};
 
-    std_msgs::msg::Bool msg_bool;
+    std_msgs_stamped::msg::BoolStamped msg_bool;
     msg_bool.data = this->_in_contact;
+    msg_bool.header.stamp = this->now();
     this->_contact_publisher->publish(msg_bool);
     msg_bool.data = this->_is_aligned;
     this->_aligned_publisher->publish(msg_bool);
@@ -234,8 +236,8 @@ void Planner::_timer_callback()
         if (this->_in_contact_old == false) // rising edge
         {
             this->_quat_IB_at_contact = this->_current_quat;
-            Eigen::Matrix3d R_IO_temp; // unused
-            Eigen::Matrix3d R_IB_at_contact = _quat_IB_at_contact.normalized().toRotationMatrix();
+            Eigen::Matrix3d R_IO_at_contact;
+            Eigen::Matrix3d R_IB_at_contact = this->_quat_IB_at_contact.normalized().toRotationMatrix();
             double joint_state[2] = {this->_curr_js.position[0],
                                      this->_curr_js.position[1]};
             kinematics::forward_kinematics(R_IB_at_contact,
@@ -243,8 +245,9 @@ void Planner::_timer_callback()
                                            joint_state,
                                            0.0,
                                            0.0,
-                                           R_IO_temp,
+                                           R_IO_at_contact,
                                            this->_pos_IO_at_contact);
+            this->_quat_IO_at_contact = Eigen::Quaterniond(R_IO_at_contact);
             this->_in_contact_old = true;
         }
     }
@@ -290,7 +293,7 @@ void Planner::_timer_callback()
         contact_msg.pose = eigen_pose_to_geometry_pose(this->_pos_IO_at_contact, this->_quat_IB_at_contact);
 
         this->_contact_pose_publisher->publish(contact_msg);
-        _align_to_wall(this->_quat_IB_at_contact, quat_IB_des_old, this->_pos_IO_at_contact, pos_WO_des,
+        _align_to_wall(this->_quat_IO_at_contact, quat_IB_des_old, this->_pos_IO_at_contact, pos_WO_des,
                        this->_curr_js.position[1], quat_IB_des_new, pos_IB_des, R_IW);
         quat_IB_des_old = quat_IB_des_new;
 

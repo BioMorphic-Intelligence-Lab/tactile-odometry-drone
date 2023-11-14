@@ -4,6 +4,8 @@
 #include <Eigen/Dense>
 
 #include "common/common.hpp"
+#include "std_msgs_stamped/msg/bool_stamped.hpp"
+#include "std_msgs_stamped/msg/float64_stamped.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
@@ -45,7 +47,7 @@ private:
 
     std::vector<Eigen::Vector3d> _ee_offsets;
 
-    Eigen::Quaterniond quat_IB_des_old, _quat_IB_at_contact;
+    Eigen::Quaterniond quat_IB_des_old, _quat_IB_at_contact, _quat_IO_at_contact;
 
     Eigen::Vector3d _ee_offset, _start_point, _trackball_pos, _current_position, _current_ee_position, _pos_IO_at_contact;
     Eigen::Quaterniond _current_quat, _current_ee_quat;
@@ -59,8 +61,8 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr _mocap_subscription, _ee_subscription;
     rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr _trackball_subscription;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _setpoint_publisher, _setpoint_publisher_ee, _contact_pose_publisher;
-    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr _force_publisher;
-    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr _contact_publisher, _aligned_publisher;
+    rclcpp::Publisher<std_msgs_stamped::msg::Float64Stamped>::SharedPtr _force_publisher;
+    rclcpp::Publisher<std_msgs_stamped::msg::BoolStamped>::SharedPtr _contact_publisher, _aligned_publisher;
 
     /* TF publisher */
     std::unique_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;
@@ -84,7 +86,7 @@ private:
     *   pos_IB: updated position of UAV
     *   yaw_IB: updated yaw of UAV
     */
-    void _align_to_wall(Eigen::Quaterniond quat_IB_at_contact, Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des, Eigen::Matrix3d &R_IW);
+    void _align_to_wall(Eigen::Quaterniond quat_IO_at_contact, Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des, Eigen::Matrix3d &R_IW);
 
     double _control_contact_force(float linear_joint, float desired_joint);
 
