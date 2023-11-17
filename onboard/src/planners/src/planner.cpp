@@ -6,8 +6,7 @@
 using namespace personal;
 
 Planner::Planner()
-    : Node("Planner"), JS_THRESHOLD(0.001),
-      quat_IB_des_old(0.0, 0.0, 0.0, 1.0) // yaw 180°
+    : Node("Planner"), JS_THRESHOLD(0.001)
 {
 
     /* Declare all the parameters */
@@ -202,9 +201,13 @@ void Planner::_align_to_wall(Eigen::Quaterniond quat_IO_at_contact, Eigen::Quate
 void Planner::_timer_callback()
 {
     /* Init the Pose Message and time stamp it */
-    geometry_msgs::msg::PoseStamped msg{};
-    msg.header.frame_id = "world";
-    msg.header.stamp = this->now();
+    geometry_msgs::msg::PoseStamped ref_pose_msg{};
+    ref_pose_msg.header.frame_id = "world";
+    ref_pose_msg.header.stamp = this->now();
+
+    geometry_msgs::msg::PoseStamped traj_pose_msg{};
+    traj_pose_msg.header.frame_id = "world";
+    traj_pose_msg.header.stamp = this->now();
 
     /* Extract current state */
     Eigen::Vector3d curr_position = this->_current_position;
@@ -215,17 +218,10 @@ void Planner::_timer_callback()
     Eigen::Vector3d pos_WO_des = this->get_trajectory_setpoint();
 
     /*publish original trajectory pose*/
-    msg.pose = eigen_pose_to_geometry_pose(pos_WO_des, Eigen::Quaterniond(0.0, 0.0, 0.0, 1.0));
-    this->_setpoint_publisher_ee->publish(msg);
+    traj_pose_msg.pose = eigen_pose_to_geometry_pose(pos_WO_des, Eigen::Quaterniond(0.0, 0.0, 0.0, 1.0));
+    this->_setpoint_publisher_ee->publish(traj_pose_msg);
 
     double joint_state[2] = {this->_curr_js.position[0], this->_curr_js.position[1]};
-
-    std_msgs_stamped::msg::BoolStamped msg_bool;
-    msg_bool.data = this->_in_contact;
-    msg_bool.header.stamp = this->now();
-    this->_contact_publisher->publish(msg_bool);
-    msg_bool.data = this->_is_aligned;
-    this->_aligned_publisher->publish(msg_bool);
 
     if (this->_in_contact)
     {
@@ -251,7 +247,7 @@ void Planner::_timer_callback()
             this->_in_contact_old = true;
         }
     }
-    else
+    else // not in contact
     {
         // reset position offset if contact is lost
         this->_position_offset = 0.0;
@@ -259,6 +255,13 @@ void Planner::_timer_callback()
         /* check if UAV is in contact*/
         this->_in_contact = this->_detect_contact();
     }
+
+    std_msgs_stamped::msg::BoolStamped msg_bool;
+    msg_bool.data = this->_in_contact;
+    msg_bool.header.stamp = this->now();
+    this->_contact_publisher->publish(msg_bool);
+    msg_bool.data = this->_is_aligned;
+    this->_aligned_publisher->publish(msg_bool);
 
     if (this->_is_aligned && this->_in_contact)
     {
@@ -293,9 +296,9 @@ void Planner::_timer_callback()
         contact_msg.pose = eigen_pose_to_geometry_pose(this->_pos_IO_at_contact, this->_quat_IB_at_contact);
 
         this->_contact_pose_publisher->publish(contact_msg);
-        _align_to_wall(this->_quat_IO_at_contact, quat_IB_des_old, this->_pos_IO_at_contact, pos_WO_des,
+        _align_to_wall(this->_quat_IO_at_contact, this->_quat_IB_des_old, this->_pos_IO_at_contact, pos_WO_des,
                        this->_curr_js.position[1], quat_IB_des_new, pos_IB_des, R_IW);
-        quat_IB_des_old = quat_IB_des_new;
+        this->_quat_IB_des_old = quat_IB_des_new;
 
         Eigen::Vector3d force_offset(0, this->_position_offset, 0);
         pos_IB_des += R_IW * force_offset; // rotate offset to world frame and add it
@@ -305,9 +308,10 @@ void Planner::_timer_callback()
 
         /* Add it to the message */
         // Eigen::Quaterniond quat_IB_des = common::quaternion_from_euler(0, 0, output_yaw);
-        msg.pose = eigen_pose_to_geometry_pose(pos_IB_des, quat_IB_des_new);
-        msg.pose.position.z = this->_start_point.z();
-        msg.header.frame_id = "aligned pose";
+        ref_pose_msg.pose = eigen_pose_to_geometry_pose(pos_IB_des, quat_IB_des_new);
+        const auto offseet_temp = common::rot_z(common::yaw_from_quaternion_y_align(curr_quat)) * (Eigen::Vector3d(0, 0.24, -0.0135) - this->_ee_offset);
+        ref_pose_msg.pose.position.z = this->_start_point.z() + offseet_temp.z();
+        ref_pose_msg.header.frame_id = "aligned pose";
     }
     /* Otherwise the trajectory has not started yet and
      * we fly towards the start position. For this we command reference positions that are
@@ -330,12 +334,12 @@ void Planner::_timer_callback()
             pos_WO_des += common::rot_z(common::yaw_from_quaternion_y_align(curr_quat)) * (Eigen::Vector3d(0, 0.24, -0.0135) - this->_ee_offset);
         }
 
-        msg.pose = eigen_pose_to_geometry_pose(pos_WO_des, Eigen::Quaterniond(0.0, 0.0, 0.0, 1.0)); // z = 1
-        msg.header.frame_id = "unaligned pose";
+        ref_pose_msg.pose = eigen_pose_to_geometry_pose(pos_WO_des, Eigen::Quaterniond(0.0, 0.0, 0.0, 1.0)); // z = 1
+        ref_pose_msg.header.frame_id = "unaligned pose";
     }
 
     /* Finally publish the message */
-    this->_setpoint_publisher->publish(msg);
+    this->_setpoint_publisher->publish(ref_pose_msg);
 
     /* Publish TF */
 

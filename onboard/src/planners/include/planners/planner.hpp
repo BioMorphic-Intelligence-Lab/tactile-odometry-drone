@@ -47,7 +47,8 @@ private:
 
     std::vector<Eigen::Vector3d> _ee_offsets;
 
-    Eigen::Quaterniond quat_IB_des_old, _quat_IB_at_contact, _quat_IO_at_contact;
+    Eigen::Quaterniond _quat_IB_des_old = Eigen::Quaterniond(0.0, 0.0, 0.0, 1.0); // yaw 180°
+    Eigen::Quaterniond _quat_IB_at_contact, _quat_IO_at_contact;
 
     Eigen::Vector3d _ee_offset, _start_point, _trackball_pos, _current_position, _current_ee_position, _pos_IO_at_contact;
     Eigen::Quaterniond _current_quat, _current_ee_quat;
