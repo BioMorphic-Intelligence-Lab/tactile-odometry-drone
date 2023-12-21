@@ -1,70 +1,63 @@
-# FIXME currently not up to date!
-
 # The Tactile Odometry Drone
 
-The Tactile Odometry Drone is a project in which we estimate aerial robots' odometry using information from physical contact. This repository agglomerates all information related to the tactile drone project.
-
-![DronePortrait](./images/drone-portrait.png)
+The Tactile Odometry Drone is a project, in which we estimate aerial robots' odometry using information from physical contact.
+This repository agglomerates all information related to the tactile drone project.
 
 # How To Cite This
 
 To Be Determined
 
-## Explainer Video 
+# Explainer Video 
 
 <div align="center">
-  <a href="https://youtu.be/Z3fTCOoG-8s"><img src="./images/mqkQ5mHpCkM.png" alt="ExplainerVideo"></a>
+  <a href="https://youtu.be/iH8SYRLM8FM"><img src="./readme_files/thumbnail.png" alt="ExplainerVideo" width="800"></a>
 </div>
 
 # Background
 
-A large part of research in the drone community is focused on finding and avoiding obstacles in an unknown environment to explore the environment, e.g. search and rescue applications. Usually, these applications use some form of vision sensor, such as cameras and/or lidars. 
-These sensors as well as GNSS signals that are often used in combination to provide state estimation are susceptible to disturbances in indoor/underground environments. 
-A camera can fail in bad lighting conditions, a lidar provides noisy measurements when smoke or dust fills the environment, and GNSS signals are blocked when indoors.
+Aerial robots are well-established technologies in environments characterized by reliable GNSS signals and favorable conditions for visual navigation. However, their robustness is significantly challenged whenever ambient lighting is insufficient, for example, in underground, dark, or foggy environments. There, conventional navigation methods solely based on computer vision are very limited. 
 
-In this work, we investigate how instead of avoiding obstacles, we can use contact to navigate safely in an environment where the above-mentioned challenges are present. For this, we designed and build an inherently compliant interaction tool inspired by the human finger. 
-It enables an Aerial System to safely establish contact with the environment and sense the magnitude and direction of the contact force. 
-Based on that, the local normal of the environment can be inferred and new reference poses can be generated that move the system along the environment.
+This work proposes the completely novel approach to _Aerial Tactile Odometry_ for pose estimation of aerial robots exploiting contact to precisely determine the system's pose. By employing a compliant end-effector design with onboard tactile information by means of a trackball, we infer the complete UAV's pose with respect to the environment, and the distance traveled during contact. 
 
-Generally speaking, the system aligns the interaction tool with the contact force and generates new reference positions a defined distance away, normal to the contact force vector and the world z-axis. 
-For details, please refer to the publication above (or the schematic below).
+Through a large set of experiments, the proposed method shows centimeter accuracy for various environment orientations and different trajectories followed. Akin to conventional dead-reckoning odometry methods in wheeled robotics, this method provides a valuable additional source of pose estimation, increasing the robustness of aerial robots -- especially aerial manipulators -- in the real world. 
 
 <p align="center">
-    <img src="./images/AMinContact.png" alt= “PlannerScheme” width="400">
+    <img src="./readme_files/OverviewFigure.png" alt= “PlannerScheme” width="800">
 </p>
 
 
 # Results
 
-The system was tested on various wall configurations.
-See below for the resulting performance.
+In a total of 32 flight experiments, covering various relative environment orientations and trajectory profiles, the proposed methodology showcases centimeter accuracy with a relative error below 5% of the travelled distance, on average. The system is capable of following unknown flat surfaces allowing suitable contact for the position estimation in 90% of the tracked distance. 
 
-Straight Wall | Angled Away Wall | Angled Towards Wall | Bigger Angled Towards Wall
-:---:|:---:|:---:|:---:
-[<img src="./images/straight_wall_thumbnail.png" alt= “VideoStraightWall” width="400">](https://drive.google.com/file/d/1wb-oomzRinPbccY4n6zmMQCECdUvhsUz/view?usp=sharing) | [<img src="./images/angled_away_thumbnail.png" alt= “VideoAngledAwayWall” width="400">](https://drive.google.com/file/d/1mu5qWBLV5GjljpLQdXPlA3Y-cYLmAlfE/view?usp=share_link) | [<img src="./images/angled_towards_thumbnail.png" alt= “VideoAngledTowardsWall” width="400">](https://drive.google.com/file/d/1ICDdNCFxODMqksMb9ZQBc0hroavPmKRQ/view?usp=share_link)| [<img src="./images/bigger_angled_towards_thumbnail.png" alt= “VideoBiggerAngledTowardsWall” width="400">](https://drive.google.com/file/d/1VwmuxHRx2dI9Sj_H0ANfp8pA5DEYi9PN/view?usp=share_link)
+The proposed approach is particularly suited to aerial interaction tasks where contact is desired, as such contact-based odometry provides feedback directly in the task space, enabling more precise EE control.
 
+<p align="center">
+    <img src="./readme_files/line_sine.png" alt= “Odometry Results” height="350">
+    <img src="./readme_files/alignment.png" alt= “Alignment Results” height="350">
+</p>
 
-Superimposed Altitude Commands | Combined Wall
-:---:|:---:
-[<img src="./images/superimposed_thumbnail.png" alt= “VideoSuperimposedAltitudeCommands” width="400">](https://drive.google.com/file/d/1IpwDYCMSlrDi99IpKvpPwwR4NIW9pJZF/view?usp=share_link) | [<img src="./images/wavy_wall_thumbnail.png" alt= “WawyWall” width="400">](https://drive.google.com/file/d/1-QrKH-Mo7ntR5Cm1EPXF7howRcNcXn4H/view?usp=share_link) 
 
 # Repository Structure
 
 This repository contains all the sub-repositories that are needed to reproduce the experiments. 
-All recorded data is hosted off-site at this [link](FIXME).
+All recorded data is hosted off-site at this [link](https://datashare.tu-dresden.de/index.php/s/x2TiF2Qf2MHZ5tc).
 The rest of this repository is structured as follows:
-- ``tactile-drone-offboard``
+- ``offboard``
     
-    This repository contains all the software that is intended to be run off-board.
+    This folder contains all the software that is intended to be run off-board.
     This is mainly visualization modules of the system (rviz and plotting scripts) but also contains the Optitrack to ROS2 interface.
-    It also includes the calibration and system ID files which operate of data that is recorded onboard using ``ros2 bag``. 
 
-- ``tactile-drone-onboard``
+- ``onboard``
 
-    This repository contains all the software that is intended to be run onboard on the companion computer on the drone. 
-    This includes the ``micro-ros-agent`` that interfaces with PX4 running on the Pixhawk but also the drivers for the encoders, the contact force estimator, as well as the contact-based planner that generates new references.
+    This folder contains all the software that is intended to be run onboard on the companion computer on the drone. 
+    This includes the ``micro-ros-agent`` that interfaces with PX4 running on the Pixhawk but also the drivers for the encoders, the trackball interface, as well as waypoint planner.
 
-- ``tactile-drone-design``
+- ``tactile-odom-teensy``
 
-    This repository contains all the mechanical design files. 
+    This repository contains all the software for the embedded controller that connects to to the encoders.
+
+- ``tactile-odom-design``
+
+    This repository contains all the mechanical design files.
 
