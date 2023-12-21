@@ -292,7 +292,7 @@ void Planner::_timer_callback()
         Eigen::Matrix3d R_IW;
         geometry_msgs::msg::PoseStamped contact_msg{};
         contact_msg.header.stamp = this->now();
-        contact_msg.header.frame_id = "pose at contact";
+        contact_msg.header.frame_id = "world";
         contact_msg.pose = eigen_pose_to_geometry_pose(this->_pos_IO_at_contact, this->_quat_IB_at_contact);
 
         this->_contact_pose_publisher->publish(contact_msg);
@@ -311,7 +311,7 @@ void Planner::_timer_callback()
         ref_pose_msg.pose = eigen_pose_to_geometry_pose(pos_IB_des, quat_IB_des_new);
         const auto offseet_temp = common::rot_z(common::yaw_from_quaternion_y_align(curr_quat)) * (Eigen::Vector3d(0, 0.24, -0.0135) - this->_ee_offset);
         ref_pose_msg.pose.position.z = this->_start_point.z() + offseet_temp.z();
-        ref_pose_msg.header.frame_id = "aligned pose";
+        ref_pose_msg.header.frame_id = "world";
     }
     /* Otherwise the trajectory has not started yet and
      * we fly towards the start position. For this we command reference positions that are
@@ -335,7 +335,7 @@ void Planner::_timer_callback()
         }
 
         ref_pose_msg.pose = eigen_pose_to_geometry_pose(pos_WO_des, Eigen::Quaterniond(0.0, 0.0, 0.0, 1.0)); // z = 1
-        ref_pose_msg.header.frame_id = "unaligned pose";
+        ref_pose_msg.header.frame_id = "world";
     }
 
     /* Finally publish the message */
