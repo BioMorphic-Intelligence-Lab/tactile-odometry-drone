@@ -22,3 +22,6 @@
 [submodule "offboard/src/ros_gz"]
 	path = offboard/src/ros_gz
 	url = git@github.com:gazebosim/ros_gz.git
+[submodule "tactile-odom-design"]
+	path = tactile-odom-design
+	url = git@github.com:BioMorphic-Intelligence-Lab/tactile-odom-design.git
