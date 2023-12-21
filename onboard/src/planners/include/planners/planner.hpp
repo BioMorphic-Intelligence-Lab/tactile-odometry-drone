@@ -4,6 +4,8 @@
 #include <Eigen/Dense>
 
 #include "common/common.hpp"
+#include "std_msgs_stamped/msg/bool_stamped.hpp"
+#include "std_msgs_stamped/msg/float64_stamped.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
@@ -11,6 +13,7 @@
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "std_srvs/srv/trigger.hpp"
 #include "std_msgs/msg/float64.hpp"
+#include "std_msgs/msg/bool.hpp"
 
 #include "tf2/transform_datatypes.h"
 #include "tf2_ros/transform_broadcaster.h"
@@ -40,13 +43,14 @@ private:
     double _position_offset = 0.0;          // positon offset calculated by force controller in m
     double _minimum_contact_duration = 3.0; // minimum duration of contact befor contact is enabled
     double _linear_axis_error_integral = 0.0;
-    bool _align, _in_contact, _is_aligned, _contact_temp=false;
+    bool _align, _in_contact, _in_contact_old, _is_aligned, _contact_temp = false;
 
     std::vector<Eigen::Vector3d> _ee_offsets;
 
-    Eigen::Quaterniond output_q;
+    Eigen::Quaterniond _quat_IB_des_old = Eigen::Quaterniond(0.0, 0.0, 0.0, 1.0); // yaw 180°
+    Eigen::Quaterniond _quat_IB_at_contact, _quat_IO_at_contact;
 
-    Eigen::Vector3d _ee_offset, _start_point, _trackball_pos, _current_position, _current_ee_position;
+    Eigen::Vector3d _ee_offset, _start_point, _trackball_pos, _current_position, _current_ee_position, _pos_IO_at_contact;
     Eigen::Quaterniond _current_quat, _current_ee_quat;
 
     sensor_msgs::msg::JointState _curr_js, _last_js;
@@ -57,8 +61,9 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr _joint_subscription;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr _mocap_subscription, _ee_subscription;
     rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr _trackball_subscription;
-    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _setpoint_publisher, _setpoint_publisher_ee;
-    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr _force_publisher;
+    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _setpoint_publisher, _setpoint_publisher_ee, _contact_pose_publisher;
+    rclcpp::Publisher<std_msgs_stamped::msg::Float64Stamped>::SharedPtr _force_publisher;
+    rclcpp::Publisher<std_msgs_stamped::msg::BoolStamped>::SharedPtr _contact_publisher, _aligned_publisher;
 
     /* TF publisher */
     std::unique_ptr<tf2_ros::TransformBroadcaster> _tf_broadcaster;
@@ -69,6 +74,7 @@ private:
     void _mocap_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
     void _trackball_callback(const geometry_msgs::msg::PointStamped::SharedPtr msg);
     void _ee_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
+    geometry_msgs::msg::Pose eigen_pose_to_geometry_pose(Eigen::Vector3d position, Eigen::Quaterniond quat);
 
     /**
      * @brief Align UAV to be perpendicular to wall (i.e. encoderYaw == 0). The function is designed to run permanentely after the trajectory position has been set
@@ -81,7 +87,7 @@ private:
     *   pos_IB: updated position of UAV
     *   yaw_IB: updated yaw of UAV
     */
-    void _align_to_wall(Eigen::Quaterniond &quat_IB, Eigen::Vector3d &pos_IB, Eigen::Vector3d pos_WE, Eigen::Vector3d pos_BE, float encoder_yaw, Eigen::Quaterniond quat_mocap);
+    void _align_to_wall(Eigen::Quaterniond quat_IO_at_contact, Eigen::Quaterniond quat_IB_des_old, Eigen::Vector3d pos_IO_des_0, Eigen::Vector3d pos_WO, float encoder_yaw, Eigen::Quaterniond &quat_IB_des_new, Eigen::Vector3d &pos_IB_des, Eigen::Matrix3d &R_IW);
 
     double _control_contact_force(float linear_joint, float desired_joint);
 
