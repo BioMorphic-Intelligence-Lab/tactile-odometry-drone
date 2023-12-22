@@ -33,8 +33,8 @@ In a total of 32 flight experiments, covering various relative environment orien
 The proposed approach is particularly suited to aerial interaction tasks where contact is desired, as such contact-based odometry provides feedback directly in the task space, enabling more precise EE control.
 
 <p align="center">
-    <img src="./readme_files/line_sine.png" alt= “Odometry Results” height="350">
-    <img src="./readme_files/alignment.png" alt= “Alignment Results” height="350">
+    <img src="./readme_files/line_sine.png" alt= “Odometry Results” height="300">
+    <img src="./readme_files/alignment.png" alt= “Alignment Results” height="300">
 </p>
 
 
