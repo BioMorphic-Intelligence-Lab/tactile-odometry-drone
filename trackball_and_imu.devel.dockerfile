@@ -14,13 +14,14 @@ WORKDIR /home/user/ros
 ADD onboard/src ./ws/src
 WORKDIR /home/user/ros/ws
 #CMD rm -r build install log
-RUN apt-get -y update; apt-get -y install curl
-RUN sudo apt-get install -y ros-humble-phidgets-drivers \
-ros-humble-imu-tools
+RUN apt-get -y update && apt-get -y install \
+             curl \
+             ros-humble-phidgets-drivers \
+             ros-humble-imu-tools \
+    && rm -rf /var/lib/apt/lists/*
 
 # imu-tools from https://github.com/CCNYRoboticsLab/imu_tools
 # phidget-drivers from https://github.com/ros-drivers/phidgets_drivers/tree/humble
-
 
 # Setup workspace
 RUN . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --packages-select trackball_interface

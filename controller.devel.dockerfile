@@ -9,17 +9,10 @@ ARG ROS_DISTRO
 
 # Add copy of local workspace 
 WORKDIR /home/user/ros
-ADD onboard/src/px4_msgs ./ws/src/px4_msgs
-ADD onboard/src/common ./ws/src/common
-ADD onboard/src/planners ./ws/src/planners
-ADD onboard/src/estimators ./ws/src/estimators
+ADD onboard/src ./ws/src
 
 WORKDIR /home/user/ros/ws
-RUN . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --packages-select px4_msgs
-RUN . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --packages-select common
-RUN . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --packages-select planners
-RUN . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --packages-select estimators
-
+RUN . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build
 # Add the entrypoint script
 ADD controller_entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
