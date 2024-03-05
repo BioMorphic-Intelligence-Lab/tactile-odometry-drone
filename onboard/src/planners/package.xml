@@ -9,10 +9,10 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>px4_msgs</build_depend>
-  <build_depend>common</build_depend>
-  <build_depend>std_msgs_stamped</build_depend>
-  <build_depend>kinematics</build_depend>
+  <depend>px4_msgs</depend>
+  <depend>common</depend>
+  <depend>std_msgs_stamped</depend>
+  <depend>kinematics</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
