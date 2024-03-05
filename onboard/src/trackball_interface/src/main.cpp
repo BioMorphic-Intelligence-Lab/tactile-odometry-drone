@@ -112,19 +112,12 @@ public:
   {
     printf("constructor...");
 
+    this->declare_parameter("trackball_name", "X13");
     this->declare_parameter("trackball_radius", 0.019);
     this->declare_parameter("trackball_resolution", 425.0);
     this->trackball_radius = this->get_parameter("trackball_radius").as_double();
     this->resolution = this->get_parameter("trackball_resolution").as_double();
-
-    if (trackball_radius == 0.013)
-    {
-      trackball_name = "X13";
-    }
-    else
-    {
-      trackball_name = "X19";
-    }
+    this->trackball_name = this->get_parameter("trackball_name").as_string();
 
     std::string topic_name_prefix = "/trackball";
     // const str::string topic_name_suffix1 = "/position";
