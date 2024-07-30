@@ -5,7 +5,14 @@ This repository agglomerates all information related to the tactile drone projec
 
 # How To Cite This
 
-To Be Determined
+```
+@inproceedings{schuster2024,
+    title={Tactile Odometry in Aerial Physical Interaction},
+    author={Schuster, Micha and Bredenbeck, Anton and Beitelschmidt, Michael and Hamaza, Salua},
+    booktitle = {IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+    year = {2024}
+}
+```
 
 # Explainer Video 
 
